@@ -1,0 +1,241 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// --------------------------------------------------------
+// ENUMS
+// --------------------------------------------------------
+
+enum UnitType {
+  PCS
+  KG
+  GRAM
+  LITER
+  PACKET
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BKASH
+  NAGAD
+  DUE
+  SPLIT
+}
+
+enum SaleStatus {
+  COMPLETED
+  PARTIAL
+  DUE
+  CANCELLED
+}
+
+enum PurchaseStatus {
+  COMPLETED
+  PARTIAL
+  DUE
+  CANCELLED
+}
+
+enum LedgerType {
+  DEBIT  // Customer took goods on credit -> Due increases, OR Store paid supplier -> Debt decreases
+  CREDIT // Customer paid money -> Due decreases, OR Store bought on credit -> Debt increases
+}
+
+// --------------------------------------------------------
+// 1. INVENTORY MANAGEMENT
+// --------------------------------------------------------
+
+model Product {
+  id            String         @id @default(uuid())
+  name          String
+  sku           String?        @unique
+  barcode       String?        @unique
+  stock         Decimal        @default(0) @db.Decimal(10, 2)
+  lowStockLimit Decimal        @default(5) @db.Decimal(10, 2)
+  unit          UnitType       @default(PCS)
+  costPrice     Decimal        @db.Decimal(10, 2) // Buying price
+  sellingPrice  Decimal        @db.Decimal(10, 2) // Current retail price
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  saleItems     SaleItem[]
+  purchaseItems PurchaseItem[]
+
+  @@index([barcode])
+  @@index([name])
+}
+
+// --------------------------------------------------------
+// 2. DAILY SALES & INVOICING
+// --------------------------------------------------------
+
+model Sale {
+  id            String          @id @default(uuid())
+  invoiceNumber String          @unique
+  customerId    String?
+  customer      Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  subTotal      Decimal         @db.Decimal(10, 2)
+  discount      Decimal         @default(0) @db.Decimal(10, 2)
+  grandTotal    Decimal         @db.Decimal(10, 2) // subTotal - discount
+  paidAmount    Decimal         @default(0) @db.Decimal(10, 2)
+  dueAmount     Decimal         @default(0) @db.Decimal(10, 2) // grandTotal - paidAmount
+
+  paymentMethod PaymentMethod   @default(CASH)
+  status        SaleStatus      @default(COMPLETED)
+
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  items         SaleItem[]
+  ledgerEntries CustomerLedger[]
+
+  @@index([invoiceNumber])
+  @@index([createdAt])
+}
+
+model SaleItem {
+  id          String   @id @default(uuid())
+  saleId      String
+  sale        Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id])
+
+  quantity    Decimal  @db.Decimal(10, 2)
+  unitPrice   Decimal  @db.Decimal(10, 2) // Selling price at the time of sale
+  costPrice   Decimal  @db.Decimal(10, 2) // Buying price at the time of sale
+  subTotal    Decimal  @db.Decimal(10, 2) // quantity * unitPrice
+
+  createdAt   DateTime @default(now())
+
+  @@index([saleId])
+  @@index([productId])
+}
+
+// --------------------------------------------------------
+// 3. CUSTOMER LEDGER (DUE / BAKI MANAGEMENT)
+// --------------------------------------------------------
+
+model Customer {
+  id          String           @id @default(uuid())
+  name        String
+  phone       String           @unique
+  address     String?
+  currentDue  Decimal          @default(0) @db.Decimal(10, 2)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  sales       Sale[]
+  ledger      CustomerLedger[]
+
+  @@index([phone])
+}
+
+model CustomerLedger {
+  id            String         @id @default(uuid())
+  customerId    String
+  customer      Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  saleId        String?
+  sale          Sale?          @relation(fields: [saleId], references: [id], onDelete: SetNull)
+
+  type          LedgerType     // DEBIT or CREDIT
+  amount        Decimal        @db.Decimal(10, 2)
+  balanceAfter  Decimal        @db.Decimal(10, 2) // Snapshot of total due after this entry
+  note          String?        // e.g. "Invoice #INV-..." or "Cash installment"
+  paymentMethod PaymentMethod?
+
+  createdAt     DateTime       @default(now())
+
+  @@index([customerId])
+  @@index([createdAt])
+}
+
+// --------------------------------------------------------
+// 4. SUPPLIERS & PROCUREMENT (PURCHASE MANAGEMENT)
+// --------------------------------------------------------
+
+model Supplier {
+  id             String           @id @default(uuid())
+  name           String           // Contact person (e.g. Shamim Bhai)
+  companyName    String?          // e.g. Meghna Group, Unilever, City Group
+  phone          String           @unique
+  address        String?
+  currentPayable Decimal          @default(0) @db.Decimal(10, 2) // Total debt/dena to supplier
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  purchases      Purchase[]
+  ledger         SupplierLedger[]
+
+  @@index([phone])
+  @@index([companyName])
+}
+
+model Purchase {
+  id             String           @id @default(uuid())
+  purchaseNumber String           @unique // e.g. PUR-261104-001 or Supplier Chalan #
+  supplierId     String
+  supplier       Supplier         @relation(fields: [supplierId], references: [id])
+
+  subTotal       Decimal          @db.Decimal(10, 2)
+  discount       Decimal          @default(0) @db.Decimal(10, 2)
+  grandTotal     Decimal          @db.Decimal(10, 2) // subTotal - discount
+  paidAmount     Decimal          @default(0) @db.Decimal(10, 2)
+  dueAmount      Decimal          @default(0) @db.Decimal(10, 2) // grandTotal - paidAmount (Store debt)
+
+  paymentMethod  PaymentMethod    @default(CASH)
+  status         PurchaseStatus   @default(COMPLETED)
+
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  items          PurchaseItem[]
+  ledgerEntries  SupplierLedger[]
+
+  @@index([purchaseNumber])
+  @@index([supplierId])
+  @@index([createdAt])
+}
+
+model PurchaseItem {
+  id          String    @id @default(uuid())
+  purchaseId  String
+  purchase    Purchase  @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  productId   String
+  product     Product   @relation(fields: [productId], references: [id])
+
+  quantity    Decimal   @db.Decimal(10, 2)
+  unitCost    Decimal   @db.Decimal(10, 2) // Wholesale unit buying price
+  subTotal    Decimal   @db.Decimal(10, 2) // quantity * unitCost
+
+  createdAt   DateTime  @default(now())
+
+  @@index([purchaseId])
+  @@index([productId])
+}
+
+model SupplierLedger {
+  id            String         @id @default(uuid())
+  supplierId    String
+  supplier      Supplier       @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  purchaseId    String?
+  purchase      Purchase?      @relation(fields: [purchaseId], references: [id], onDelete: SetNull)
+
+  type          LedgerType     // CREDIT (Debt increases on purchase) or DEBIT (Debt decreases on payment)
+  amount        Decimal        @db.Decimal(10, 2)
+  balanceAfter  Decimal        @db.Decimal(10, 2) // Snapshot of store's total debt to supplier
+  note          String?        // e.g. "Chalan #PUR-..." or "Payment to sales rep"
+  paymentMethod PaymentMethod?
+
+  createdAt     DateTime       @default(now())
+
+  @@index([supplierId])
+  @@index([createdAt])
+}
