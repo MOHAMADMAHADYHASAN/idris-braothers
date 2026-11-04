@@ -54,7 +54,7 @@ idris-brothers/
 │   │   ├── errors/                    # AppError & Prisma/Zod Global Error Handler
 │   │   ├── middlewares/               # Request validation middleware
 │   │   └── utils/                     # Uniform API response & Async handler
-│   ├── modules/
+│   ├── features/
 │   │   ├── inventory/                 # Product CRUD, Barcode lookup, Stock adjustments
 │   │   ├── sales/                     # Checkout, Invoice generator, Sales history
 │   │   ├── customers/                 # Customer directory & Baki repayments

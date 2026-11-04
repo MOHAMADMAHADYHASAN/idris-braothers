@@ -27,7 +27,7 @@ async function testCompleteSupplyChainFlow() {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       supplierId: supplier.id,
-      purchaseNumber: 'CHALAN-MEGHNA-9988',
+      purchaseNumber: `CHALAN-MEGHNA-${Date.now().toString().slice(-4)}`,
       items: [
         {
           productId: initialOil.data.id,

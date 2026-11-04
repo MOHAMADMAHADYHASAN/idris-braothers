@@ -4,11 +4,11 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { globalErrorHandler } from './common/errors/errorHandler';
 import { AppError } from './common/errors/AppError';
-import { inventoryRoutes } from './modules/inventory/inventory.routes';
-import { salesRoutes } from './modules/sales/sales.routes';
-import { customerRoutes } from './modules/customers/customers.routes';
-import { supplierRoutes } from './modules/suppliers/suppliers.routes';
-import { purchaseRoutes } from './modules/purchases/purchases.routes';
+import { inventoryRoutes } from './features/inventory/inventory.routes';
+import { salesRoutes } from './features/sales/sales.routes';
+import { customerRoutes } from './features/customers/customers.routes';
+import { supplierRoutes } from './features/suppliers/suppliers.routes';
+import { purchaseRoutes } from './features/purchases/purchases.routes';
 
 const app: Application = express();
 
