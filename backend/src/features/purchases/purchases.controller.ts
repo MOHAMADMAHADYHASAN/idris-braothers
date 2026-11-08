@@ -1,24 +1,32 @@
 import { Request, Response } from 'express';
 import { asyncHandler } from '../../common/utils/asyncHandler';
 import { sendResponse } from '../../common/utils/apiResponse';
-import { purchaseService } from './purchases.service';
+import { purchasesService } from './purchases.service';
 
-export class PurchaseController {
-  create = asyncHandler(async (req: Request, res: Response) => {
-    const purchase = await purchaseService.processPurchase(req.body);
-    sendResponse(res, 201, 'Purchase recorded and stock incremented successfully', purchase);
+export class PurchasesController {
+  createPurchase = asyncHandler(async (req: Request, res: Response) => {
+    const purchase = await purchasesService.createPurchase(req.body);
+    sendResponse(res, 201, 'Purchase chalan recorded successfully', purchase);
   });
 
-  getAll = asyncHandler(async (req: Request, res: Response) => {
-    const result = await purchaseService.getPurchases(req.query as any);
-    sendResponse(res, 200, 'Purchase history retrieved successfully', result);
+  getPurchases = asyncHandler(async (req: Request, res: Response) => {
+    const { supplierId, purchaseNumber, startDate, endDate, page, limit } = req.query;
+    const result = await purchasesService.getPurchases({
+      supplierId: supplierId as string,
+      purchaseNumber: purchaseNumber as string,
+      startDate: startDate as string,
+      endDate: endDate as string,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
+    sendResponse(res, 200, 'Purchases retrieved successfully', result);
   });
 
-  getByIdOrNumber = asyncHandler(async (req: Request, res: Response) => {
-    const identifier = req.params.id as string;
-    const purchase = await purchaseService.getPurchaseByIdOrNumber(identifier);
-    sendResponse(res, 200, 'Purchase chalan details retrieved', purchase);
+  getPurchaseById = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const purchase = await purchasesService.getPurchaseById(id);
+    sendResponse(res, 200, 'Purchase details retrieved successfully', purchase);
   });
 }
 
-export const purchaseController = new PurchaseController();
+export const purchasesController = new PurchasesController();

@@ -1,50 +1,31 @@
 import { z } from 'zod';
+import { SaleType } from '@prisma/client';
 
-const PaymentMethodEnum = z.enum([
-  'CASH',
-  'CARD',
-  'BKASH',
-  'NAGAD',
-  'DUE',
-  'SPLIT',
-]);
-
-const SaleStatusEnum = z.enum(['COMPLETED', 'PARTIAL', 'DUE', 'CANCELLED']);
+export const createSaleItemSchema = z
+  .object({
+    productId: z.string().uuid('Valid product ID is required'),
+    unitName: z.string().min(1, 'Unit name is required (e.g. কেজি, প্যাকেট, ৫০ কেজি বস্তা)').default('কেজি'),
+    conversionFactor: z.number().positive().default(1),
+    quantity: z.number().positive('Quantity must be greater than 0').optional(),
+    unitPrice: z.number().positive('Unit price must be greater than 0').optional(),
+    customTotalPrice: z.number().positive('Custom total price must be greater than 0 (e.g. ২০ টাকার এলাচ)').optional(),
+  })
+  .refine(
+    (data) => data.quantity !== undefined || data.customTotalPrice !== undefined,
+    {
+      message: 'Either quantity or customTotalPrice must be provided',
+      path: ['quantity'],
+    }
+  );
 
 export const createSaleSchema = z.object({
-  body: z.object({
-    customerId: z.string().uuid('Invalid customer ID format').optional(),
-    items: z
-      .array(
-        z.object({
-          productId: z.string().uuid('Invalid product ID format'),
-          quantity: z.number().positive('Quantity must be greater than 0'),
-        })
-      )
-      .min(1, 'Cart cannot be empty. At least 1 item is required'),
-    discount: z.number().min(0, 'Discount cannot be negative').default(0),
-    paidAmount: z.number().min(0, 'Paid amount cannot be negative'),
-    paymentMethod: PaymentMethodEnum.default('CASH'),
-  }),
+  saleType: z.nativeEnum(SaleType).default(SaleType.RETAIL),
+  customerId: z.string().uuid().optional().nullable(),
+  discount: z.number().min(0).default(0),
+  paidAmount: z.number().min(0, 'Paid amount cannot be negative'),
+  note: z.string().optional(),
+  items: z.array(createSaleItemSchema).min(1, 'Sale must include at least one product item'),
 });
 
-export const getSalesQuerySchema = z.object({
-  query: z.object({
-    customerId: z.string().uuid().optional(),
-    status: SaleStatusEnum.optional(),
-    paymentMethod: PaymentMethodEnum.optional(),
-    startDate: z.string().datetime().optional(),
-    endDate: z.string().datetime().optional(),
-    page: z.string().optional(),
-    limit: z.string().optional(),
-  }),
-});
-
-export const getSaleParamsSchema = z.object({
-  params: z.object({
-    id: z.string().min(1, 'Sale identifier is required'),
-  }),
-});
-
-export type CreateSaleInput = z.infer<typeof createSaleSchema>['body'];
-export type GetSalesQueryInput = z.infer<typeof getSalesQuerySchema>['query'];
+export type CreateSaleItemInput = z.infer<typeof createSaleItemSchema>;
+export type CreateSaleInput = z.infer<typeof createSaleSchema>;

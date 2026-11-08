@@ -1,212 +1,238 @@
-import { Prisma, PurchaseStatus } from '@prisma/client';
-import { prisma } from '../../config/prisma';
+import { Prisma, SupplierLedgerType } from '@prisma/client';
 import { AppError } from '../../common/errors/AppError';
-import { CreatePurchaseInput, GetPurchasesQueryInput } from './purchases.validation';
+import { prisma } from '../../config/prisma';
+import { purchasesRepository } from './purchases.repository';
+import { inventoryRepository } from '../inventory/inventory.repository';
+import { supplierRepository } from '../suppliers/suppliers.repository';
+import { CreatePurchaseInput } from './purchases.validation';
+import { getPagination, buildPaginationMeta, PaginationParams } from '../../common/utils/pagination';
+import { getDayBoundaries, buildDateRangeFilter } from '../../common/utils/dateUtils';
+import { generateDailySequenceCode } from '../../common/utils/codeGenerator';
 
-export class PurchaseService {
+export class PurchasesService {
   /**
-   * Process Stock-In Purchase Chalan using Prisma $transaction:
-   * 1. Validates supplier existence
-   * 2. Atomically increments product inventory
-   * 3. Updates latest costPrice of each product
-   * 4. Creates Purchase and Line Items
-   * 5. If store leaves a balance due, increments supplier debt and creates a SupplierLedger entry
+   * Helper to generate unique purchase/chalan number: PUR-YYMMDD-XXXX
    */
-  async processPurchase(data: CreatePurchaseInput) {
-    return await prisma.$transaction(async (tx) => {
-      // Step 1: Verify supplier
-      const supplier = await tx.supplier.findUnique({
-        where: { id: data.supplierId },
-      });
+  private async generatePurchaseNumber(tx: Prisma.TransactionClient): Promise<string> {
+    const { startOfDay, endOfDay } = getDayBoundaries();
+    const countToday = await purchasesRepository.countPurchasesToday(startOfDay, endOfDay, tx);
+    return generateDailySequenceCode('PUR', countToday);
+  }
 
-      if (!supplier) {
-        throw new AppError('Supplier profile not found', 404);
+  /**
+   * Record Stock In / Mahajan Procurement (মহাজন থেকে মাল ক্রয় ও চালানের এন্ট্রি)
+   */
+  async createPurchase(data: CreatePurchaseInput) {
+    return await prisma.$transaction(async (tx) => {
+      // 1. Validate Supplier
+      const supplier = await supplierRepository.findById(data.supplierId, tx);
+      if (!supplier || !supplier.isActive) {
+        throw new AppError('Supplier / Mahajan not found or inactive', 404);
       }
 
-      let subTotal = new Prisma.Decimal(0);
-      const purchaseItemsToCreate: Array<{
+      // 2. Generate or validate purchaseNumber
+      let purchaseNumber = data.purchaseNumber?.trim();
+      if (!purchaseNumber) {
+        purchaseNumber = await this.generatePurchaseNumber(tx);
+      } else {
+        const existing = await purchasesRepository.findByPurchaseNumber(purchaseNumber);
+        if (existing) {
+          throw new AppError(`Purchase number/chalan "${purchaseNumber}" already exists`, 409);
+        }
+      }
+
+      // 3. Process items, add stock, and revalue replacement costs
+      let calculatedSubTotal = new Prisma.Decimal(0);
+      const preparedItems: {
         productId: string;
+        unitName: string;
+        conversionFactor: Prisma.Decimal;
         quantity: Prisma.Decimal;
+        baseQuantity: Prisma.Decimal;
         unitCost: Prisma.Decimal;
+        newRetailPrice?: Prisma.Decimal;
+        newWholesalePrice?: Prisma.Decimal;
         subTotal: Prisma.Decimal;
-      }> = [];
+      }[] = [];
 
-      // Step 2: Iterate through items, increment stock & update cost price
       for (const item of data.items) {
-        const product = await tx.product.findUnique({
-          where: { id: item.productId },
-        });
-
-        if (!product) {
-          throw new AppError(`Product with ID ${item.productId} not found`, 404);
+        const product = await inventoryRepository.findById(item.productId, tx);
+        if (!product || !product.isActive) {
+          throw new AppError(`Product with ID ${item.productId} not found or inactive`, 404);
         }
 
         const quantity = new Prisma.Decimal(item.quantity);
+        const conversionFactor = new Prisma.Decimal(item.conversionFactor);
+        const baseQuantity = quantity.mul(conversionFactor);
+
+        // Add inventory in base unit
+        await inventoryRepository.adjustStock(product.id, baseQuantity, 'ADD', tx);
+
         const unitCost = new Prisma.Decimal(item.unitCost);
-        const lineTotal = unitCost.mul(quantity);
-        subTotal = subTotal.add(lineTotal);
+        const itemSubTotal = quantity.mul(unitCost);
+        calculatedSubTotal = calculatedSubTotal.add(itemSubTotal);
 
-        // Increment stock and update costPrice for accurate profit margins
-        await tx.product.update({
-          where: { id: item.productId },
-          data: {
-            stock: { increment: quantity },
-            costPrice: unitCost,
-          },
-        });
+        // Dynamic Replacement Cost Valuation:
+        // Calculate new cost per base unit (e.g. if 50kg sack costs 6000 TK, cost per KG = 120 TK)
+        const costPerBaseUnit = unitCost.div(conversionFactor);
 
-        purchaseItemsToCreate.push({
+        const priceUpdates: {
+          currentPurchasePrice: Prisma.Decimal;
+          retailPrice?: Prisma.Decimal;
+          wholesalePrice?: Prisma.Decimal;
+        } = {
+          currentPurchasePrice: costPerBaseUnit,
+        };
+
+        if (item.newRetailPrice) {
+          priceUpdates.retailPrice = new Prisma.Decimal(item.newRetailPrice);
+        }
+        if (item.newWholesalePrice) {
+          priceUpdates.wholesalePrice = new Prisma.Decimal(item.newWholesalePrice);
+        }
+
+        // Immediately revalue product prices on the Product table
+        await inventoryRepository.updatePrices(product.id, priceUpdates, tx);
+
+        // If requested, save/update this custom unit (carton/sack) for future use
+        if (item.saveUnitForFuture) {
+          await inventoryRepository.upsertUnit(
+            product.id,
+            item.unitName,
+            conversionFactor,
+            item.newRetailPrice ? new Prisma.Decimal(item.newRetailPrice) : null,
+            item.newWholesalePrice ? new Prisma.Decimal(item.newWholesalePrice) : null,
+            tx
+          );
+        }
+
+        preparedItems.push({
           productId: product.id,
+          unitName: item.unitName,
+          conversionFactor,
           quantity,
+          baseQuantity,
           unitCost,
-          subTotal: lineTotal,
+          newRetailPrice: item.newRetailPrice ? new Prisma.Decimal(item.newRetailPrice) : undefined,
+          newWholesalePrice: item.newWholesalePrice ? new Prisma.Decimal(item.newWholesalePrice) : undefined,
+          subTotal: itemSubTotal,
         });
       }
 
-      // Step 3: Financials
+      // 4. Financial calculations
+      const transportCost = new Prisma.Decimal(data.transportCost || 0);
       const discount = new Prisma.Decimal(data.discount || 0);
-      const grandTotal = subTotal.sub(discount);
-      const paidAmount = new Prisma.Decimal(data.paidAmount);
-      const diff = grandTotal.sub(paidAmount);
-      const dueAmount = diff.greaterThan(0) ? diff : new Prisma.Decimal(0);
-
-      let status: PurchaseStatus = PurchaseStatus.COMPLETED;
-      if (dueAmount.greaterThan(0)) {
-        status = paidAmount.greaterThan(0) ? PurchaseStatus.PARTIAL : PurchaseStatus.DUE;
+      const grandTotal = calculatedSubTotal.add(transportCost).sub(discount);
+      if (grandTotal.lessThan(0)) {
+        throw new AppError('Discount cannot exceed purchase total', 400);
       }
 
-      // Generate Chalan Number if not manually supplied
-      const purchaseNumber =
-        data.purchaseNumber ||
-        `PUR-${Date.now().toString().slice(-6)}-${Math.floor(1000 + Math.random() * 9000)}`;
+      const paidAmount = new Prisma.Decimal(data.paidAmount || 0);
+      const dueAmount = grandTotal.sub(paidAmount);
 
-      // Step 4: Record the Purchase
-      const purchase = await tx.purchase.create({
-        data: {
+      // 5. Create Purchase Record
+      const purchase = await purchasesRepository.create(
+        {
           purchaseNumber,
-          supplierId: data.supplierId,
-          subTotal,
+          supplier: { connect: { id: supplier.id } },
+          subTotal: calculatedSubTotal,
+          transportCost,
           discount,
           grandTotal,
           paidAmount,
           dueAmount,
-          paymentMethod: data.paymentMethod,
-          status,
+          note: data.note,
           items: {
-            create: purchaseItemsToCreate,
+            create: preparedItems.map((item) => ({
+              productId: item.productId,
+              unitName: item.unitName,
+              conversionFactor: item.conversionFactor,
+              quantity: item.quantity,
+              baseQuantity: item.baseQuantity,
+              unitCost: item.unitCost,
+              newRetailPrice: item.newRetailPrice,
+              newWholesalePrice: item.newWholesalePrice,
+              subTotal: item.subTotal,
+            })),
           },
         },
-        include: {
-          supplier: true,
-          items: {
-            include: {
-              product: {
-                select: { id: true, name: true, barcode: true, unit: true, stock: true },
-              },
-            },
-          },
+        tx
+      );
+
+      // 6. Atomic Supplier Khata / Ledger update
+      const payableDelta = grandTotal.sub(paidAmount);
+      const updatedSupplier = await supplierRepository.updatePayable(supplier.id, payableDelta, tx);
+
+      await supplierRepository.createLedgerEntry(
+        {
+          supplier: { connect: { id: supplier.id } },
+          purchase: { connect: { id: purchase.id } },
+          entryType: SupplierLedgerType.PURCHASE_DUE,
+          credit: grandTotal,
+          debit: paidAmount,
+          balanceAfter: updatedSupplier.currentPayable,
+          note: `মাল ক্রয়ের চালান #${purchaseNumber}`,
         },
-      });
+        tx
+      );
 
-      // Step 5: If there is remaining debt to supplier, update supplier ledger
-      if (dueAmount.greaterThan(0)) {
-        const newTotalPayable = supplier.currentPayable.add(dueAmount);
-
-        await tx.supplier.update({
-          where: { id: data.supplierId },
-          data: { currentPayable: newTotalPayable },
-        });
-
-        // CREDIT increases store's liability/debt to the supplier
-        await tx.supplierLedger.create({
-          data: {
-            supplierId: data.supplierId,
-            purchaseId: purchase.id,
-            type: 'CREDIT',
-            amount: dueAmount,
-            balanceAfter: newTotalPayable,
-            note: `Due on Chalan #${purchaseNumber}`,
-            paymentMethod: data.paymentMethod,
-          },
-        });
-      }
-
-      return purchase;
+      return {
+        ...purchase,
+        supplierCurrentPayable: updatedSupplier.currentPayable,
+      };
     });
   }
 
   /**
-   * Get purchase history
+   * Get purchases list with filters and pagination
    */
-  async getPurchases(query: GetPurchasesQueryInput) {
-    const page = Number(query.page) || 1;
-    const limit = Number(query.limit) || 20;
-    const skip = (page - 1) * limit;
-
+  async getPurchases(query: {
+    supplierId?: string;
+    purchaseNumber?: string;
+    startDate?: string;
+    endDate?: string;
+  } & PaginationParams) {
+    const { page, limit, skip } = getPagination(query);
     const where: Prisma.PurchaseWhereInput = {};
 
     if (query.supplierId) {
       where.supplierId = query.supplierId;
     }
+    if (query.purchaseNumber) {
+      where.purchaseNumber = { contains: query.purchaseNumber, mode: 'insensitive' };
+    }
 
-    if (query.status) {
-      where.status = query.status;
+    const dateFilter = buildDateRangeFilter(query.startDate, query.endDate);
+    if (dateFilter) {
+      where.createdAt = dateFilter;
     }
 
     const [total, purchases] = await Promise.all([
-      prisma.purchase.count({ where }),
-      prisma.purchase.findMany({
+      purchasesRepository.count(where),
+      purchasesRepository.findMany({
         where,
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
-        include: {
-          supplier: {
-            select: { id: true, name: true, companyName: true, phone: true },
-          },
-          _count: {
-            select: { items: true },
-          },
-        },
       }),
     ]);
 
     return {
       purchases,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
+      meta: buildPaginationMeta(total, page, limit),
     };
   }
 
   /**
-   * Get purchase chalan details
+   * Get single purchase details by ID
    */
-  async getPurchaseByIdOrNumber(identifier: string) {
-    const purchase = await prisma.purchase.findFirst({
-      where: {
-        OR: [{ id: identifier }, { purchaseNumber: identifier }],
-      },
-      include: {
-        supplier: true,
-        items: {
-          include: {
-            product: true,
-          },
-        },
-        ledgerEntries: true,
-      },
-    });
-
+  async getPurchaseById(id: string) {
+    const purchase = await purchasesRepository.findById(id);
     if (!purchase) {
-      throw new AppError('Purchase chalan not found', 404);
+      throw new AppError('Purchase order / chalan not found', 404);
     }
-
     return purchase;
   }
 }
 
-export const purchaseService = new PurchaseService();
+export const purchasesService = new PurchasesService();

@@ -4,20 +4,35 @@ import { sendResponse } from '../../common/utils/apiResponse';
 import { salesService } from './sales.service';
 
 export class SalesController {
-  checkout = asyncHandler(async (req: Request, res: Response) => {
-    const sale = await salesService.processSale(req.body);
-    sendResponse(res, 201, 'Sale completed and invoice generated successfully', sale);
+  createSale = asyncHandler(async (req: Request, res: Response) => {
+    const sale = await salesService.createSale(req.body);
+    sendResponse(res, 201, 'Sale invoice created successfully', sale);
   });
 
-  getAll = asyncHandler(async (req: Request, res: Response) => {
-    const result = await salesService.getSales(req.query as any);
-    sendResponse(res, 200, 'Sales records retrieved successfully', result);
+  getSales = asyncHandler(async (req: Request, res: Response) => {
+    const { customerId, saleType, invoiceNumber, startDate, endDate, page, limit } = req.query;
+    const result = await salesService.getSales({
+      customerId: customerId as string,
+      saleType: saleType as string,
+      invoiceNumber: invoiceNumber as string,
+      startDate: startDate as string,
+      endDate: endDate as string,
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
+    sendResponse(res, 200, 'Sales invoices retrieved successfully', result);
   });
 
-  getByIdOrInvoice = asyncHandler(async (req: Request, res: Response) => {
-    const identifier = req.params.id as string;
-    const sale = await salesService.getSaleByIdOrInvoice(identifier);
-    sendResponse(res, 200, 'Invoice details retrieved successfully', sale);
+  getSaleById = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const sale = await salesService.getSaleById(id);
+    sendResponse(res, 200, 'Sale details retrieved successfully', sale);
+  });
+
+  getSaleReceipt = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const receipt = await salesService.getSaleReceipt(id);
+    sendResponse(res, 200, 'Sale receipt retrieved successfully', receipt);
   });
 }
 

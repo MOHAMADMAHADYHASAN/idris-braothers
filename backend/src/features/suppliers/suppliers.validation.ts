@@ -1,39 +1,32 @@
 import { z } from 'zod';
 
-const PaymentMethodEnum = z.enum(['CASH', 'CARD', 'BKASH', 'NAGAD']);
-
 export const createSupplierSchema = z.object({
-  body: z.object({
-    name: z.string().min(2, 'Contact person name must be at least 2 characters'),
-    companyName: z.string().optional(),
-    phone: z.string().min(6, 'Please provide a valid phone number'),
-    address: z.string().optional(),
-  }),
+  name: z.string().min(2, 'Supplier / Mahajan contact name is required'),
+  companyName: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  address: z.string().optional().nullable(),
+  openingPayable: z.number().default(0), // Can be positive (store owes mahajan) or negative (advance with mahajan)
 });
 
 export const updateSupplierSchema = z.object({
-  params: z.object({
-    id: z.string().uuid('Invalid supplier ID format'),
-  }),
-  body: z.object({
-    name: z.string().min(2).optional(),
-    companyName: z.string().optional(),
-    phone: z.string().min(6).optional(),
-    address: z.string().optional(),
-  }),
+  name: z.string().min(2).optional(),
+  companyName: z.string().optional().nullable(),
+  phone: z.string().optional().nullable(),
+  address: z.string().optional().nullable(),
+  isActive: z.boolean().optional(),
 });
 
-export const recordSupplierPaymentSchema = z.object({
-  params: z.object({
-    id: z.string().uuid('Invalid supplier ID format'),
-  }),
-  body: z.object({
-    amount: z.number().positive('Payment amount must be greater than 0'),
-    paymentMethod: PaymentMethodEnum.default('CASH'),
-    note: z.string().optional(),
-  }),
+export const paySupplierSchema = z.object({
+  amount: z.number().positive('Payment amount must be greater than 0'),
+  note: z.string().optional(),
 });
 
-export type CreateSupplierInput = z.infer<typeof createSupplierSchema>['body'];
-export type UpdateSupplierInput = z.infer<typeof updateSupplierSchema>['body'];
-export type RecordSupplierPaymentInput = z.infer<typeof recordSupplierPaymentSchema>['body'];
+export const adjustSupplierBalanceSchema = z.object({
+  amount: z.number(), // positive = increases store debt, negative = decreases store debt (discount/rebate)
+  reason: z.string().min(2, 'Adjustment reason is required'),
+});
+
+export type CreateSupplierInput = z.infer<typeof createSupplierSchema>;
+export type UpdateSupplierInput = z.infer<typeof updateSupplierSchema>;
+export type PaySupplierInput = z.infer<typeof paySupplierSchema>;
+export type AdjustSupplierBalanceInput = z.infer<typeof adjustSupplierBalanceSchema>;

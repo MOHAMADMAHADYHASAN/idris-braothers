@@ -1,50 +1,30 @@
 import { Router } from 'express';
+import { validate } from '../../common/middlewares/validate';
 import { inventoryController } from './inventory.controller';
-import { validateRequest } from '../../common/middlewares/validate';
 import {
   createProductSchema,
   updateProductSchema,
-  adjustStockSchema,
-  barcodeQuerySchema,
+  updateProductPricesSchema,
+  addProductUnitSchema,
+  recordWastageSchema,
 } from './inventory.validation';
 
 const router = Router();
 
-// 1. Create a product
-router.post(
-  '/',
-  validateRequest(createProductSchema),
-  inventoryController.create
-);
+// Products
+router.post('/', validate(createProductSchema), inventoryController.createProduct);
+router.get('/', inventoryController.getProducts);
+router.get('/barcode/:barcode', inventoryController.getProductByBarcode);
+router.get('/wastages', inventoryController.getWastages);
+router.get('/:id', inventoryController.getProductById);
+router.patch('/:id', validate(updateProductSchema), inventoryController.updateProduct);
+router.patch('/:id/prices', validate(updateProductPricesSchema), inventoryController.updatePrices);
 
-// 2. Get list of products (search, filter, pagination)
-router.get('/', inventoryController.getAll);
+// Multi-Unit Conversion
+router.post('/:id/units', validate(addProductUnitSchema), inventoryController.addProductUnit);
+router.delete('/units/:unitId', inventoryController.deleteProductUnit);
 
-// 3. Fast Barcode lookup (Cashier Scanner)
-router.get(
-  '/barcode/:barcode',
-  validateRequest(barcodeQuerySchema),
-  inventoryController.getByBarcode
-);
-
-// 4. Get product by ID
-router.get('/:id', inventoryController.getById);
-
-// 5. Update product
-router.patch(
-  '/:id',
-  validateRequest(updateProductSchema),
-  inventoryController.update
-);
-
-// 6. Manual Stock Adjustment (Stock-in / Damage)
-router.patch(
-  '/:id/stock',
-  validateRequest(adjustStockSchema),
-  inventoryController.adjustStock
-);
-
-// 7. Soft Delete (Deactivate)
-router.delete('/:id', inventoryController.delete);
+// Stock Wastage / Shrinkage
+router.post('/:id/wastage', validate(recordWastageSchema), inventoryController.recordWastage);
 
 export const inventoryRoutes = router;

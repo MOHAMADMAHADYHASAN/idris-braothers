@@ -1,43 +1,25 @@
 import { z } from 'zod';
 
-const PaymentMethodEnum = z.enum([
-  'CASH',
-  'CARD',
-  'BKASH',
-  'NAGAD',
-  'DUE',
-  'SPLIT',
-]);
-
-const PurchaseStatusEnum = z.enum(['COMPLETED', 'PARTIAL', 'DUE', 'CANCELLED']);
+export const createPurchaseItemSchema = z.object({
+  productId: z.string().uuid('Valid product ID is required'),
+  unitName: z.string().min(1, 'Unit name is required (e.g. ৫০ কেজি বস্তা, কার্টন (২৪ প্যাকেট), কেজি)'),
+  conversionFactor: z.number().positive('Conversion factor must be greater than 0').default(1),
+  quantity: z.number().positive('Quantity must be greater than 0'),
+  unitCost: z.number().positive('Unit cost must be greater than 0'),
+  newRetailPrice: z.number().positive().optional(),
+  newWholesalePrice: z.number().positive().optional(),
+  saveUnitForFuture: z.boolean().optional().default(false), // Automatically save this custom carton/unit for future use
+});
 
 export const createPurchaseSchema = z.object({
-  body: z.object({
-    supplierId: z.string().uuid('Invalid supplier ID format'),
-    purchaseNumber: z.string().optional(), // Can use supplier's paper chalan #
-    items: z
-      .array(
-        z.object({
-          productId: z.string().uuid('Invalid product ID format'),
-          quantity: z.number().positive('Quantity must be greater than 0'),
-          unitCost: z.number().positive('Unit cost must be greater than 0'),
-        })
-      )
-      .min(1, 'At least 1 item is required in a purchase chalan'),
-    discount: z.number().min(0, 'Discount cannot be negative').default(0),
-    paidAmount: z.number().min(0, 'Paid amount cannot be negative'),
-    paymentMethod: PaymentMethodEnum.default('CASH'),
-  }),
+  purchaseNumber: z.string().optional(), // If omitted, will be auto-generated (PUR-YYMMDD-XXXX)
+  supplierId: z.string().uuid('Supplier ID is required'),
+  transportCost: z.number().min(0).default(0), // কুলি / ট্রাক ভাড়া
+  discount: z.number().min(0).default(0),
+  paidAmount: z.number().min(0).default(0),
+  note: z.string().optional(),
+  items: z.array(createPurchaseItemSchema).min(1, 'Purchase must have at least one item'),
 });
 
-export const getPurchasesQuerySchema = z.object({
-  query: z.object({
-    supplierId: z.string().uuid().optional(),
-    status: PurchaseStatusEnum.optional(),
-    page: z.string().optional(),
-    limit: z.string().optional(),
-  }),
-});
-
-export type CreatePurchaseInput = z.infer<typeof createPurchaseSchema>['body'];
-export type GetPurchasesQueryInput = z.infer<typeof getPurchasesQuerySchema>['query'];
+export type CreatePurchaseItemInput = z.infer<typeof createPurchaseItemSchema>;
+export type CreatePurchaseInput = z.infer<typeof createPurchaseSchema>;

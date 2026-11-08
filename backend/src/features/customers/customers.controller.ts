@@ -4,37 +4,55 @@ import { sendResponse } from '../../common/utils/apiResponse';
 import { customerService } from './customers.service';
 
 export class CustomerController {
-  create = asyncHandler(async (req: Request, res: Response) => {
+  createCustomer = asyncHandler(async (req: Request, res: Response) => {
     const customer = await customerService.createCustomer(req.body);
-    sendResponse(res, 201, 'Customer registered successfully', customer);
+    sendResponse(res, 201, 'Customer created successfully', customer);
   });
 
-  getAll = asyncHandler(async (req: Request, res: Response) => {
-    const { search, page, limit } = req.query;
+  getCustomers = asyncHandler(async (req: Request, res: Response) => {
+    const { search, customerType, dueFilter, page, limit } = req.query;
     const result = await customerService.getCustomers({
-      search: typeof search === 'string' ? search : undefined,
+      search: search as string,
+      customerType: customerType as string,
+      dueFilter: dueFilter as any,
       page: page ? Number(page) : undefined,
       limit: limit ? Number(limit) : undefined,
     });
-    sendResponse(res, 200, 'Customer list retrieved successfully', result);
+    sendResponse(res, 200, 'Customers retrieved successfully', result);
   });
 
-  getById = asyncHandler(async (req: Request, res: Response) => {
-    const id = req.params.id as string;
+  getCustomerById = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
     const customer = await customerService.getCustomerById(id);
-    sendResponse(res, 200, 'Customer profile retrieved', customer);
+    sendResponse(res, 200, 'Customer details retrieved successfully', customer);
   });
 
-  recordPayment = asyncHandler(async (req: Request, res: Response) => {
-    const id = req.params.id as string;
-    const result = await customerService.recordPayment(id, req.body);
-    sendResponse(res, 200, 'Payment recorded and due balance updated', result);
+  updateCustomer = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const customer = await customerService.updateCustomer(id, req.body);
+    sendResponse(res, 200, 'Customer updated successfully', customer);
   });
 
-  update = asyncHandler(async (req: Request, res: Response) => {
-    const id = req.params.id as string;
-    const updated = await customerService.updateCustomer(id, req.body);
-    sendResponse(res, 200, 'Customer profile updated', updated);
+  receivePayment = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const result = await customerService.receivePayment(id, req.body);
+    sendResponse(res, 200, 'Customer payment received and ledger updated', result);
+  });
+
+  adjustBalance = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const result = await customerService.adjustBalance(id, req.body);
+    sendResponse(res, 200, 'Customer balance adjusted successfully', result);
+  });
+
+  getCustomerLedger = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const { page, limit } = req.query;
+    const result = await customerService.getCustomerLedger(id, {
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
+    sendResponse(res, 200, 'Customer ledger statements retrieved successfully', result);
   });
 }
 

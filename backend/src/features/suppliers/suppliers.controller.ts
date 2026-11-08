@@ -4,37 +4,54 @@ import { sendResponse } from '../../common/utils/apiResponse';
 import { supplierService } from './suppliers.service';
 
 export class SupplierController {
-  create = asyncHandler(async (req: Request, res: Response) => {
+  createSupplier = asyncHandler(async (req: Request, res: Response) => {
     const supplier = await supplierService.createSupplier(req.body);
-    sendResponse(res, 201, 'Supplier profile created successfully', supplier);
+    sendResponse(res, 201, 'Supplier created successfully', supplier);
   });
 
-  getAll = asyncHandler(async (req: Request, res: Response) => {
-    const { search, page, limit } = req.query;
+  getSuppliers = asyncHandler(async (req: Request, res: Response) => {
+    const { search, payableFilter, page, limit } = req.query;
     const result = await supplierService.getSuppliers({
-      search: typeof search === 'string' ? search : undefined,
+      search: search as string,
+      payableFilter: payableFilter as any,
       page: page ? Number(page) : undefined,
       limit: limit ? Number(limit) : undefined,
     });
-    sendResponse(res, 200, 'Supplier directory retrieved successfully', result);
+    sendResponse(res, 200, 'Suppliers retrieved successfully', result);
   });
 
-  getById = asyncHandler(async (req: Request, res: Response) => {
-    const id = req.params.id as string;
+  getSupplierById = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
     const supplier = await supplierService.getSupplierById(id);
-    sendResponse(res, 200, 'Supplier profile retrieved', supplier);
+    sendResponse(res, 200, 'Supplier details retrieved successfully', supplier);
   });
 
-  recordPayment = asyncHandler(async (req: Request, res: Response) => {
-    const id = req.params.id as string;
-    const result = await supplierService.recordPayment(id, req.body);
-    sendResponse(res, 200, 'Payment recorded and payable balance updated', result);
+  updateSupplier = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const supplier = await supplierService.updateSupplier(id, req.body);
+    sendResponse(res, 200, 'Supplier updated successfully', supplier);
   });
 
-  update = asyncHandler(async (req: Request, res: Response) => {
-    const id = req.params.id as string;
-    const updated = await supplierService.updateSupplier(id, req.body);
-    sendResponse(res, 200, 'Supplier details updated successfully', updated);
+  paySupplier = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const result = await supplierService.paySupplier(id, req.body);
+    sendResponse(res, 200, 'Payment to supplier recorded successfully', result);
+  });
+
+  adjustBalance = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const result = await supplierService.adjustBalance(id, req.body);
+    sendResponse(res, 200, 'Supplier balance adjusted successfully', result);
+  });
+
+  getSupplierLedger = asyncHandler(async (req: Request, res: Response) => {
+    const id = String(req.params.id);
+    const { page, limit } = req.query;
+    const result = await supplierService.getSupplierLedger(id, {
+      page: page ? Number(page) : undefined,
+      limit: limit ? Number(limit) : undefined,
+    });
+    sendResponse(res, 200, 'Supplier ledger statements retrieved successfully', result);
   });
 }
 
