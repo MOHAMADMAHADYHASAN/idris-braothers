@@ -30,7 +30,7 @@
   --color-wholesale-border: #F59E0B;
 
   /* Typography */
-  --font-sans: var(--font-hind-siliguri), system-ui, sans-serif;
+  --font-sans: var(--font-noto-sans-bengali), system-ui, sans-serif;
   --font-mono: var(--font-mono-numbers), "Inter", monospace;
 }
 

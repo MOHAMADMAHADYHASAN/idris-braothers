@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { SaleType } from '@/features/pos/pos.types';
-import { Store, Tag } from 'lucide-react';
+import { Storefront, Tag } from '@phosphor-icons/react';
 
 interface PosHeaderModeBarProps {
   saleType: SaleType;
@@ -32,7 +32,11 @@ export function PosHeaderModeBar({
             isWholesale ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white'
           }`}
         >
-          {isWholesale ? <Tag className="w-4 h-4" /> : <Store className="w-4 h-4" />}
+          {isWholesale ? (
+            <Tag size={18} weight="bold" />
+          ) : (
+            <Storefront size={18} weight="bold" />
+          )}
         </div>
         <div>
           <div className="flex items-center gap-2">

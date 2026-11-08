@@ -9,7 +9,7 @@
 ## 1. Core Architectural Standards (বাধ্যতামূলক নিয়মাবলী)
 
 ### A. Feature-Colocated Architecture (ডোমেন-ভিত্তিক স্ট্রাকচার)
-Layer-based স্ট্রাকচার (যেমন গ্লোবাল `/services` বা গ্লোবাল `/stores`) নিষিদ্ধ। প্রতিটি ফিচার তার নিজস্ব ফোল্ডারে থাকবে:
+Layer-based স্ট্রাকচার (যেমন গ্লোবাল `/services` বা গ্লোবাল `/stores`) কঠোরভাবে নিষিদ্ধ। প্রতিটি ফিচার তার নিজস্ব ফোল্ডারে থাকবে:
 
 ```text
 src/features/[feature-name]/
@@ -19,19 +19,49 @@ src/features/[feature-name]/
 └── components/               # ফিচারের নিজস্ব কম্পোনেন্টসমূহ
 ```
 
-### B. Centralized API Endpoints & Client
+### B. Typography & Font Standard (টাইপোগ্রাফি রুল)
+1. **Primary Bengali Typography:** **`Noto Sans Bengali`** (Google Fonts).
+   - এটি স্ক্রিন ডিসপ্লেতে ছোট সাইজেও সবচেয়ে নিখুঁত ও পরিষ্কার দেখায়।
+   - **কড়া নিয়ম:** বাংলায় কখনোই কোনো `tracking` (letter-spacing) ব্যবহার করা যাবে না।
+   - লাইন-হাইট সবসময় $\ge 1.4$ থেকে $1.5$ হতে হবে যাতে ওপর-নিচের কোনো কার-চিহ্ন না কাটে।
+2. **Numbers & Financial Decimals:** **`JetBrains Mono`** with `.tabular-numbers` / `tabular-nums`.
+   - মুদ্রা, ওজন (৪ দশমিক) এবং রানিং খাতার ব্যালেন্সে মোনোস্পেস ব্যবহার বাধ্যতামূলক যাতে দ্রুত স্ক্যানিংয়ের সময় দশমিক কলামগুলো কখনো ডানে-বামে না কাঁপে।
+3. *(Hind Siliguri বা অন্য কোনো ফন্ট সিস্টেম থেকে সম্পূর্ণ বর্জন করা হয়েছে)*।
+
+### C. Iconography Standard (@phosphor-icons/react)
+- পুরো অ্যাপ্লিকেশনে **শুধুমাত্র এবং শুধুমাত্র `@phosphor-icons/react`** ব্যবহার করতে হবে।
+- **`lucide-react` বা অন্য কোনো আইকন লাইব্রেরি ব্যবহার করা যাবে না** (সিস্টেম থেকে সম্পূর্ণ আনইন্সটল করা হয়েছে)।
+- **ইমপোর্ট নিয়মাবলী:**
+  - Client Components (`'use client'`):
+    ```tsx
+    import { ShoppingCart, Storefront, Plus, Trash } from '@phosphor-icons/react';
+    ```
+  - Server Components (RSC):
+    ```tsx
+    import { ShoppingCart, Storefront } from '@phosphor-icons/react/dist/ssr';
+    ```
+- **ওজন কনভেনশন:**
+  - সাধারণ বাটন ও অ্যাকশনে `weight="bold"`।
+  - হাইলাইটেড বা স্পটলাইট ফিচারে `weight="fill"` অথবা `weight="duotone"`।
+
+### D. Imagery & Photos Standard (Unsplash CDN)
+- যদি কোনো পণ্যের ছবি, মসলার ব্যানার বা প্লেসহোল্ডার ফটো দরকার হয়, তবে **বাধ্যতামূলকভাবে Unsplash CDN** (`https://images.unsplash.com/...`) ব্যবহার করতে হবে।
+- `next.config.ts`-এ `images.unsplash.com` ইতোমধ্যে কনফিগার করা আছে।
+- `next/image` দিয়ে অপ্টিমাইজড রেন্ডার করতে হবে এবং ছবি লোড না হলে সুন্দর ফলব্যাক আইকন দেখাতে হবে।
+
+### E. Centralized API Endpoints & Client
 - **`src/config/apiEndpoints.ts`:** সমস্ত ব্যাকএন্ড রাউট টাইপড কনস্ট্যান্ট আকারে থাকবে। কোনো সার্ভিসে হার্ডকোডেড ইউআরএল স্ট্রিং লেখা যাবে না।
 - **`src/lib/apiClient.ts`:** সেন্ট্রালাইজড ফেচ ক্লায়েন্ট যাতে রয়েছে:
   - ইউনিফাইড এরর হ্যান্ডলিং (`ApiError`).
   - Request Deduping (POS-এ দ্রুত ক্লিক করলে ডাবল ইনভয়েস সাবমিট হওয়া প্রতিরোধ করে).
   - টাইমআউট গার্ড (১৫ সেকেন্ড).
 
-### C. Decimal & Currency Rules (টাকা ও ওজনের হিসাব)
+### F. Decimal & Currency Rules (টাকা ও ওজনের হিসাব)
 - ব্যাকএন্ড প্রিজমা ডেসিমেলগুলোকে স্ট্রিং হিসেবে রিটার্ন করে (`"14.9943"`, `"36270.00"`).
 - সার্ভিস লেয়ারে `parseDecimal()` ব্যবহার করে সেগুলোকে জাভাস্ক্রিপ্ট `number`-এ কনভার্ট করে Zustand স্টোরে রাখা হয়।
 - **UI রেন্ডারিং:**
-  - মুদ্রা: `formatCurrency(val)` ➔ `৳3,500.00`
-  - ওজন/পরিমাণ: `formatWeight(val, unit)` ➔ `0.0056 কেজি` (মাইক্রো-মসলার জন্য ৪ দশমিক অক্ষত থাকে).
+  - মুদ্রা: `formatCurrency(val)` ➔ `৳৩,৫০০.০০`
+  - ওজন/পরিমাণ: `formatWeight(val, unit)` ➔ `০.০০৫৬ কেজি` (মাইক্রো-মসলার জন্য ৪ দশমিক অক্ষত থাকে).
 
 ---
 
@@ -40,9 +70,10 @@ src/features/[feature-name]/
 ```text
 src/
 ├── app/                              # Next.js App Router পেজ ও লেআউট
-│   ├── layout.tsx                    # রুট লেআউট
+│   ├── layout.tsx                    # রুট লেআউট (Noto Sans Bengali + JetBrains Mono)
+│   ├── globals.css                   # Tailwind v4 @theme, স্লেট টোকেন, থার্মাল প্রিন্ট CSS
 │   ├── page.tsx                      # ড্যাশবোর্ড / বিক্রয় ও বকেয়া সামারি
-│   ├── pos/                          # পিওএস ক্যাশ কাউন্টার বিলিং
+│   ├── pos/                          # পিওএস ক্যাশ কাউন্টার বিলিং (h-[100dvh])
 │   │   └── page.tsx
 │   ├── products/                     # পণ্য ও ডাইনামিক ইউনিট ম্যানেজমেন্ট
 │   │   └── page.tsx
@@ -56,15 +87,15 @@ src/
 │   └── reports/                      # লাভ-ক্ষতি, স্টক ভ্যালু ও বকেয়া রিপোর্ট
 │       └── page.tsx
 ├── components/                       # শেয়ার্ড ও রিইউজেবল কম্পোনেন্ট
-│   ├── ui/                           # Button, Input, Modal, Badge, Table, Card
+│   ├── ui/                           # PosHeaderModeBar, KhataBalanceBadge, MobileCard, KpiCard
 │   ├── layout/                       # Navbar, Sidebar, TopHeader
-│   └── shared/                       # DebouncedSearch, BarcodeListener, CurrencyDisplay
+│   └── shared/                       # ThermalReceipt, DebouncedSearch
 ├── config/
 │   └── apiEndpoints.ts               # সেন্ট্রালাইজড টাইপড এপিআই রাউটস
 ├── lib/
 │   ├── apiClient.ts                  # টাইপড ফেচ ক্লায়েন্ট উইথ ডিডুপ্লিকেশন
 │   ├── decimal.ts                    # ৪ দশমিকে নির্ভুল হিসাব ও ফরম্যাটিং
-│   └── utils.ts                      # Tailwind merge (cn), debounce ইত্যাদি
+│   └── utils.ts                      # Tailwind merge (cn)
 └── features/                         # ডোমেন-ভিত্তিক ফিচার মডিউল
     ├── product/                      # পণ্য, ইউনিট মাস্টার, বস্তা/কার্টন কনভার্শন ও অপচয়
     │   ├── product.types.ts
@@ -75,7 +106,7 @@ src/
     │   ├── pos.types.ts
     │   ├── pos.service.ts
     │   ├── usePosStore.ts
-    │   └── components/
+    │   └── components/               # PosProductCatalog, PosCartTable, PosSettlementPanel
     ├── purchase/                     # চালান এন্ট্রি, অন-দ্য-ফ্লাই কার্টন কনভার্শন ও রিপ্লেসমেন্ট কস্ট
     │   ├── purchase.types.ts
     │   ├── purchase.service.ts
@@ -116,14 +147,5 @@ src/
      `পূর্বের বকেয়া (৳১২,৭৭০) + আজকের বিল (৳৫০০) - নগদ জমা (৳৩০০) = নতুন বকেয়া (৳১২,৯৭০)`.
 4. **Offline Cart Persistence:**
    - ব্রাউজার রিলোড বা ট্যাব ভুলে কেটে গেলেও কার্টের ডাটা হারিয়ে যাবে না (`localStorage` কি: `idris-pos-cart`)।
-
----
-
-## 4. Frontend Phased Implementation Plan
-
-| Phase | ফোকাস এরিয়া | প্রধান ডেলিভারেবলস |
-| :--- | :--- | :--- |
-| **Phase 1** | **Core Setup & Critical Engines (সম্পন্ন)** | `apiEndpoints`, `apiClient`, `decimal.ts`, `product` মডিউল এবং `pos` ইঞ্জিন (কার্ট, রিভার্স ক্যালকুলেশন ও বাকি হিসাব)। |
-| **Phase 2** | **POS Counter UI & Thermal Receipt** | কীবোর্ড-ফার্স্ট পিওএস স্ক্রিন, দ্রুত পণ্য সার্চ গ্রিড, কার্ট টেবিল, কাস্টমার ড্রপডাউন এবং ৫8mm/৮০mm রসিদ ভিউ। |
-| **Phase 3** | **Khata Ledger (Customer & Mahajan)** | লাল খাতার সম্পূর্ণ লেজার স্ক্রিন, রানিং ব্যালেন্স ব্যাজ, নগদ আদায় ও মহাজনকে পরিশোধ মডাল। |
-| **Phase 4** | **Purchases, Cashbox & Reports** | মহাজনের চালান এন্ট্রি (অন-দ্য-ফ্লাই কার্টন সেভ), দৈনিক ক্যাশবাক্স ক্লোজিং ও প্রফিট/লস ড্যাশবোর্ড। |
+5. **Thermal Slip Directives:**
+   - রসিদ প্রিন্টে `@media print` সরাসরি খাঁটি কালো কালার (`#000000`) পাঠাবে যাতে থার্মাল প্রিন্টারে কোনো অক্ষর ঘোলাটে না হয়।

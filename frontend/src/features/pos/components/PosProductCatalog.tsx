@@ -1,7 +1,13 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Search, Barcode, Plus, Zap, AlertCircle } from 'lucide-react';
+import {
+  MagnifyingGlass,
+  Barcode,
+  Plus,
+  Lightning,
+  WarningCircle,
+} from '@phosphor-icons/react';
 import { Product, ProductUnit } from '@/features/product/product.types';
 import { useProductStore } from '@/features/product/useProductStore';
 import { usePosStore } from '../usePosStore';
@@ -10,18 +16,16 @@ import { formatCurrency, formatWeight } from '@/lib/decimal';
 export function PosProductCatalog() {
   const { products, isLoading, fetchProducts } = useProductStore();
   const { saleType, addItem, addReversePriceItem } = usePosStore();
-  
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
   const [reverseModalProduct, setReverseModalProduct] = useState<Product | null>(null);
   const [customAmount, setCustomAmount] = useState<string>('20');
 
-  // Load products on mount
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Debounced Search filter
   const filteredProducts = products.filter((p) => {
     const matchCategory =
       selectedCategory === 'ALL' || p.category === selectedCategory;
@@ -59,7 +63,11 @@ export function PosProductCatalog() {
       {/* 1. Header: Search Bar & Barcode Scanner Indicator */}
       <div className="p-3.5 border-b border-slate-200 bg-slate-50/70 space-y-2.5">
         <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <MagnifyingGlass
+            size={18}
+            weight="bold"
+            className="text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
+          />
           <input
             id="pos-search-input"
             type="text"
@@ -68,7 +76,11 @@ export function PosProductCatalog() {
             placeholder="পণ্য খুঁজুন (নাম, বাংলা নাম, বারকোড বা SKU) [F2]"
             className="w-full h-11 pl-10 pr-10 rounded-xl border border-slate-300 bg-white text-sm font-semibold text-slate-900 placeholder:text-slate-400 focus:border-emerald-600 transition-all"
           />
-          <Barcode className="w-5 h-5 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          <Barcode
+            size={22}
+            weight="bold"
+            className="text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+          />
         </div>
 
         {/* Category Pills */}
@@ -99,7 +111,7 @@ export function PosProductCatalog() {
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="h-64 flex flex-col items-center justify-center text-slate-400 text-sm">
-            <AlertCircle className="w-8 h-8 text-slate-300 mb-2" />
+            <WarningCircle size={32} weight="duotone" className="text-slate-300 mb-2" />
             কোনো পণ্য খুঁজে পাওয়া যায়নি
           </div>
         ) : (
@@ -166,7 +178,7 @@ export function PosProductCatalog() {
                       onClick={() => addItem(product)}
                       className="w-full h-9 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-[0.98] cursor-pointer"
                     >
-                      <Plus className="w-3.5 h-3.5" />
+                      <Plus size={15} weight="bold" />
                       যোগ করুন (১ {product.baseUnitName})
                     </button>
 
@@ -200,7 +212,7 @@ export function PosProductCatalog() {
                         onClick={() => setReverseModalProduct(product)}
                         className="w-full py-1 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[11px] font-bold flex items-center justify-center gap-1 transition-all cursor-pointer"
                       >
-                        <Zap className="w-3 h-3 text-amber-600" />
+                        <Lightning size={14} weight="fill" className="text-amber-600" />
                         টাকার অংকে বিক্রি (যেমন ২০ টাকার এলাচ)
                       </button>
                     )}
@@ -220,7 +232,8 @@ export function PosProductCatalog() {
             className="bg-white rounded-2xl max-w-sm w-full p-5 shadow-xl border border-slate-200 space-y-4"
           >
             <div>
-              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-600 flex items-center gap-1">
+                <Lightning size={14} weight="fill" />
                 টাকার অংকে বিক্রি (Reverse Calculation)
               </span>
               <h3 className="text-base font-bold text-slate-900 mt-0.5">

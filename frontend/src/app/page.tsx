@@ -6,14 +6,11 @@ import {
   Users,
   Truck,
   Wallet,
-  TrendingUp,
+  TrendUp,
   Receipt,
   ArrowRight,
-  Sparkles,
-  Store,
-  Layers,
-  History,
-} from 'lucide-react';
+  Storefront,
+} from '@phosphor-icons/react/dist/ssr';
 import { KpiCard } from '@/components/ui/KpiCard';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
@@ -53,7 +50,7 @@ export default async function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shadow-xs">
-              <Store className="w-5 h-5" />
+              <Storefront size={22} weight="bold" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -73,11 +70,11 @@ export default async function DashboardPage() {
           {/* Quick Jump to POS Button */}
           <Link
             href="/pos"
-            className="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-xs transition-all active:scale-[0.98]"
+            className="h-10 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-bold flex items-center gap-2 shadow-xs transition-all active:scale-[0.98] cursor-pointer"
           >
-            <ShoppingCart className="w-4 h-4" />
+            <ShoppingCart size={18} weight="bold" />
             <span>পিওএস ক্যাশ কাউন্টার</span>
-            <ArrowRight className="w-4 h-4 hidden sm:block" />
+            <ArrowRight size={16} weight="bold" className="hidden sm:block" />
           </Link>
         </div>
       </header>
@@ -101,25 +98,25 @@ export default async function DashboardPage() {
             <KpiCard
               label="আজকের মোট বিক্রি (Sales Revenue)"
               exactValue={totalSales}
-              icon={<TrendingUp className="w-4 h-4 text-emerald-600" />}
+              icon={<TrendUp size={20} weight="bold" className="text-emerald-600" />}
               periodText="আজকের ক্যাশ ও বাকি মিলিয়ে"
             />
             <KpiCard
               label="ক্যাশ ড্রয়ারে নগদ (Net Cash in Hand)"
               exactValue={cashInHand}
-              icon={<Wallet className="w-4 h-4 text-emerald-600" />}
+              icon={<Wallet size={20} weight="bold" className="text-emerald-600" />}
               periodText="নগদ গ্রহণ - নগদ প্রদান"
             />
             <KpiCard
               label="বাজারে মোট বকেয়া (Customer Dues)"
               exactValue={customerReceivables}
-              icon={<Users className="w-4 h-4 text-rose-600" />}
+              icon={<Users size={20} weight="bold" className="text-rose-600" />}
               periodText="খদ্দেরদের কাছে মোট পাওনা"
             />
             <KpiCard
               label="মহাজন দেনা (Supplier Payables)"
               exactValue={supplierPayables}
-              icon={<Truck className="w-4 h-4 text-amber-600" />}
+              icon={<Truck size={20} weight="bold" className="text-amber-600" />}
               periodText="আড়তদারদের কাছে দোকানের দেনা"
             />
           </div>
@@ -153,9 +150,9 @@ export default async function DashboardPage() {
             <div className="flex gap-2">
               <Link
                 href="/pos"
-                className="h-11 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-colors"
+                className="h-11 px-5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-colors cursor-pointer"
               >
-                <ShoppingCart className="w-4 h-4" />
+                <ShoppingCart size={18} weight="bold" />
                 নতুন বিক্রি শুরু করুন
               </Link>
             </div>
@@ -176,7 +173,7 @@ export default async function DashboardPage() {
               className="bg-white border border-slate-200 hover:border-emerald-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
             >
               <div className="w-12 h-12 rounded-xl bg-emerald-50 group-hover:bg-emerald-600 group-hover:text-white text-emerald-700 flex items-center justify-center transition-colors mb-2.5">
-                <ShoppingCart className="w-6 h-6" />
+                <ShoppingCart size={24} weight="bold" />
               </div>
               <h3 className="font-bold text-xs sm:text-sm text-slate-900">পিওএস কাউন্টার</h3>
               <p className="text-[10px] text-slate-400 mt-0.5">দ্রুত ক্যাশ ও বাকি বিক্রি</p>
@@ -187,7 +184,7 @@ export default async function DashboardPage() {
               className="bg-white border border-slate-200 hover:border-emerald-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
             >
               <div className="w-12 h-12 rounded-xl bg-slate-50 group-hover:bg-slate-900 group-hover:text-white text-slate-700 flex items-center justify-center transition-colors mb-2.5">
-                <Package className="w-6 h-6" />
+                <Package size={24} weight="bold" />
               </div>
               <h3 className="font-bold text-xs sm:text-sm text-slate-900">পণ্য ও স্টক</h3>
               <p className="text-[10px] text-slate-400 mt-0.5">৪ দশমিক ও ডাইনামিক বস্তা</p>
@@ -198,7 +195,7 @@ export default async function DashboardPage() {
               className="bg-white border border-slate-200 hover:border-emerald-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
             >
               <div className="w-12 h-12 rounded-xl bg-rose-50 group-hover:bg-rose-600 group-hover:text-white text-rose-700 flex items-center justify-center transition-colors mb-2.5">
-                <Users className="w-6 h-6" />
+                <Users size={24} weight="bold" />
               </div>
               <h3 className="font-bold text-xs sm:text-sm text-slate-900">কাস্টমার বাকি খাতা</h3>
               <p className="text-[10px] text-slate-400 mt-0.5">নগদ আদায় ও লেজার</p>
@@ -209,7 +206,7 @@ export default async function DashboardPage() {
               className="bg-white border border-slate-200 hover:border-emerald-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
             >
               <div className="w-12 h-12 rounded-xl bg-amber-50 group-hover:bg-amber-600 group-hover:text-white text-amber-700 flex items-center justify-center transition-colors mb-2.5">
-                <Truck className="w-6 h-6" />
+                <Truck size={24} weight="bold" />
               </div>
               <h3 className="font-bold text-xs sm:text-sm text-slate-900">মহাজনের খাতা</h3>
               <p className="text-[10px] text-slate-400 mt-0.5">চালান ও পাওনা পরিশোধ</p>
@@ -220,7 +217,7 @@ export default async function DashboardPage() {
               className="bg-white border border-slate-200 hover:border-emerald-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
             >
               <div className="w-12 h-12 rounded-xl bg-blue-50 group-hover:bg-blue-600 group-hover:text-white text-blue-700 flex items-center justify-center transition-colors mb-2.5">
-                <Wallet className="w-6 h-6" />
+                <Wallet size={24} weight="bold" />
               </div>
               <h3 className="font-bold text-xs sm:text-sm text-slate-900">ক্যাশবাক্স ও খরচ</h3>
               <p className="text-[10px] text-slate-400 mt-0.5">ড্রয়ার ক্যাশ ক্লোজিং</p>
@@ -231,7 +228,7 @@ export default async function DashboardPage() {
               className="bg-white border border-slate-200 hover:border-emerald-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
             >
               <div className="w-12 h-12 rounded-xl bg-purple-50 group-hover:bg-purple-600 group-hover:text-white text-purple-700 flex items-center justify-center transition-colors mb-2.5">
-                <Receipt className="w-6 h-6" />
+                <Receipt size={24} weight="bold" />
               </div>
               <h3 className="font-bold text-xs sm:text-sm text-slate-900">রিপোর্ট ও প্রফিট</h3>
               <p className="text-[10px] text-slate-400 mt-0.5">লাভ-ক্ষতি ও স্টক ভ্যালু</p>
@@ -244,42 +241,42 @@ export default async function DashboardPage() {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 py-1.5 flex items-center justify-around shadow-lg">
         <Link
           href="/"
-          className="flex flex-col items-center gap-0.5 text-emerald-700 py-1 px-3"
+          className="flex flex-col items-center gap-0.5 text-emerald-700 py-1 px-3 cursor-pointer"
         >
-          <Store className="w-5 h-5" />
+          <Storefront size={20} weight="bold" />
           <span className="text-[10px] font-bold">হোম</span>
         </Link>
 
         <Link
           href="/khata/customers"
-          className="flex flex-col items-center gap-0.5 text-slate-500 hover:text-slate-900 py-1 px-3"
+          className="flex flex-col items-center gap-0.5 text-slate-500 hover:text-slate-900 py-1 px-3 cursor-pointer"
         >
-          <Users className="w-5 h-5" />
+          <Users size={20} weight="bold" />
           <span className="text-[10px] font-bold">বাকি খাতা</span>
         </Link>
 
         {/* Elevated Center FAB Button for Quick POS Jump */}
         <Link
           href="/pos"
-          className="w-13 h-13 -mt-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg border-4 border-white active:scale-95 transition-transform"
+          className="w-13 h-13 -mt-6 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-lg border-4 border-white active:scale-95 transition-transform cursor-pointer"
           title="পিওএস টার্মিনাল"
         >
-          <ShoppingCart className="w-6 h-6" />
+          <ShoppingCart size={24} weight="bold" />
         </Link>
 
         <Link
           href="/products"
-          className="flex flex-col items-center gap-0.5 text-slate-500 hover:text-slate-900 py-1 px-3"
+          className="flex flex-col items-center gap-0.5 text-slate-500 hover:text-slate-900 py-1 px-3 cursor-pointer"
         >
-          <Package className="w-5 h-5" />
+          <Package size={20} weight="bold" />
           <span className="text-[10px] font-bold">পণ্য</span>
         </Link>
 
         <Link
           href="/cashbox"
-          className="flex flex-col items-center gap-0.5 text-slate-500 hover:text-slate-900 py-1 px-3"
+          className="flex flex-col items-center gap-0.5 text-slate-500 hover:text-slate-900 py-1 px-3 cursor-pointer"
         >
-          <Wallet className="w-5 h-5" />
+          <Wallet size={20} weight="bold" />
           <span className="text-[10px] font-bold">ক্যাশবাক্স</span>
         </Link>
       </nav>

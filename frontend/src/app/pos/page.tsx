@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ShoppingCart, Grid, Receipt } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, GridFour } from '@phosphor-icons/react';
 import { usePosStore } from '@/features/pos/usePosStore';
 import { PosHeaderModeBar } from '@/components/ui/PosHeaderModeBar';
 import { PosProductCatalog } from '@/features/pos/components/PosProductCatalog';
@@ -14,16 +14,11 @@ import { ThermalReceiptData } from '@/features/pos/pos.types';
 export default function PosPage() {
   const { saleType, setSaleType, cart, fetchThermalReceipt, getGrandTotal } = usePosStore();
 
-  // Mobile segmented tab state ('catalog' | 'settlement')
   const [mobileTab, setMobileTab] = useState<'catalog' | 'settlement'>('catalog');
-  
-  // Thermal receipt modal state
   const [activeThermalReceipt, setActiveThermalReceipt] = useState<ThermalReceiptData | null>(null);
 
-  // Global Keyboard Navigation (F2, F4, Ctrl+Enter)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // F2: Focus on Product Search input
       if (e.key === 'F2') {
         e.preventDefault();
         setMobileTab('catalog');
@@ -31,7 +26,6 @@ export default function PosPage() {
         searchInput?.focus();
       }
 
-      // F4: Focus on Paid Amount input
       if (e.key === 'F4') {
         e.preventDefault();
         setMobileTab('settlement');
@@ -62,10 +56,10 @@ export default function PosPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/"
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
             title="ড্যাশবোর্ডে ফিরে যান"
           >
-            <ArrowLeft className="w-5 h-5" />
+            <ArrowLeft size={20} weight="bold" />
           </Link>
           <div>
             <h1 className="font-bold text-sm sm:text-base text-slate-900 leading-tight">
@@ -100,25 +94,25 @@ export default function PosPage() {
             <button
               type="button"
               onClick={() => setMobileTab('catalog')}
-              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
                 mobileTab === 'catalog'
                   ? 'bg-white text-slate-900 shadow-2xs'
                   : 'text-slate-500'
               }`}
             >
-              <Grid className="w-3.5 h-3.5" />
+              <GridFour size={15} weight="bold" />
               পণ্য
             </button>
             <button
               type="button"
               onClick={() => setMobileTab('settlement')}
-              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
                 mobileTab === 'settlement'
                   ? 'bg-emerald-600 text-white shadow-2xs'
                   : 'text-slate-500'
               }`}
             >
-              <ShoppingCart className="w-3.5 h-3.5" />
+              <ShoppingCart size={15} weight="bold" />
               কার্ট ({cart.length})
             </button>
           </div>

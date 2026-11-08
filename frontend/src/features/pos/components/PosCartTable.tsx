@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Trash2, Plus, Minus, ShoppingBag, Zap } from 'lucide-react';
+import { Trash, Plus, Minus, ShoppingBag, Lightning } from '@phosphor-icons/react';
 import { usePosStore } from '../usePosStore';
 import { formatCurrency, formatWeight } from '@/lib/decimal';
 
@@ -11,7 +11,7 @@ export function PosCartTable() {
   if (cart.length === 0) {
     return (
       <div className="h-64 flex flex-col items-center justify-center p-6 text-slate-400 border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
-        <ShoppingBag className="w-10 h-10 text-slate-300 mb-2 stroke-[1.5]" />
+        <ShoppingBag size={44} weight="duotone" className="text-slate-300 mb-2" />
         <p className="font-bold text-sm text-slate-600">বিক্রয় কার্ট সম্পূর্ণ খালি</p>
         <p className="text-xs text-slate-400 mt-0.5">
           বামের তালিকা থেকে পণ্য সিলেক্ট করে যোগ করুন
@@ -32,7 +32,7 @@ export function PosCartTable() {
           onClick={clearCart}
           className="text-[11px] font-bold text-rose-600 hover:text-rose-700 hover:underline flex items-center gap-1 cursor-pointer"
         >
-          <Trash2 className="w-3 h-3" />
+          <Trash size={14} weight="bold" />
           কার্ট খালি করুন
         </button>
       </div>
@@ -52,7 +52,7 @@ export function PosCartTable() {
                 </h4>
                 {item.isReverseCalculated && (
                   <span className="shrink-0 px-1.5 py-0.2 rounded text-[10px] font-bold bg-amber-100 text-amber-800 flex items-center gap-0.5">
-                    <Zap className="w-2.5 h-2.5" />
+                    <Lightning size={12} weight="fill" />
                     টাকা মোড
                   </span>
                 )}
@@ -86,7 +86,7 @@ export function PosCartTable() {
                   className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:bg-slate-200 transition-colors cursor-pointer"
                   title="পরিমাণ কমান"
                 >
-                  <Minus className="w-3.5 h-3.5" />
+                  <Minus size={14} weight="bold" />
                 </button>
                 <span className="w-10 sm:w-12 text-center text-xs sm:text-sm font-black text-slate-900 tabular-numbers">
                   {item.quantity}
@@ -97,7 +97,7 @@ export function PosCartTable() {
                   className="w-8 h-8 sm:w-9 sm:h-9 flex items-center justify-center text-slate-600 hover:bg-slate-100 active:bg-slate-200 transition-colors cursor-pointer"
                   title="পরিমাণ বাড়ান"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus size={14} weight="bold" />
                 </button>
               </div>
             ) : (
@@ -118,7 +118,7 @@ export function PosCartTable() {
                 onClick={() => removeItem(item.id)}
                 className="text-[11px] text-slate-400 hover:text-rose-600 mt-1 inline-flex items-center gap-0.5 cursor-pointer"
               >
-                <Trash2 className="w-3 h-3" />
+                <Trash size={13} weight="bold" />
                 মুছুন
               </button>
             </div>

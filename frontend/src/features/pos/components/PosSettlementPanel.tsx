@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { User, CheckCircle2, AlertTriangle, ArrowRight, Banknote } from 'lucide-react';
+import { User, CheckCircle, Warning, Money } from '@phosphor-icons/react';
 import { usePosStore } from '../usePosStore';
 import { posService } from '../pos.service';
 import { CustomerOption } from '../pos.types';
@@ -37,7 +37,6 @@ export function PosSettlementPanel({ onSaleSuccess }: PosSettlementPanelProps) {
   const [customerList, setCustomerList] = useState<CustomerOption[]>([]);
   const [showCustomerDropdown, setShowCustomerDropdown] = useState(false);
 
-  // Fetch customers for selector
   useEffect(() => {
     posService.searchCustomers().then(setCustomerList).catch(console.error);
   }, []);
@@ -49,7 +48,6 @@ export function PosSettlementPanel({ onSaleSuccess }: PosSettlementPanelProps) {
   const changeAmount = getChangeAmount();
   const isCartEmpty = cart.length === 0;
 
-  // Handle Quick Cash Full Pay
   const handleFullCash = () => {
     setPaidAmount(grandTotal);
   };
@@ -75,8 +73,8 @@ export function PosSettlementPanel({ onSaleSuccess }: PosSettlementPanelProps) {
         {/* 1. Customer Selection */}
         <div>
           <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center justify-between">
-            <span className="flex items-center gap-1">
-              <User className="w-3.5 h-3.5 text-slate-500" />
+            <span className="flex items-center gap-1.5">
+              <User size={15} weight="bold" className="text-slate-500" />
               কাস্টমার / খদ্দের
             </span>
             {selectedCustomer && (
@@ -191,8 +189,8 @@ export function PosSettlementPanel({ onSaleSuccess }: PosSettlementPanelProps) {
         {/* 3. Cash Payment Received & Change */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-slate-700 flex items-center gap-1">
-              <Banknote className="w-3.5 h-3.5 text-emerald-600" />
+            <label className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <Money size={16} weight="bold" className="text-emerald-600" />
               নগদ গ্রহণ (Cash Paid) [F4]:
             </label>
             <button
@@ -280,7 +278,7 @@ export function PosSettlementPanel({ onSaleSuccess }: PosSettlementPanelProps) {
 
         {error && (
           <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-1.5">
-            <AlertTriangle className="w-4 h-4 shrink-0" />
+            <Warning size={16} weight="bold" className="shrink-0" />
             {error}
           </div>
         )}
@@ -301,7 +299,7 @@ export function PosSettlementPanel({ onSaleSuccess }: PosSettlementPanelProps) {
             <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
             <>
-              <CheckCircle2 className="w-5 h-5" />
+              <CheckCircle size={20} weight="bold" />
               বিক্রি সম্পন্ন করুন ও রসিদ প্রিন্ট [Ctrl+Enter]
             </>
           )}

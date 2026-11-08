@@ -1,11 +1,11 @@
 import type { Metadata } from 'next';
-import { Hind_Siliguri, JetBrains_Mono } from 'next/font/google';
+import { Noto_Sans_Bengali, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 
-const hindSiliguri = Hind_Siliguri({
-  weight: ['400', '500', '600', '700'],
-  subsets: ['bengali', 'latin'],
-  variable: '--font-hind-siliguri',
+const notoSansBengali = Noto_Sans_Bengali({
+  weight: ['400', '500', '600', '700', '800'],
+  subsets: ['bengali'],
+  variable: '--font-noto-sans-bengali',
   display: 'swap',
 });
 
@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html
       lang="bn"
-      className={`${hindSiliguri.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${notoSansBengali.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-surface-canvas text-ink-primary">
         {children}

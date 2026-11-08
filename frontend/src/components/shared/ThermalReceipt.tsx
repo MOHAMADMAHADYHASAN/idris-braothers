@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Printer, X } from 'lucide-react';
+import { Printer, X } from '@phosphor-icons/react';
 import { ThermalReceiptData } from '@/features/pos/pos.types';
 import { formatCurrency } from '@/lib/decimal';
 
@@ -28,16 +28,16 @@ export function ThermalReceipt({
         {/* Modal Top Actions (Hidden on Print) */}
         <div className="p-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between no-print">
           <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-            <Printer className="w-4 h-4 text-emerald-600" />
+            <Printer size={16} weight="bold" className="text-emerald-600" />
             থার্মাল ক্যাশ মেমো রসিদ ({paperWidth})
           </span>
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handlePrint}
-              className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 flex items-center gap-1 cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 flex items-center gap-1.5 cursor-pointer"
             >
-              <Printer className="w-3.5 h-3.5" />
+              <Printer size={15} weight="bold" />
               প্রিন্ট দিন
             </button>
             <button
@@ -45,7 +45,7 @@ export function ThermalReceipt({
               onClick={onClose}
               className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 cursor-pointer"
             >
-              <X className="w-4 h-4" />
+              <X size={16} weight="bold" />
             </button>
           </div>
         </div>
