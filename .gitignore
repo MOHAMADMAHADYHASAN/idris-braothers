@@ -16,3 +16,4 @@ frontend/npm-debug.log*
 # General
 .DS_Store
 *.pem
+bruno/

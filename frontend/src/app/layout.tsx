@@ -1,29 +1,39 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Hind_Siliguri, JetBrains_Mono } from 'next/font/google';
+import './globals.css';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const hindSiliguri = Hind_Siliguri({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['bengali', 'latin'],
+  variable: '--font-hind-siliguri',
+  display: 'swap',
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const jetbrainsMono = JetBrains_Mono({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-mono-numbers',
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
-  title: "Idris Brothers - Grocery POS Counter",
-  description: "Modern Decoupled Point of Sale & Due Management for Local Grocery Store",
+  title: 'ইদ্রিস ব্রাদার্স - মুদি ও মসলার আড়ত ও পিওএস কাউন্টার',
+  description: 'Traditional Grocery & Spice POS, Multi-Unit Inventory and Khata Management System (Morichpotti, Feni Bazar)',
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      lang="bn"
+      className={`${hindSiliguri.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-surface-canvas text-ink-primary">
+        {children}
+      </body>
     </html>
   );
 }

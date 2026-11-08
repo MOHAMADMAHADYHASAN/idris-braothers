@@ -1,26 +1,101 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* Surfaces & Canvas (Anti-Fatigue Slate) */
+  --color-surface-canvas: #F8FAFC;
+  --color-surface-card: #FFFFFF;
+  --color-surface-subtle: #F1F5F9;
+  --color-border-subtle: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+
+  /* Ink & Typography */
+  --color-ink-primary: #0F172A;
+  --color-ink-secondary: #475569;
+  --color-ink-muted: #94A3B8;
+
+  /* Brand Primary (Trust & Grocery Freshness Emerald) */
+  --color-brand-default: #059669;
+  --color-brand-hover: #047857;
+  --color-brand-soft: #D1FAE5;
+
+  /* Financial Semantics */
+  --color-cash-bg: #DCFCE7;
+  --color-cash-text: #15803D;
+
+  --color-due-bg: #FEE2E2;
+  --color-due-text: #B91C1C;
+
+  --color-wholesale-bg: #FEF3C7;
+  --color-wholesale-text: #B45309;
+  --color-wholesale-border: #F59E0B;
+
+  /* Typography */
+  --font-sans: var(--font-hind-siliguri), system-ui, sans-serif;
+  --font-mono: var(--font-mono-numbers), "Inter", monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+/* Base Body Styles */
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-surface-canvas);
+  color: var(--color-ink-primary);
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Monospace Decimal & Currency Alignment */
+.tabular-numbers {
+  font-family: var(--font-mono);
+  font-feature-settings: "tnum" 1;
+  font-variant-numeric: tabular-nums;
+}
+
+/* High-Visibility Focus Ring for Fast POS Enter Navigation */
+input:focus-visible,
+button:focus-visible,
+select:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-surface-card), 0 0 0 4px #059669;
+}
+
+/* Scrollbar Styling for High-Density Tables */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* 58mm / 80mm Thermal Receipt Directives */
+@media print {
+  /* Suppress all administrative UI chrome */
+  aside, header, nav, footer, .no-print, [class*="print:hidden"] {
+    display: none !important;
+  }
+  body, main {
+    height: auto !important;
+    overflow: visible !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  /* Force solid 100% black on thermal printers */
+  .thermal-receipt,
+  .thermal-receipt * {
+    color: #000000 !important;
+    background: transparent !important;
+    border-color: #000000 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: none !important;
+  }
 }
