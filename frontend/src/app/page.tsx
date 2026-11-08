@@ -12,6 +12,7 @@ import {
   Storefront,
 } from '@phosphor-icons/react/dist/ssr';
 import { KpiCard } from '@/components/ui/KpiCard';
+import { StoreShutterHero } from '@/components/StoreShutterHero';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
 
@@ -45,6 +46,13 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-surface-canvas text-ink-primary pb-20 md:pb-12">
+      {/* 0. Store Shutter Roll-up Reveal Hero */}
+      <StoreShutterHero
+        storeName="ইদ্রিস ব্রাদার্স"
+        storeTagline="মুদি ও মসলার আড়ত • মরিচপট্টি, ফেনী বাজার"
+        imageSrc="/store_shutter.jpg"
+      />
+
       {/* 1. Global Shell Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-2xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
@@ -167,7 +175,7 @@ export default async function DashboardPage() {
             দোকানের মূল মডিউলসমূহ (Quick Management Portals)
           </h2>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
             <Link
               href="/pos"
               className="bg-white border border-slate-200 hover:border-emerald-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
@@ -177,6 +185,17 @@ export default async function DashboardPage() {
               </div>
               <h3 className="font-bold text-xs sm:text-sm text-slate-900">পিওএস কাউন্টার</h3>
               <p className="text-[10px] text-slate-400 mt-0.5">দ্রুত ক্যাশ ও বাকি বিক্রি</p>
+            </Link>
+
+            <Link
+              href="/purchases"
+              className="bg-white border border-slate-200 hover:border-amber-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-xl bg-amber-50 group-hover:bg-amber-600 group-hover:text-white text-amber-700 flex items-center justify-center transition-colors mb-2.5">
+                <Receipt size={24} weight="bold" />
+              </div>
+              <h3 className="font-bold text-xs sm:text-sm text-slate-900">চালান এন্ট্রি</h3>
+              <p className="text-[10px] text-slate-400 mt-0.5">মোকাম মাল ও স্টক ইন</p>
             </Link>
 
             <Link
