@@ -18,7 +18,7 @@ export function CustomerKpiSummary() {
       <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
         <div className="flex items-center justify-between">
           <span className="text-xs sm:text-sm font-medium text-ink-muted">মোট বাজার বকেয়া</span>
-          <div className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/60 text-slate-600 flex items-center justify-center">
             <Coins size={18} weight="bold" />
           </div>
         </div>
@@ -34,7 +34,7 @@ export function CustomerKpiSummary() {
       <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
         <div className="flex items-center justify-between">
           <span className="text-xs sm:text-sm font-medium text-ink-muted">বকেয়াদার কাস্টমার</span>
-          <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/60 text-slate-600 flex items-center justify-center">
             <Receipt size={18} weight="bold" />
           </div>
         </div>
@@ -50,7 +50,7 @@ export function CustomerKpiSummary() {
       <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
         <div className="flex items-center justify-between">
           <span className="text-xs sm:text-sm font-medium text-ink-muted">মোট নিবন্ধিত খাতা</span>
-          <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/60 text-slate-600 flex items-center justify-center">
             <Users size={18} weight="bold" />
           </div>
         </div>

@@ -2,10 +2,15 @@ import { create } from 'zustand';
 import { productService } from './product.service';
 import {
   Product,
+  ProductVariant,
+  VariantUnit,
+  Category,
+  Brand,
   UnitMaster,
   StockWastage,
   CreateProductDTO,
   UpdateProductDTO,
+  UpdateVariantDTO,
   UpdateProductPricesDTO,
   AddProductUnitDTO,
   RecordWastageDTO,
@@ -16,6 +21,8 @@ import { PaginationMeta } from '@/lib/apiClient';
 interface ProductState {
   products: Product[];
   selectedProduct: Product | null;
+  categories: Category[];
+  brands: Brand[];
   units: UnitMaster[];
   wastages: StockWastage[];
   pagination: PaginationMeta | null;
@@ -23,22 +30,34 @@ interface ProductState {
   isSaving: boolean;
   error: string | null;
   searchQuery: string;
-  selectedCategory: string | null;
+  selectedCategoryId: string | null;
+  selectedBrandId: string | null;
+  lowStockOnly: boolean;
 
   // Actions
   fetchProducts: (params?: ProductFilterParams) => Promise<void>;
   fetchProductById: (id: string) => Promise<Product | null>;
-  fetchProductByBarcode: (barcode: string) => Promise<Product | null>;
+  fetchVariantById: (variantId: string) => Promise<ProductVariant | null>;
+  fetchProductByBarcode: (barcode: string) => Promise<{ variant: ProductVariant; matchedUnit?: VariantUnit } | null>;
+  fetchMetadata: () => Promise<void>; // Fetch categories, brands, and units in parallel
+  fetchCategories: () => Promise<void>;
+  fetchBrands: () => Promise<void>;
   fetchUnits: () => Promise<void>;
+  createCategory: (dto: { name: string; banglaName?: string; parentId?: string }) => Promise<Category>;
+  createBrand: (dto: { name: string; banglaName?: string }) => Promise<Brand>;
+  deleteVariant: (variantId: string) => Promise<{ success: boolean; deactivated?: boolean }>;
   createProduct: (dto: CreateProductDTO) => Promise<Product>;
   updateProduct: (id: string, dto: UpdateProductDTO) => Promise<Product>;
-  updatePrices: (id: string, dto: UpdateProductPricesDTO) => Promise<Product>;
-  addCustomUnit: (productId: string, dto: AddProductUnitDTO) => Promise<void>;
-  deleteCustomUnit: (productId: string, unitId: string) => Promise<void>;
-  recordWastage: (productId: string, dto: RecordWastageDTO) => Promise<StockWastage>;
-  fetchWastages: (params?: { page?: number; limit?: number; productId?: string }) => Promise<void>;
+  updateVariant: (variantId: string, dto: UpdateVariantDTO) => Promise<ProductVariant>;
+  updatePrices: (id: string, dto: UpdateProductPricesDTO) => Promise<ProductVariant>;
+  addCustomUnit: (targetId: string, dto: AddProductUnitDTO) => Promise<VariantUnit>;
+  deleteCustomUnit: (unitId: string) => Promise<void>;
+  recordWastage: (targetId: string, dto: RecordWastageDTO) => Promise<StockWastage>;
+  fetchWastages: (params?: { page?: number; limit?: number; variantId?: string; productId?: string }) => Promise<void>;
   setSearchQuery: (query: string) => void;
-  setSelectedCategory: (category: string | null) => void;
+  setSelectedCategoryId: (categoryId: string | null) => void;
+  setSelectedBrandId: (brandId: string | null) => void;
+  setLowStockOnly: (lowStockOnly: boolean) => void;
   setSelectedProduct: (product: Product | null) => void;
   clearError: () => void;
 }
@@ -46,6 +65,8 @@ interface ProductState {
 export const useProductStore = create<ProductState>((set, get) => ({
   products: [],
   selectedProduct: null,
+  categories: [],
+  brands: [],
   units: [],
   wastages: [],
   pagination: null,
@@ -53,14 +74,18 @@ export const useProductStore = create<ProductState>((set, get) => ({
   isSaving: false,
   error: null,
   searchQuery: '',
-  selectedCategory: null,
+  selectedCategoryId: null,
+  selectedBrandId: null,
+  lowStockOnly: false,
 
   fetchProducts: async (params) => {
     set({ isLoading: true, error: null });
     try {
       const mergedParams: ProductFilterParams = {
         search: get().searchQuery || undefined,
-        category: get().selectedCategory || undefined,
+        categoryId: get().selectedCategoryId || undefined,
+        brandId: get().selectedBrandId || undefined,
+        lowStockOnly: get().lowStockOnly || undefined,
         ...params,
       };
       const { products, meta } = await productService.getProducts(mergedParams);
@@ -82,21 +107,92 @@ export const useProductStore = create<ProductState>((set, get) => ({
     }
   },
 
-  fetchProductByBarcode: async (barcode: string) => {
+  fetchVariantById: async (variantId: string) => {
     try {
-      const product = await productService.getProductByBarcode(barcode);
-      return product;
+      return await productService.getVariantById(variantId);
     } catch (err: any) {
       return null;
     }
   },
 
+  fetchProductByBarcode: async (barcode: string) => {
+    try {
+      return await productService.getProductByBarcode(barcode);
+    } catch (err: any) {
+      return null;
+    }
+  },
+
+  fetchMetadata: async () => {
+    try {
+      const [categories, brands, units] = await Promise.all([
+        productService.getCategories(),
+        productService.getBrands(),
+        productService.getUnits(),
+      ]);
+      set({ categories, brands, units });
+    } catch (err: any) {
+      console.error('Failed to load metadata (categories/brands/units):', err);
+    }
+  },
+
+  fetchCategories: async () => {
+    try {
+      const categories = await productService.getCategories();
+      set({ categories });
+    } catch (err: any) {
+      console.error('Failed to load categories:', err);
+    }
+  },
+
+  fetchBrands: async () => {
+    try {
+      const brands = await productService.getBrands();
+      set({ brands });
+    } catch (err: any) {
+      console.error('Failed to load brands:', err);
+    }
+  },
+
   fetchUnits: async () => {
     try {
-      const units = await productService.getUnitMasterList();
+      const units = await productService.getUnits();
       set({ units });
     } catch (err: any) {
-      console.error('Failed to load dynamic units:', err);
+      console.error('Failed to load units:', err);
+    }
+  },
+
+  createCategory: async (dto) => {
+    try {
+      const newCategory = await productService.createCategory(dto);
+      set((state) => ({ categories: [...state.categories, newCategory] }));
+      return newCategory;
+    } catch (err: any) {
+      set({ error: err.message });
+      throw err;
+    }
+  },
+
+  createBrand: async (dto) => {
+    try {
+      const newBrand = await productService.createBrand(dto);
+      set((state) => ({ brands: [...state.brands, newBrand] }));
+      return newBrand;
+    } catch (err: any) {
+      set({ error: err.message });
+      throw err;
+    }
+  },
+
+  deleteVariant: async (variantId) => {
+    try {
+      const res = await productService.deleteVariant(variantId);
+      await get().fetchProducts();
+      return res;
+    } catch (err: any) {
+      set({ error: err.message });
+      throw err;
     }
   },
 
@@ -120,11 +216,25 @@ export const useProductStore = create<ProductState>((set, get) => ({
     try {
       const updated = await productService.updateProduct(id, dto);
       set((state) => ({
-        products: state.products.map((p) => (p.id === id ? updated : p)),
-        selectedProduct: state.selectedProduct?.id === id ? updated : state.selectedProduct,
+        products: state.products.map((p) => (p.id === id ? { ...p, ...updated } : p)),
+        selectedProduct: state.selectedProduct?.id === id ? { ...state.selectedProduct, ...updated } : state.selectedProduct,
         isSaving: false,
       }));
       return updated;
+    } catch (err: any) {
+      set({ error: err.message, isSaving: false });
+      throw err;
+    }
+  },
+
+  updateVariant: async (variantId, dto) => {
+    set({ isSaving: true, error: null });
+    try {
+      const updatedVariant = await productService.updateVariant(variantId, dto);
+      // Re-fetch products to ensure full parent-variant consistency
+      await get().fetchProducts();
+      set({ isSaving: false });
+      return updatedVariant;
     } catch (err: any) {
       set({ error: err.message, isSaving: false });
       throw err;
@@ -135,11 +245,8 @@ export const useProductStore = create<ProductState>((set, get) => ({
     set({ isSaving: true, error: null });
     try {
       const updated = await productService.updatePrices(id, dto);
-      set((state) => ({
-        products: state.products.map((p) => (p.id === id ? updated : p)),
-        selectedProduct: state.selectedProduct?.id === id ? updated : state.selectedProduct,
-        isSaving: false,
-      }));
+      await get().fetchProducts();
+      set({ isSaving: false });
       return updated;
     } catch (err: any) {
       set({ error: err.message, isSaving: false });
@@ -147,67 +254,35 @@ export const useProductStore = create<ProductState>((set, get) => ({
     }
   },
 
-  addCustomUnit: async (productId, dto) => {
+  addCustomUnit: async (targetId, dto) => {
     set({ isSaving: true, error: null });
     try {
-      const newUnit = await productService.addProductUnit(productId, dto);
-      set((state) => {
-        const updateProductUnits = (p: Product) => {
-          if (p.id !== productId) return p;
-          return {
-            ...p,
-            units: [...(p.units || []), newUnit],
-          };
-        };
-
-        return {
-          products: state.products.map(updateProductUnits),
-          selectedProduct: state.selectedProduct?.id === productId
-            ? updateProductUnits(state.selectedProduct)
-            : state.selectedProduct,
-          isSaving: false,
-        };
-      });
+      const newUnit = await productService.addProductUnit(targetId, dto);
+      await get().fetchProducts();
+      set({ isSaving: false });
+      return newUnit;
     } catch (err: any) {
       set({ error: err.message, isSaving: false });
       throw err;
     }
   },
 
-  deleteCustomUnit: async (productId, unitId) => {
+  deleteCustomUnit: async (unitId) => {
     try {
       await productService.deleteProductUnit(unitId);
-      set((state) => {
-        const removeUnit = (p: Product) => {
-          if (p.id !== productId) return p;
-          return {
-            ...p,
-            units: (p.units || []).filter((u) => u.id !== unitId),
-          };
-        };
-
-        return {
-          products: state.products.map(removeUnit),
-          selectedProduct: state.selectedProduct?.id === productId
-            ? removeUnit(state.selectedProduct)
-            : state.selectedProduct,
-        };
-      });
+      await get().fetchProducts();
     } catch (err: any) {
       set({ error: err.message });
       throw err;
     }
   },
 
-  recordWastage: async (productId, dto) => {
+  recordWastage: async (targetId, dto) => {
     set({ isSaving: true, error: null });
     try {
-      const wastage = await productService.recordWastage(productId, dto);
-      // Deduct stock in state
+      const wastage = await productService.recordWastage(targetId, dto);
+      await get().fetchProducts();
       set((state) => ({
-        products: state.products.map((p) =>
-          p.id === productId ? { ...p, stockQuantity: p.stockQuantity - dto.quantity } : p
-        ),
         wastages: [wastage, ...state.wastages],
         isSaving: false,
       }));
@@ -229,7 +304,9 @@ export const useProductStore = create<ProductState>((set, get) => ({
   },
 
   setSearchQuery: (searchQuery) => set({ searchQuery }),
-  setSelectedCategory: (selectedCategory) => set({ selectedCategory }),
+  setSelectedCategoryId: (selectedCategoryId) => set({ selectedCategoryId }),
+  setSelectedBrandId: (selectedBrandId) => set({ selectedBrandId }),
+  setLowStockOnly: (lowStockOnly) => set({ lowStockOnly }),
   setSelectedProduct: (selectedProduct) => set({ selectedProduct }),
   clearError: () => set({ error: null }),
 }));

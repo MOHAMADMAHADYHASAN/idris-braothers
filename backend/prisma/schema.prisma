@@ -66,79 +66,146 @@ model UnitMaster {
 }
 
 // ========================================================
-// 2. INVENTORY & MULTI-UNIT CONVERSION (পণ্য ও ইউনিট)
+// 2. CATEGORY & BRAND HIERARCHY (ক্যাটাগরি ও ব্র্যান্ড)
+// ========================================================
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String     // e.g. "মসলা", "চাল ও ডাল", "তেল", "চিনি", "দুধ ও দুগ্ধজাত"
+  banglaName  String?
+  slug        String     @unique
+  parentId    String?
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Category[] @relation("CategoryHierarchy")
+  
+  products    Product[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([parentId])
+  @@index([name])
+}
+
+model Brand {
+  id          String    @id @default(uuid())
+  name        String    @unique // e.g. "Dano", "Fresh", "Teer", "ACI Pure", "Rupchanda"
+  banglaName  String?
+  products    Product[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([name])
+}
+
+// ========================================================
+// 3. PRODUCT & PRODUCT VARIANT (SKU) ARCHITECTURE
 // ========================================================
 
 model Product {
-  id                   String         @id @default(uuid())
-  name                 String         // e.g. "মরিচ (শুকনা - পঞ্চগড়)"
-  banglaName           String?
-  sku                  String?        @unique
-  barcode              String?        @unique
-  category             String?        // e.g. "মসলা", "চাল ও ডাল", "তেল", "চিনি", "দুধ"
+  id          String           @id @default(uuid())
+  name        String           // e.g. "ডানো ফুল ক্রিম দুধ", "শুকনা মরিচ", "মিনিকেট চাল"
+  banglaName  String?
+  description String?
   
-  // 100% Dynamic Base Unit (e.g. "কেজি", "প্যাকেট", "লিটার", "পিস")
+  categoryId  String?
+  category    Category?        @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  
+  brandId     String?
+  brand       Brand?           @relation(fields: [brandId], references: [id], onDelete: SetNull)
+  
+  hasVariants Boolean          @default(false) // true হলে একাধিক সাইজ/গ্রেড আছে, false হলে একক সাধারণ পণ্য
+  isActive    Boolean          @default(true)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  variants    ProductVariant[]
+
+  @@index([categoryId])
+  @@index([brandId])
+  @@index([name])
+}
+
+model ProductVariant {
+  id                   String         @id @default(uuid())
+  productId            String
+  product              Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  variantName          String         // e.g. "৫০০ গ্রাম প্যাকেট", "১ কেজি প্যাকেট", "দেশি", "আমদানি (বোল্ড)" বা একক পণ্যে "Default"
+  sku                  String         @unique // e.g. "DANO-500G", "CHILI-DESHI-01"
+  barcode              String?        @unique
+  
+  // ডাইনামিক বেস ইউনিট (যেমন: "কেজি", "গ্রাম", "প্যাকেট", "লিটার", "পিস")
   baseUnitName         String         @default("কেজি")
   
-  // High-precision quantity tracking: 4 decimal places for micro-weight spices
-  stockQuantity        Decimal        @default(0) @db.Decimal(12, 4) // মূল স্টক
+  // ভগ্নাংশ/ওজন কন্ট্রোল ফ্ল্যাগ:
+  // true = খোলা মরিচ/চাল (০.২৫০ কেজি বা ২০ টাকার এলাচ বিক্রি সম্ভব)
+  // false = প্যাকেট দুধ/সাবান/তেলের বোতল (ক্যাশিয়ার ১, ২ এর জায়গায় ১.৫ বিক্রি করতে পারবে না)
+  allowDecimalQty      Boolean        @default(true)
+  
+  // ফ্লেক্সিবল অ্যাট্রিবিউটস (JSONB) - যেমন: {"origin": "পঞ্চগড়", "grade": "A+", "netWeight": "500g"}
+  attributes           Json?          @default("{}")
+  
+  // মূল স্টক (৪ দশমিকে নির্ভুল স্পাইস হিসাব)
+  stockQuantity        Decimal        @default(0) @db.Decimal(12, 4)
   lowStockAlert        Decimal        @default(10) @db.Decimal(12, 4)
   
-  // Dynamic Replacement Cost (সর্বশেষ ক্রয়মূল্য ভিত্তিক মূল্যায়ন)
-  currentPurchasePrice Decimal        @db.Decimal(12, 2) // সর্বশেষ ক্রয়মূল্য per baseUnit
-  retailPrice          Decimal        @db.Decimal(12, 2) // খুচরা বিক্রয়মূল্য per baseUnit
-  wholesalePrice       Decimal        @db.Decimal(12, 2) // পাইকারি বিক্রয়মূল্য per baseUnit
+  // রিপ্লেসমেন্ট কস্ট ও বিক্রয়মূল্য (প্রতি baseUnit-এর জন্য)
+  currentPurchasePrice Decimal        @db.Decimal(12, 2)
+  retailPrice          Decimal        @db.Decimal(12, 2)
+  wholesalePrice       Decimal        @db.Decimal(12, 2)
   
   isActive             Boolean        @default(true)
   createdAt            DateTime       @default(now())
   updatedAt            DateTime       @updatedAt
 
-  units                ProductUnit[]  // কাস্টম ইউনিট (৫০ কেজি বস্তা, ২৫ কেজি বস্তা, ৫ কেজি পাল্লা, কার্টন ইত্যাদি)
+  units                VariantUnit[]  // কার্টন / বস্তা কনভার্শন ফ্যাক্টর
   saleItems            SaleItem[]
   purchaseItems        PurchaseItem[]
   wastages             StockWastage[]
 
+  @@index([productId])
   @@index([barcode])
-  @@index([name])
-  @@index([category])
+  @@index([sku])
+  @@index([variantName])
 }
 
-model ProductUnit {
-  id               String   @id @default(uuid())
-  productId        String
-  product          Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
-  unitName         String   // e.g. "৫০ কেজি বস্তা", "কার্টন (২৪ প্যাকেট)", "৫ কেজি পাল্লা"
-  conversionFactor Decimal  @db.Decimal(12, 4) // মূল এককে রূপান্তর গুণক (e.g. 50.0000 for 50kg, 24.0000 for 24pkts)
-  retailPrice      Decimal? @db.Decimal(12, 2) // ঐ ইউনিটের জন্য সরাসরি খুচরা মূল্য (যদি থাকে)
-  wholesalePrice   Decimal? @db.Decimal(12, 2) // ঐ ইউনিটের জন্য সরাসরি পাইকারি মূল্য (যদি থাকে)
-  isDefault        Boolean  @default(false)
+model VariantUnit {
+  id               String         @id @default(uuid())
+  variantId        String
+  variant          ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
 
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  unitName         String         // e.g. "৫০ কেজি বস্তা", "কার্টন (২৪ প্যাকেট)", "পাল্লা (৫ কেজি)"
+  conversionFactor Decimal        @db.Decimal(12, 4) // মূল এককে রূপান্তর গুণক (e.g. 50.0000 for 50kg, 24.0000 for 24pkts)
+  retailPrice      Decimal?       @db.Decimal(12, 2) // ঐ ইউনিটের জন্য সরাসরি খুচরা মূল্য (ঐচ্ছিক)
+  wholesalePrice   Decimal?       @db.Decimal(12, 2) // ঐ ইউনিটের জন্য সরাসরি পাইকারি মূল্য (ঐচ্ছিক)
+  barcode          String?        @unique
+  isDefault        Boolean        @default(false)
 
-  @@unique([productId, unitName])
-  @@index([productId])
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  @@unique([variantId, unitName])
+  @@index([variantId])
 }
 
 model StockWastage {
-  id                 String   @id @default(uuid())
-  productId          String
-  product            Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id                 String         @id @default(uuid())
+  variantId          String
+  variant            ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
   
-  quantity           Decimal  @db.Decimal(12, 4) // Base unit-এ নষ্ট বা ঘাটতির পরিমাণ (e.g. 2.5000 KG)
-  costPriceSnapshot  Decimal  @db.Decimal(12, 2) // অপচয়ের সময়কার ক্রয়মূল্য
-  lossAmount         Decimal  @db.Decimal(12, 2) // quantity * costPriceSnapshot
-  reason             String   // e.g. "শুকিয়ে ওজন হ্রাস", "প্যাকেট নষ্ট", "ইঁদুরে খাওয়া/পড়ে যাওয়া"
+  quantity           Decimal        @db.Decimal(12, 4) // Base unit-এ নষ্ট বা ঘাটতির পরিমাণ (e.g. 2.5000 KG)
+  costPriceSnapshot  Decimal        @db.Decimal(12, 2) // অপচয়ের সময়কার ক্রয়মূল্য
+  lossAmount         Decimal        @db.Decimal(12, 2) // quantity * costPriceSnapshot
+  reason             String         // e.g. "শুকিয়ে ওজন হ্রাস", "প্যাকেট নষ্ট", "ইঁদুরে খাওয়া/পড়ে যাওয়া"
   note               String?
-  recordedAt         DateTime @default(now())
+  recordedAt         DateTime       @default(now())
 
-  @@index([productId])
+  @@index([variantId])
   @@index([recordedAt])
 }
 
 // ========================================================
-// 3. CUSTOMER KHATA / LEDGER (কাস্টমারের বাকির খাতা)
+// 4. CUSTOMER KHATA / LEDGER (কাস্টমারের বাকির খাতা)
 // ========================================================
 
 model Customer {
@@ -181,7 +248,7 @@ model CustomerLedger {
 }
 
 // ========================================================
-// 4. SALES & INVOICING (বিক্রয় ও রসিদ)
+// 5. SALES & INVOICING (বিক্রয় ও রসিদ)
 // ========================================================
 
 model Sale {
@@ -213,30 +280,30 @@ model Sale {
 }
 
 model SaleItem {
-  id                String   @id @default(uuid())
+  id                String         @id @default(uuid())
   saleId            String
-  sale              Sale     @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  sale              Sale           @relation(fields: [saleId], references: [id], onDelete: Cascade)
   
-  productId         String
-  product           Product  @relation(fields: [productId], references: [id])
+  variantId         String
+  variant           ProductVariant @relation(fields: [variantId], references: [id])
 
-  unitName          String   // e.g. "৫০ কেজি বস্তা", "কেজি", "পাল্লা", "প্যাকেট"
-  conversionFactor  Decimal  @default(1) @db.Decimal(12, 4)
-  quantity          Decimal  @db.Decimal(12, 4) // বিক্রিত ইউনিটের সংখ্যা
-  baseQuantity      Decimal  @db.Decimal(12, 4) // quantity * conversionFactor (স্টক থেকে বিয়োগ হবে)
+  unitName          String         // e.g. "৫০ কেজি বস্তা", "কেজি", "পাল্লা", "প্যাকেট"
+  conversionFactor  Decimal        @default(1) @db.Decimal(12, 4)
+  quantity          Decimal        @db.Decimal(12, 4) // বিক্রিত ইউনিটের সংখ্যা
+  baseQuantity      Decimal        @db.Decimal(12, 4) // quantity * conversionFactor (স্টক থেকে বিয়োগ হবে)
   
-  unitPrice         Decimal  @db.Decimal(12, 2) // বিক্রয়মূল্য প্রতি ইউনিট
-  costPriceSnapshot Decimal  @db.Decimal(12, 2) // বিক্রির মুহূর্তের ক্রয়মূল্য (সঠিক মুনাফা হিসাবের জন্য)
-  subTotal          Decimal  @db.Decimal(12, 2) // মোট টাকা (বা customTotalPrice)
+  unitPrice         Decimal        @db.Decimal(12, 2) // বিক্রয়মূল্য প্রতি ইউনিট
+  costPriceSnapshot Decimal        @db.Decimal(12, 2) // বিক্রির মুহূর্তের ক্রয়মূল্য (সঠিক মুনাফা হিসাবের জন্য)
+  subTotal          Decimal        @db.Decimal(12, 2) // মোট টাকা (বা customTotalPrice)
 
-  createdAt         DateTime @default(now())
+  createdAt         DateTime       @default(now())
 
   @@index([saleId])
-  @@index([productId])
+  @@index([variantId])
 }
 
 // ========================================================
-// 5. SUPPLIER & PROCUREMENT (মহাজনের খাতা ও মাল ক্রয়)
+// 6. SUPPLIER & PROCUREMENT (মহাজনের খাতা ও মাল ক্রয়)
 // ========================================================
 
 model Supplier {
@@ -307,31 +374,31 @@ model Purchase {
 }
 
 model PurchaseItem {
-  id                String   @id @default(uuid())
+  id                String         @id @default(uuid())
   purchaseId        String
-  purchase          Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  purchase          Purchase       @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
   
-  productId         String
-  product           Product  @relation(fields: [productId], references: [id])
+  variantId         String
+  variant           ProductVariant @relation(fields: [variantId], references: [id])
 
-  unitName          String   // e.g. "৫০ কেজি বস্তা", "কার্টন (২৪ প্যাকেট)", "কেজি"
-  conversionFactor  Decimal  @default(1) @db.Decimal(12, 4)
-  quantity          Decimal  @db.Decimal(12, 4) // ক্রয়ের ইউনিটের সংখ্যা
-  baseQuantity      Decimal  @db.Decimal(12, 4) // quantity * conversionFactor (স্টকে যোগ হবে)
+  unitName          String         // e.g. "৫০ কেজি বস্তা", "কার্টন (২৪ প্যাকেট)", "কেজি"
+  conversionFactor  Decimal        @default(1) @db.Decimal(12, 4)
+  quantity          Decimal        @db.Decimal(12, 4) // ক্রয়ের ইউনিটের সংখ্যা
+  baseQuantity      Decimal        @db.Decimal(12, 4) // quantity * conversionFactor (স্টকে যোগ হবে)
   
-  unitCost          Decimal  @db.Decimal(12, 2) // ক্রয়মূল্য প্রতি ইউনিট
-  newRetailPrice    Decimal? @db.Decimal(12, 2) // নতুন খুচরা বিক্রয়মূল্য (ঐচ্ছিক, দিলে প্রডাক্টে আপডেট হবে)
-  newWholesalePrice Decimal? @db.Decimal(12, 2) // নতুন পাইকারি বিক্রয়মূল্য (ঐচ্ছিক, দিলে প্রডাক্টে আপডেট হবে)
-  subTotal          Decimal  @db.Decimal(12, 2) // quantity * unitCost
+  unitCost          Decimal        @db.Decimal(12, 2) // ক্রয়মূল্য প্রতি ইউনিট
+  newRetailPrice    Decimal?       @db.Decimal(12, 2) // নতুন খুচরা বিক্রয়মূল্য (ঐচ্ছিক, দিলে প্রডাক্টে আপডেট হবে)
+  newWholesalePrice Decimal?       @db.Decimal(12, 2) // নতুন পাইকারি বিক্রয়মূল্য (ঐচ্ছিক, দিলে প্রডাক্টে আপডেট হবে)
+  subTotal          Decimal        @db.Decimal(12, 2) // quantity * unitCost
 
-  createdAt         DateTime @default(now())
+  createdAt         DateTime       @default(now())
 
   @@index([purchaseId])
-  @@index([productId])
+  @@index([variantId])
 }
 
 // ========================================================
-// 6. DAILY PETTY EXPENSES (দোকানের দৈনিক খরচ)
+// 7. DAILY PETTY EXPENSES (দোকানের দৈনিক খরচ)
 // ========================================================
 
 model DailyExpense {

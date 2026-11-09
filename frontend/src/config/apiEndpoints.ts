@@ -4,7 +4,18 @@
  * No hardcoded URL strings are permitted inside any service or component.
  */
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api/v1';
+function resolveApiBaseUrl(): string {
+  // In browser, dynamically talk to port 5000 on the same host (localhost or shop local WiFi IP)
+  if (typeof window !== 'undefined') {
+    return `http://${window.location.hostname}:5000/api/v1`;
+  }
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  return 'http://127.0.0.1:5000/api/v1';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 const SERVER_BASE_URL = API_BASE_URL.replace('/api/v1', '');
 
 export const API_ENDPOINTS = {
@@ -20,7 +31,10 @@ export const API_ENDPOINTS = {
   // Products & Inventory Management
   PRODUCTS: {
     BASE: `${API_BASE_URL}/inventory`,
+    CATEGORIES: `${API_BASE_URL}/inventory/categories`,
+    BRANDS: `${API_BASE_URL}/inventory/brands`,
     BY_ID: (id: string) => `${API_BASE_URL}/inventory/${id}`,
+    VARIANT_BY_ID: (variantId: string) => `${API_BASE_URL}/inventory/variant/${variantId}`,
     BY_BARCODE: (barcode: string) => `${API_BASE_URL}/inventory/barcode/${encodeURIComponent(barcode)}`,
     PRICES: (id: string) => `${API_BASE_URL}/inventory/${id}/prices`,
     ADD_UNIT: (id: string) => `${API_BASE_URL}/inventory/${id}/units`,

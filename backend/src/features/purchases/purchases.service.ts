@@ -4,33 +4,31 @@ import { prisma } from '../../config/prisma';
 import { purchasesRepository } from './purchases.repository';
 import { inventoryRepository } from '../inventory/inventory.repository';
 import { supplierRepository } from '../suppliers/suppliers.repository';
-import { CreatePurchaseInput } from './purchases.validation';
 import { getPagination, buildPaginationMeta, PaginationParams } from '../../common/utils/pagination';
-import { getDayBoundaries, buildDateRangeFilter } from '../../common/utils/dateUtils';
-import { generateDailySequenceCode } from '../../common/utils/codeGenerator';
+import { getDayBoundaries } from '../../common/utils/dateUtils';
+import { CreatePurchaseInput } from './purchases.validation';
 
 export class PurchasesService {
   /**
-   * Helper to generate unique purchase/chalan number: PUR-YYMMDD-XXXX
-   */
-  private async generatePurchaseNumber(tx: Prisma.TransactionClient): Promise<string> {
-    const { startOfDay, endOfDay } = getDayBoundaries();
-    const countToday = await purchasesRepository.countPurchasesToday(startOfDay, endOfDay, tx);
-    return generateDailySequenceCode('PUR', countToday);
-  }
-
-  /**
-   * Record Stock In / Mahajan Procurement (মহাজন থেকে মাল ক্রয় ও চালানের এন্ট্রি)
+   * Process a Procurement / Supplier Inward Challan (মাল ক্রয় ও স্টক বৃদ্ধি).
+   * Atomic operations inside Prisma $transaction:
+   * 1. Validate supplier and products/variants
+   * 2. Increment inventory stock on ProductVariant
+   * 3. Dynamic Replacement Cost Valuation: Update variant currentPurchasePrice (and optional new retail/wholesale prices)
+   * 4. Save optional custom bulk units (VariantUnit) for future sales/purchases
+   * 5. Generate purchase challan number (PUR-YYYYMMDD-XXXX) if not provided
+   * 6. Create Purchase and PurchaseItem records linked to variantId
+   * 7. Update Supplier Running Khata (Ledger) if credit/due exists
    */
   async createPurchase(data: CreatePurchaseInput) {
-    return await prisma.$transaction(async (tx) => {
-      // 1. Validate Supplier
-      const supplier = await supplierRepository.findById(data.supplierId, tx);
-      if (!supplier || !supplier.isActive) {
-        throw new AppError('Supplier / Mahajan not found or inactive', 404);
-      }
+    // 1. Resolve supplier
+    const supplier = await supplierRepository.findById(data.supplierId);
+    if (!supplier || !supplier.isActive) {
+      throw new AppError('Supplier not found or inactive', 404);
+    }
 
-      // 2. Generate or validate purchaseNumber
+    return await prisma.$transaction(async (tx) => {
+      // 2. Generate or validate purchase challan number
       let purchaseNumber = data.purchaseNumber?.trim();
       if (!purchaseNumber) {
         purchaseNumber = await this.generatePurchaseNumber(tx);
@@ -44,7 +42,7 @@ export class PurchasesService {
       // 3. Process items, add stock, and revalue replacement costs
       let calculatedSubTotal = new Prisma.Decimal(0);
       const preparedItems: {
-        productId: string;
+        variantId: string;
         unitName: string;
         conversionFactor: Prisma.Decimal;
         quantity: Prisma.Decimal;
@@ -56,17 +54,26 @@ export class PurchasesService {
       }[] = [];
 
       for (const item of data.items) {
-        const product = await inventoryRepository.findById(item.productId, tx);
-        if (!product || !product.isActive) {
-          throw new AppError(`Product with ID ${item.productId} not found or inactive`, 404);
+        let variant = null;
+        if (item.variantId) {
+          variant = await inventoryRepository.findVariantById(item.variantId, tx);
+        } else if (item.productId) {
+          const product = await inventoryRepository.findById(item.productId, tx);
+          if (product && product.variants.length > 0) {
+            variant = await inventoryRepository.findVariantById(product.variants[0].id, tx);
+          }
+        }
+
+        if (!variant || !variant.isActive || !variant.product.isActive) {
+          throw new AppError(`Item variant ${item.variantId || item.productId} not found or inactive`, 404);
         }
 
         const quantity = new Prisma.Decimal(item.quantity);
         const conversionFactor = new Prisma.Decimal(item.conversionFactor);
         const baseQuantity = quantity.mul(conversionFactor);
 
-        // Add inventory in base unit
-        await inventoryRepository.adjustStock(product.id, baseQuantity, 'ADD', tx);
+        // Add inventory in base unit to the variant stock pool
+        await inventoryRepository.adjustStock(variant.id, baseQuantity, 'ADD', tx);
 
         const unitCost = new Prisma.Decimal(item.unitCost);
         const itemSubTotal = quantity.mul(unitCost);
@@ -91,23 +98,24 @@ export class PurchasesService {
           priceUpdates.wholesalePrice = new Prisma.Decimal(item.newWholesalePrice);
         }
 
-        // Immediately revalue product prices on the Product table
-        await inventoryRepository.updatePrices(product.id, priceUpdates, tx);
+        // Immediately revalue product prices on the ProductVariant table
+        await inventoryRepository.updatePrices(variant.id, priceUpdates, tx);
 
         // If requested, save/update this custom unit (carton/sack) for future use
         if (item.saveUnitForFuture) {
           await inventoryRepository.upsertUnit(
-            product.id,
+            variant.id,
             item.unitName,
             conversionFactor,
             item.newRetailPrice ? new Prisma.Decimal(item.newRetailPrice) : null,
             item.newWholesalePrice ? new Prisma.Decimal(item.newWholesalePrice) : null,
+            null,
             tx
           );
         }
 
         preparedItems.push({
-          productId: product.id,
+          variantId: variant.id,
           unitName: item.unitName,
           conversionFactor,
           quantity,
@@ -144,7 +152,7 @@ export class PurchasesService {
           note: data.note,
           items: {
             create: preparedItems.map((item) => ({
-              productId: item.productId,
+              variant: { connect: { id: item.variantId } },
               unitName: item.unitName,
               conversionFactor: item.conversionFactor,
               quantity: item.quantity,
@@ -160,31 +168,48 @@ export class PurchasesService {
       );
 
       // 6. Atomic Supplier Khata / Ledger update
-      const payableDelta = grandTotal.sub(paidAmount);
-      const updatedSupplier = await supplierRepository.updatePayable(supplier.id, payableDelta, tx);
+      let updatedSupplierPayable = null;
+      if (grandTotal.greaterThan(0)) {
+        const payableDelta = grandTotal.sub(paidAmount);
+        const updatedSupplier = await supplierRepository.updatePayable(supplier.id, payableDelta, tx);
+        updatedSupplierPayable = updatedSupplier.currentPayable;
 
-      await supplierRepository.createLedgerEntry(
-        {
-          supplier: { connect: { id: supplier.id } },
-          purchase: { connect: { id: purchase.id } },
-          entryType: SupplierLedgerType.PURCHASE_DUE,
-          credit: grandTotal,
-          debit: paidAmount,
-          balanceAfter: updatedSupplier.currentPayable,
-          note: `মাল ক্রয়ের চালান #${purchaseNumber}`,
-        },
-        tx
-      );
+        await supplierRepository.createLedgerEntry(
+          {
+            supplier: { connect: { id: supplier.id } },
+            purchase: { connect: { id: purchase.id } },
+            entryType: SupplierLedgerType.PURCHASE_DUE,
+            credit: grandTotal,
+            debit: paidAmount,
+            balanceAfter: updatedSupplierPayable,
+            note: `Purchase Chalan #${purchaseNumber}`,
+          },
+          tx
+        );
+      }
 
       return {
-        ...purchase,
-        supplierCurrentPayable: updatedSupplier.currentPayable,
+        purchase,
+        supplierPayable: updatedSupplierPayable,
       };
     });
   }
 
   /**
-   * Get purchases list with filters and pagination
+   * Daily Purchase Challan number generator: PUR-YYYYMMDD-0001
+   */
+  private async generatePurchaseNumber(tx?: Prisma.TransactionClient): Promise<string> {
+    const { startOfDay, endOfDay } = getDayBoundaries();
+    const todayCount = await purchasesRepository.countPurchasesToday(startOfDay, endOfDay, tx);
+
+    const dateStr = startOfDay.toISOString().slice(0, 10).replace(/-/g, '');
+    const sequenceStr = String(todayCount + 1).padStart(4, '0');
+
+    return `PUR-${dateStr}-${sequenceStr}`;
+  }
+
+  /**
+   * List purchase challans with filtering & pagination
    */
   async getPurchases(query: {
     supplierId?: string;
@@ -193,18 +218,25 @@ export class PurchasesService {
     endDate?: string;
   } & PaginationParams) {
     const { page, limit, skip } = getPagination(query);
+
     const where: Prisma.PurchaseWhereInput = {};
 
     if (query.supplierId) {
       where.supplierId = query.supplierId;
     }
+
     if (query.purchaseNumber) {
       where.purchaseNumber = { contains: query.purchaseNumber, mode: 'insensitive' };
     }
 
-    const dateFilter = buildDateRangeFilter(query.startDate, query.endDate);
-    if (dateFilter) {
-      where.createdAt = dateFilter;
+    if (query.startDate || query.endDate) {
+      where.createdAt = {};
+      if (query.startDate) {
+        where.createdAt.gte = new Date(new Date(query.startDate).setHours(0, 0, 0, 0));
+      }
+      if (query.endDate) {
+        where.createdAt.lte = new Date(new Date(query.endDate).setHours(23, 59, 59, 999));
+      }
     }
 
     const [total, purchases] = await Promise.all([
@@ -224,14 +256,71 @@ export class PurchasesService {
   }
 
   /**
-   * Get single purchase details by ID
+   * Get single purchase challan by ID
    */
   async getPurchaseById(id: string) {
     const purchase = await purchasesRepository.findById(id);
+
     if (!purchase) {
-      throw new AppError('Purchase order / chalan not found', 404);
+      throw new AppError('Purchase record not found', 404);
     }
+
     return purchase;
+  }
+
+  /**
+   * Supplier Chalan Print formatting for Store Record
+   */
+  async generatePrintChallan(id: string) {
+    const purchase = await this.getPurchaseById(id);
+
+    const storeInfo = {
+      storeName: 'ইদ্রিস ব্রাদার্স',
+      tagline: 'পাইকারি ও খুচরা মসলা এবং মুদি মাল বিক্রয় কেন্দ্র',
+      market: 'মরিচপট্টি, বড় বাজার, ফেনী',
+    };
+
+    const supplierInfo = {
+      name: purchase.supplier.name,
+      company: purchase.supplier.companyName || 'N/A',
+      phone: purchase.supplier.phone || 'N/A',
+      currentPayable: purchase.supplier.currentPayable,
+    };
+
+    const items = purchase.items.map((item, idx) => {
+      const baseName = item.variant.product.banglaName || item.variant.product.name;
+      const variantSuffix = item.variant.variantName !== 'Default' ? ` (${item.variant.variantName})` : '';
+      return {
+        sl: idx + 1,
+        productName: `${baseName}${variantSuffix}`,
+        unitName: item.unitName,
+        quantity: item.quantity,
+        unitCost: item.unitCost,
+        subTotal: item.subTotal,
+        newRetailPrice: item.newRetailPrice,
+        newWholesalePrice: item.newWholesalePrice,
+      };
+    });
+
+    return {
+      store: storeInfo,
+      challan: {
+        purchaseNumber: purchase.purchaseNumber,
+        date: purchase.createdAt.toLocaleDateString('bn-BD', { timeZone: 'Asia/Dhaka' }),
+        status: purchase.status,
+      },
+      supplier: supplierInfo,
+      items,
+      billing: {
+        subTotal: purchase.subTotal,
+        transportCost: purchase.transportCost,
+        discount: purchase.discount,
+        grandTotal: purchase.grandTotal,
+        paidAmount: purchase.paidAmount,
+        dueAmount: purchase.dueAmount,
+      },
+      note: purchase.note,
+    };
   }
 }
 

@@ -28,7 +28,10 @@ export function PosProductCatalog() {
 
   const filteredProducts = products.filter((p) => {
     const matchCategory =
-      selectedCategory === 'ALL' || p.category === selectedCategory;
+      selectedCategory === 'ALL' ||
+      p.category?.name === selectedCategory ||
+      p.categoryId === selectedCategory ||
+      (typeof p.category === 'string' && p.category === selectedCategory);
     const matchSearch =
       searchTerm === '' ||
       p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

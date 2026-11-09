@@ -13,21 +13,29 @@ This backend is strictly tailored to the traditional grocery and spice market op
 1. **Dual Sales Modes:**
    - Every product supports both **Retail (খুচরা)** and **Wholesale (পাইকারি)** pricing.
    - Customers and sales invoices can be either `RETAIL` or `WHOLESALE`.
-2. **100% Dynamic Units (No Rigid Enums):**
-   - No hardcoded unit enums. All base units (`baseUnitName: String`) and sub-units (`ProductUnit` table) are dynamic and managed through the `UnitMaster` system.
+2. **Product -> ProductVariant (SKU) -> VariantUnit Architecture (Retail Industry Standard):**
+   - **Parent Product:** Common info (`name`, `banglaName`, `categoryId`, `brandId`, `hasVariants: Boolean`).
+   - **ProductVariant (Sellable SKU):** Holds actual stock, barcode, sku, replacement purchase cost, retail/wholesale prices, dynamic `baseUnitName` from `UnitMaster`, `allowDecimalQty: Boolean`, and flexible `attributes: Json?` (JSONB).
+   - **All transaction items (`SaleItem`, `PurchaseItem`, `StockWastage`) must link to `variantId` (never `productId`).**
+   - **Decimal / Weighable Protection (`allowDecimalQty`):**
+     - `true` for loose/weighable commodities (চাল, ডাল, খোলা মসলা): Allows decimal quantities (`0.250 KG`) and Reverse Price-to-Weight calculation (e.g. ২০ টাকার এলাচ).
+     - `false` for sealed packets and bottles (১ কেজি দুধের প্যাকেট, তেলের বোতল, সাবান): Strictly rejects fractional billing (prevents staff selling 1.5 packets of milk).
+   - **Single-Screen Simple Product UX:** For standard single items (খোলা চিনি বা শুকনা মরিচ), backend auto-creates 1 parent `Product` + 1 default `ProductVariant` (`variantName: 'Default'`) in one atomic transaction.
+3. **100% Dynamic Units (No Rigid Enums):**
+   - No hardcoded unit enums. All base units (`baseUnitName: String`) and sub-units (`VariantUnit` table) are dynamic and managed through the `UnitMaster` system.
    - Sacks (বস্তা), Cartons (কার্টন), Palla (পাল্লা), Packets (প্যাকেট), Litres (লিটার), and Tins (টিন) use dynamic `conversionFactor`.
-3. **4-Decimal Precision (`Decimal(12, 4)`):**
+4. **4-Decimal Precision (`Decimal(12, 4)`):**
    - Quantities, weights, and conversion factors are stored as 4-decimal numbers to prevent financial leakage on high-value micro-spices (Cardamom/এলাচ, Vietnam Cinnamon/দারুচিনি, Cloves/লবঙ্গ).
-4. **Reverse Price-to-Weight Calculation (টাকার অংকে বিক্রি):**
+5. **Reverse Price-to-Weight Calculation (টাকার অংকে বিক্রি):**
    - When a retail customer requests a monetary value (e.g., "২০ টাকার এলাচ"), the POS accepts `customTotalPrice: 20` without quantity. The backend automatically back-calculates the weight to 4 decimal places: `baseQuantity = customTotalPrice / unitPrice`.
-5. **Dynamic Replacement Cost Valuation (NO FIFO/LIFO):**
-   - When a new purchase shipment arrives at a new rate, **all existing stock** of that product is immediately revalued at the new replacement purchase cost.
+6. **Dynamic Replacement Cost Valuation (NO FIFO/LIFO):**
+   - When a new purchase shipment arrives at a new rate, **all existing stock** of that variant is immediately revalued at the new replacement purchase cost.
    - For historical invoice accuracy, `SaleItem` and `StockWastage` capture an immutable `costPriceSnapshot`.
-6. **Strictly Cash & Due Running Khata (নগদ ও বাকির খাতা):**
+7. **Strictly Cash & Due Running Khata (নগদ ও বাকির খাতা):**
    - 100% physical cash-based store. No digital wallets (bKash/cards) are tracked.
    - Customers maintain a running balance (`currentDue`). Transactions atomically write immutable ledger rows (`CustomerLedger`) with `debit`, `credit`, and `balanceAfter`.
    - Suppliers/Mahajans maintain a running payable balance (`currentPayable`) with atomic `SupplierLedger` records.
-7. **Daily Cashbox Closing:**
+8. **Daily Cashbox Closing:**
    - Cash drawer reconciliation: `Net Cash in Hand = Total Cash In (Sales + Due Collections) - Total Cash Out (Supplier Payments + Expenses)`.
 
 ---

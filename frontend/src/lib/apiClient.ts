@@ -66,6 +66,9 @@ class ApiClient {
   }
 
   async request<T>(endpoint: string, options: RequestOptions = {}): Promise<ApiResponse<T>> {
+    if (!endpoint || typeof endpoint !== 'string') {
+      throw new ApiError('API endpoint URL is invalid or undefined', 400);
+    }
     const { params, dedupe = false, timeoutMs = this.defaultTimeout, ...fetchOptions } = options;
     const url = this.buildUrl(endpoint, params);
     const method = fetchOptions.method || 'GET';

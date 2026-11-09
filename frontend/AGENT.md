@@ -44,7 +44,25 @@ src/features/[feature-name]/
   - সাধারণ বাটন ও অ্যাকশনে `weight="bold"`।
   - হাইলাইটেড বা স্পটলাইট ফিচারে `weight="fill"` অথবা `weight="duotone"`।
 
-### D. Imagery & Photos Standard (Unsplash CDN)
+### D. Strict Ban on "AI Slop" Rainbow Icon Containers (রংধনু আইকন বক্স কঠোরভাবে নিষিদ্ধ)
+- **কঠোর নিষেধাজ্ঞা (STRICT BAN):** ড্যাশবোর্ড কার্ড, মডিউল নেভিগেশন গ্রিড, মেনু আইটেম বা বাটন আইকনের পেছনে কখনোই এলোমেলো বিভিন্ন প্যাস্টেল কালার বক্স (যেমন একটি কার্ডে `bg-emerald-50`, অন্যটিতে `bg-amber-50`, `bg-rose-50`, `bg-blue-50`, `bg-purple-50` ইত্যাদি) দেওয়া **সম্পূর্ণ নিষিদ্ধ**। এটি ইন্টারফেসে সস্তা ও জেনেরিক এআই-জেনারেটেড লুক ("pura AI slop") তৈরি করে।
+- **বাধ্যতামূলক ইউনিফায়েড নিউট্রাল স্ট্যান্ডার্ড (Unified Neutral Container):**
+  - সমস্ত সাধারণ ন্যাভিগেশন, মডিউল লঞ্চার ও ড্যাশবোর্ড কার্ড আইকনের জন্য **একই মার্জিত নিউট্রাল কন্টেইনার** ব্যবহার করতে হবে:
+    ```tsx
+    // সঠিক নিয়ম (Mandatory Standard):
+    <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-700 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 flex items-center justify-center transition-all duration-200 mb-2.5">
+      <Icon size={22} weight="bold" />
+    </div>
+    ```
+  - কার্ড হোভারে আইকন স্মুথলি ডার্ক স্লেট (`group-hover:bg-slate-900 group-hover:text-white`) বা ব্র্যান্ড কালারে ট্রানজিশন করবে। কোনো কার্ডেই আলাদা আলাদা ক্যান্ডি কালার দেওয়া যাবে না।
+- **কালার ব্যবহারের একমাত্র ব্যতিক্রম (Semantic Color Only):**
+  - কালার (যেমন লাল, সবুজ, হলুদ) শুধুমাত্র এবং শুধুমাত্র **আসল ফিন্যান্সিয়াল স্ট্যাটাস ও সিস্টেম স্টেট** বোঝাতে ব্যবহার করা যাবে:
+    - বকেয়া দেনা-পাওনা / ডিউ / ঘাটতি ➔ Rose/Red (`text-rose-600` / `bg-rose-50 text-rose-700`)
+    - নগদ ক্যাশ ইন হ্যান্ড / লাভ / পরিশোধিত ➔ Emerald/Green (`text-emerald-600` / `bg-emerald-50 text-emerald-700`)
+    - ওয়ার্নিং / স্টক অ্যালার্ট / পাইকারি মোড ➔ Amber/Yellow
+  - মেনু বা ন্যাভিগেশন আইকনে কখনোই এই সেমান্টিক কালার ছিটানো যাবে না।
+
+### E. Imagery & Photos Standard (Unsplash CDN)
 - যদি কোনো পণ্যের ছবি, মসলার ব্যানার বা প্লেসহোল্ডার ফটো দরকার হয়, তবে **বাধ্যতামূলকভাবে Unsplash CDN** (`https://images.unsplash.com/...`) ব্যবহার করতে হবে।
 - `next.config.ts`-এ `images.unsplash.com` ইতোমধ্যে কনফিগার করা আছে।
 - `next/image` দিয়ে অপ্টিমাইজড রেন্ডার করতে হবে এবং ছবি লোড না হলে সুন্দর ফলব্যাক আইকন দেখাতে হবে।

@@ -21,7 +21,7 @@ export function SupplierKpiSummary() {
       <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
         <div className="flex items-center justify-between">
           <span className="text-xs sm:text-sm font-medium text-ink-muted">মোট মহাজন দেনা</span>
-          <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/60 text-slate-600 flex items-center justify-center">
             <Truck size={18} weight="bold" />
           </div>
         </div>
@@ -37,7 +37,7 @@ export function SupplierKpiSummary() {
       <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
         <div className="flex items-center justify-between">
           <span className="text-xs sm:text-sm font-medium text-ink-muted">পাওনাদার আড়তদার</span>
-          <div className="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/60 text-slate-600 flex items-center justify-center">
             <HandCoins size={18} weight="bold" />
           </div>
         </div>
@@ -53,7 +53,7 @@ export function SupplierKpiSummary() {
       <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
         <div className="flex items-center justify-between">
           <span className="text-xs sm:text-sm font-medium text-ink-muted">মোট তালিকাভুক্ত মহাজন</span>
-          <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/60 text-slate-600 flex items-center justify-center">
             <Users size={18} weight="bold" />
           </div>
         </div>

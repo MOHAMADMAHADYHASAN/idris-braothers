@@ -1,42 +1,40 @@
-import { Prisma, CustomerLedgerType, SaleType } from '@prisma/client';
+import { Prisma, SaleType, CustomerLedgerType } from '@prisma/client';
 import { AppError } from '../../common/errors/AppError';
 import { prisma } from '../../config/prisma';
 import { salesRepository } from './sales.repository';
 import { inventoryRepository } from '../inventory/inventory.repository';
 import { customerRepository } from '../customers/customers.repository';
-import { CreateSaleInput } from './sales.validation';
 import { getPagination, buildPaginationMeta, PaginationParams } from '../../common/utils/pagination';
-import { getDayBoundaries, buildDateRangeFilter } from '../../common/utils/dateUtils';
-import { generateDailySequenceCode } from '../../common/utils/codeGenerator';
+import { getDayBoundaries } from '../../common/utils/dateUtils';
+import { CreateSaleInput } from './sales.validation';
 
 export class SalesService {
   /**
-   * Helper to generate unique invoice number: INV-YYMMDD-XXXX
-   */
-  private async generateInvoiceNumber(tx: Prisma.TransactionClient): Promise<string> {
-    const { startOfDay, endOfDay } = getDayBoundaries();
-    const countToday = await salesRepository.countSalesToday(startOfDay, endOfDay, tx);
-    return generateDailySequenceCode('INV', countToday);
-  }
-
-  /**
-   * Process POS Checkout / Sale Transaction (খুচরা বা পাইকারি বিক্রয়)
+   * Process a complete POS / Store Counter Sale transaction.
+   * Atomic operations inside Prisma $transaction:
+   * 1. Validate customer and product variants
+   * 2. Calculate prices (Standard quantity or Reverse price-to-weight)
+   * 3. Enforce allowDecimalQty rules (whole numbers for packaged items)
+   * 4. Deduct inventory stock from ProductVariant
+   * 5. Capture replacement cost snapshot
+   * 6. Generate chronological daily invoice number (INV-YYYYMMDD-XXXX)
+   * 7. Save Sale and SaleItem records linked to variantId
+   * 8. Update Customer Running Khata (Ledger) if credit/due exists
    */
   async createSale(data: CreateSaleInput) {
-    return await prisma.$transaction(async (tx) => {
-      // 1. Validate customer if provided
-      let customer = null;
-      if (data.customerId) {
-        customer = await customerRepository.findById(data.customerId, tx);
-        if (!customer || !customer.isActive) {
-          throw new AppError('Customer not found or inactive', 404);
-        }
+    // 1. Resolve customer if provided
+    let customer = null;
+    if (data.customerId) {
+      customer = await customerRepository.findById(data.customerId);
+      if (!customer || !customer.isActive) {
+        throw new AppError('Customer not found or inactive', 404);
       }
+    }
 
-      // 2. Validate and process each item
+    return await prisma.$transaction(async (tx) => {
       let calculatedSubTotal = new Prisma.Decimal(0);
       const preparedItems: {
-        productId: string;
+        variantId: string;
         unitName: string;
         conversionFactor: Prisma.Decimal;
         quantity: Prisma.Decimal;
@@ -46,10 +44,21 @@ export class SalesService {
         subTotal: Prisma.Decimal;
       }[] = [];
 
+      // 2. Process sale items
       for (const item of data.items) {
-        const product = await inventoryRepository.findById(item.productId, tx);
-        if (!product || !product.isActive) {
-          throw new AppError(`Product with ID ${item.productId} not found or inactive`, 404);
+        // Resolve variant
+        let variant = null;
+        if (item.variantId) {
+          variant = await inventoryRepository.findVariantById(item.variantId, tx);
+        } else if (item.productId) {
+          const product = await inventoryRepository.findById(item.productId, tx);
+          if (product && product.variants.length > 0) {
+            variant = await inventoryRepository.findVariantById(product.variants[0].id, tx);
+          }
+        }
+
+        if (!variant || !variant.isActive || !variant.product.isActive) {
+          throw new AppError(`Item variant ${item.variantId || item.productId} not found or inactive`, 404);
         }
 
         const conversionFactor = new Prisma.Decimal(item.conversionFactor || 1);
@@ -60,12 +69,19 @@ export class SalesService {
 
         if (item.customTotalPrice !== undefined && item.customTotalPrice > 0) {
           // Reverse Price-to-Weight Calculation (টাকার অঙ্কে বিক্রি, e.g. ২০ টাকার এলাচ)
+          if (!variant.allowDecimalQty) {
+            throw new AppError(
+              `Reverse price calculation is only supported for weighable/loose items. "${variant.product.name} - ${variant.variantName}" is a packaged item.`,
+              400
+            );
+          }
+
           itemSubTotal = new Prisma.Decimal(item.customTotalPrice);
 
           if (item.unitPrice !== undefined) {
             unitPrice = new Prisma.Decimal(item.unitPrice);
           } else {
-            unitPrice = data.saleType === 'WHOLESALE' ? product.wholesalePrice : product.retailPrice;
+            unitPrice = data.saleType === 'WHOLESALE' ? variant.wholesalePrice : variant.retailPrice;
           }
 
           // Calculate price per base unit and back-calculate exact base quantity to 4 decimal places
@@ -75,40 +91,49 @@ export class SalesService {
         } else if (item.quantity !== undefined && item.quantity > 0) {
           // Standard Unit/Quantity Sale Mode
           quantity = new Prisma.Decimal(item.quantity);
+
+          // Enforce integer quantities for packaged goods
+          if (!variant.allowDecimalQty && !quantity.isInteger()) {
+            throw new AppError(
+              `Fractional quantity (${quantity}) is not allowed for packaged/discrete item "${variant.product.name} - ${variant.variantName}". Please enter whole numbers (১, ২, ইত্যাদি).`,
+              400
+            );
+          }
+
           baseQuantity = quantity.mul(conversionFactor);
 
           if (item.unitPrice !== undefined) {
             unitPrice = new Prisma.Decimal(item.unitPrice);
           } else {
-            unitPrice = data.saleType === 'WHOLESALE' ? product.wholesalePrice : product.retailPrice;
+            unitPrice = data.saleType === 'WHOLESALE' ? variant.wholesalePrice : variant.retailPrice;
           }
 
           itemSubTotal = quantity.mul(unitPrice);
         } else {
           throw new AppError(
-            `Either quantity or customTotalPrice must be provided for product "${product.name}"`,
+            `Either quantity or customTotalPrice must be provided for "${variant.product.name}"`,
             400
           );
         }
 
         // Check inventory stock
-        if (product.stockQuantity.lessThan(baseQuantity)) {
+        if (variant.stockQuantity.lessThan(baseQuantity)) {
           throw new AppError(
-            `Insufficient stock for "${product.name}". Required: ${baseQuantity} ${product.baseUnitName}, Available: ${product.stockQuantity} ${product.baseUnitName}`,
+            `Insufficient stock for "${variant.product.name} - ${variant.variantName}". Required: ${baseQuantity} ${variant.baseUnitName}, Available: ${variant.stockQuantity} ${variant.baseUnitName}`,
             400
           );
         }
 
-        // Deduct inventory in base unit
-        await inventoryRepository.adjustStock(product.id, baseQuantity, 'SUBTRACT', tx);
+        // Deduct inventory in base unit from the specific SKU/variant
+        await inventoryRepository.adjustStock(variant.id, baseQuantity, 'SUBTRACT', tx);
         calculatedSubTotal = calculatedSubTotal.add(itemSubTotal);
 
         // Calculate replacement purchase cost per sold unit at this exact moment
-        const costPriceSnapshot = product.currentPurchasePrice.mul(conversionFactor);
+        const costPriceSnapshot = variant.currentPurchasePrice.mul(conversionFactor);
 
         preparedItems.push({
-          productId: product.id,
-          unitName: item.unitName || product.baseUnitName,
+          variantId: variant.id,
+          unitName: item.unitName || variant.baseUnitName,
           conversionFactor,
           quantity,
           baseQuantity,
@@ -154,7 +179,7 @@ export class SalesService {
           note: data.note,
           items: {
             create: preparedItems.map((item) => ({
-              productId: item.productId,
+              variant: { connect: { id: item.variantId } },
               unitName: item.unitName,
               conversionFactor: item.conversionFactor,
               quantity: item.quantity,
@@ -182,46 +207,67 @@ export class SalesService {
             entryType: CustomerLedgerType.SALE_DUE,
             debit: grandTotal,
             credit: paidAmount,
-            balanceAfter: updatedCustomer.currentDue,
-            note: `বিক্রয় রসিদ #${invoiceNumber}`,
+            balanceAfter: updatedCustomerDue,
+            note: `Sale Invoice #${invoiceNumber}`,
           },
           tx
         );
       }
 
       return {
-        ...sale,
-        customerCurrentDue: updatedCustomerDue,
+        sale,
+        customerDue: updatedCustomerDue,
       };
     });
   }
 
   /**
-   * Get sales invoices with filters and pagination
+   * Daily invoice number generator: INV-YYYYMMDD-0001
+   */
+  private async generateInvoiceNumber(tx?: Prisma.TransactionClient): Promise<string> {
+    const { startOfDay, endOfDay } = getDayBoundaries();
+    const todayCount = await salesRepository.countSalesToday(startOfDay, endOfDay, tx);
+
+    const dateStr = startOfDay.toISOString().slice(0, 10).replace(/-/g, '');
+    const sequenceStr = String(todayCount + 1).padStart(4, '0');
+
+    return `INV-${dateStr}-${sequenceStr}`;
+  }
+
+  /**
+   * List sales invoices with filtering & pagination
    */
   async getSales(query: {
     customerId?: string;
-    saleType?: string;
+    saleType?: SaleType;
     invoiceNumber?: string;
     startDate?: string;
     endDate?: string;
   } & PaginationParams) {
     const { page, limit, skip } = getPagination(query);
+
     const where: Prisma.SaleWhereInput = {};
 
     if (query.customerId) {
       where.customerId = query.customerId;
     }
+
     if (query.saleType) {
-      where.saleType = query.saleType as SaleType;
+      where.saleType = query.saleType;
     }
+
     if (query.invoiceNumber) {
       where.invoiceNumber = { contains: query.invoiceNumber, mode: 'insensitive' };
     }
 
-    const dateFilter = buildDateRangeFilter(query.startDate, query.endDate);
-    if (dateFilter) {
-      where.createdAt = dateFilter;
+    if (query.startDate || query.endDate) {
+      where.createdAt = {};
+      if (query.startDate) {
+        where.createdAt.gte = new Date(new Date(query.startDate).setHours(0, 0, 0, 0));
+      }
+      if (query.endDate) {
+        where.createdAt.lte = new Date(new Date(query.endDate).setHours(23, 59, 59, 999));
+      }
     }
 
     const [total, sales] = await Promise.all([
@@ -241,20 +287,29 @@ export class SalesService {
   }
 
   /**
-   * Get single invoice details by ID
+   * Get single sale invoice by ID
    */
   async getSaleById(id: string) {
     const sale = await salesRepository.findById(id);
+
     if (!sale) {
       throw new AppError('Sale invoice not found', 404);
     }
+
     return sale;
   }
 
   /**
-   * Get formatted POS thermal receipt (৫৬ মিমি / ৮০ মিমি প্রিন্টার ও ভাউচার রসিদ)
+   * Get formatted receipt for printing
    */
   async getSaleReceipt(id: string) {
+    return await this.generatePrintInvoice(id);
+  }
+
+  /**
+   * Thermal Print / Official Invoice formatting for Idris Brothers
+   */
+  async generatePrintInvoice(id: string) {
     const sale = await this.getSaleById(id);
 
     const storeInfo = {
@@ -282,14 +337,18 @@ export class SalesService {
       customerPreviousDue = customerCurrentTotalDue.sub(thisInvoiceDueDelta);
     }
 
-    const items = sale.items.map((item, idx) => ({
-      sl: idx + 1,
-      productName: item.product.banglaName || item.product.name,
-      unitName: item.unitName,
-      quantity: item.quantity,
-      unitPrice: item.unitPrice,
-      subTotal: item.subTotal,
-    }));
+    const items = sale.items.map((item, idx) => {
+      const baseName = item.variant.product.banglaName || item.variant.product.name;
+      const variantSuffix = item.variant.variantName !== 'Default' ? ` (${item.variant.variantName})` : '';
+      return {
+        sl: idx + 1,
+        productName: `${baseName}${variantSuffix}`,
+        unitName: item.unitName,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        subTotal: item.subTotal,
+      };
+    });
 
     return {
       store: storeInfo,

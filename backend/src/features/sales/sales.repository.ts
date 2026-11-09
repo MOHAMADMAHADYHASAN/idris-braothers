@@ -1,56 +1,107 @@
-import { Prisma, Sale, SaleItem } from '@prisma/client';
+import { Prisma, Sale, SaleItem, Customer } from '@prisma/client';
 import { prisma } from '../../config/prisma';
 import { BaseRepository } from '../../common/repositories/base.repository';
 
-export class SalesRepository extends BaseRepository {
+export type SaleItemWithVariant = SaleItem & {
+  variant: {
+    id: string;
+    variantName: string;
+    sku: string;
+    barcode: string | null;
+    baseUnitName: string;
+    allowDecimalQty: boolean;
+    product: {
+      id: string;
+      name: string;
+      banglaName: string | null;
+    };
+  };
+};
 
-  async create(data: Prisma.SaleCreateInput, tx?: Prisma.TransactionClient): Promise<Sale & { items: SaleItem[] }> {
+export type SaleWithDetails = Sale & {
+  items: SaleItemWithVariant[];
+  customer: Customer | null;
+  ledgerEntries?: any[];
+};
+
+export class SalesRepository extends BaseRepository {
+  async create(data: Prisma.SaleCreateInput, tx?: Prisma.TransactionClient): Promise<SaleWithDetails> {
     return await this.getDb(tx).sale.create({
       data,
       include: {
         items: {
           include: {
-            product: {
-              select: { id: true, name: true, banglaName: true, baseUnitName: true },
+            variant: {
+              select: {
+                id: true,
+                variantName: true,
+                sku: true,
+                barcode: true,
+                baseUnitName: true,
+                allowDecimalQty: true,
+                product: {
+                  select: { id: true, name: true, banglaName: true },
+                },
+              },
             },
           },
         },
         customer: true,
       },
-    });
+    }) as unknown as SaleWithDetails;
   }
 
-  async findById(id: string, tx?: Prisma.TransactionClient) {
+  async findById(id: string, tx?: Prisma.TransactionClient): Promise<SaleWithDetails | null> {
     return await this.getDb(tx).sale.findUnique({
       where: { id },
       include: {
         items: {
           include: {
-            product: {
-              select: { id: true, name: true, banglaName: true, baseUnitName: true },
+            variant: {
+              select: {
+                id: true,
+                variantName: true,
+                sku: true,
+                barcode: true,
+                baseUnitName: true,
+                allowDecimalQty: true,
+                product: {
+                  select: { id: true, name: true, banglaName: true },
+                },
+              },
             },
           },
         },
         customer: true,
         ledgerEntries: true,
       },
-    });
+    }) as unknown as SaleWithDetails | null;
   }
 
-  async findByInvoiceNumber(invoiceNumber: string) {
+  async findByInvoiceNumber(invoiceNumber: string): Promise<SaleWithDetails | null> {
     return await prisma.sale.findUnique({
       where: { invoiceNumber },
       include: {
         items: {
           include: {
-            product: {
-              select: { id: true, name: true, banglaName: true, baseUnitName: true },
+            variant: {
+              select: {
+                id: true,
+                variantName: true,
+                sku: true,
+                barcode: true,
+                baseUnitName: true,
+                allowDecimalQty: true,
+                product: {
+                  select: { id: true, name: true, banglaName: true },
+                },
+              },
             },
           },
         },
         customer: true,
       },
-    });
+    }) as unknown as SaleWithDetails | null;
   }
 
   async findMany(params: {

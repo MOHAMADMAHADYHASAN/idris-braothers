@@ -50,7 +50,7 @@ export default async function DashboardPage() {
       <StoreShutterHero
         storeName="ইদ্রিস ব্রাদার্স"
         storeTagline="মুদি ও মসলার আড়ত • মরিচপট্টি, ফেনী বাজার"
-        imageSrc="/store_shutter.jpg"
+        imageSrc="/images/shutter/store_shutter.jpg"
       />
 
       {/* 1. Global Shell Header */}
@@ -178,10 +178,10 @@ export default async function DashboardPage() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
             <Link
               href="/pos"
-              className="bg-white border border-slate-200 hover:border-emerald-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
+              className="bg-white border border-slate-200/90 hover:border-slate-400 hover:shadow-xs rounded-xl p-4 transition-all flex flex-col items-center text-center group cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-xl bg-emerald-50 group-hover:bg-emerald-600 group-hover:text-white text-emerald-700 flex items-center justify-center transition-colors mb-2.5">
-                <ShoppingCart size={24} weight="bold" />
+              <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-700 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 flex items-center justify-center transition-all duration-200 mb-2.5">
+                <ShoppingCart size={22} weight="bold" />
               </div>
               <h3 className="font-bold text-xs sm:text-sm text-slate-900">পিওএস কাউন্টার</h3>
               <p className="text-[10px] text-slate-400 mt-0.5">দ্রুত ক্যাশ ও বাকি বিক্রি</p>
@@ -189,10 +189,10 @@ export default async function DashboardPage() {
 
             <Link
               href="/purchases"
-              className="bg-white border border-slate-200 hover:border-amber-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
+              className="bg-white border border-slate-200/90 hover:border-slate-400 hover:shadow-xs rounded-xl p-4 transition-all flex flex-col items-center text-center group cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-xl bg-amber-50 group-hover:bg-amber-600 group-hover:text-white text-amber-700 flex items-center justify-center transition-colors mb-2.5">
-                <Receipt size={24} weight="bold" />
+              <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-700 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 flex items-center justify-center transition-all duration-200 mb-2.5">
+                <Receipt size={22} weight="bold" />
               </div>
               <h3 className="font-bold text-xs sm:text-sm text-slate-900">চালান এন্ট্রি</h3>
               <p className="text-[10px] text-slate-400 mt-0.5">মোকাম মাল ও স্টক ইন</p>
@@ -200,10 +200,10 @@ export default async function DashboardPage() {
 
             <Link
               href="/products"
-              className="bg-white border border-slate-200 hover:border-emerald-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
+              className="bg-white border border-slate-200/90 hover:border-slate-400 hover:shadow-xs rounded-xl p-4 transition-all flex flex-col items-center text-center group cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-xl bg-slate-50 group-hover:bg-slate-900 group-hover:text-white text-slate-700 flex items-center justify-center transition-colors mb-2.5">
-                <Package size={24} weight="bold" />
+              <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-700 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 flex items-center justify-center transition-all duration-200 mb-2.5">
+                <Package size={22} weight="bold" />
               </div>
               <h3 className="font-bold text-xs sm:text-sm text-slate-900">পণ্য ও স্টক</h3>
               <p className="text-[10px] text-slate-400 mt-0.5">৪ দশমিক ও ডাইনামিক বস্তা</p>
@@ -211,10 +211,10 @@ export default async function DashboardPage() {
 
             <Link
               href="/khata/customers"
-              className="bg-white border border-slate-200 hover:border-emerald-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
+              className="bg-white border border-slate-200/90 hover:border-slate-400 hover:shadow-xs rounded-xl p-4 transition-all flex flex-col items-center text-center group cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-xl bg-rose-50 group-hover:bg-rose-600 group-hover:text-white text-rose-700 flex items-center justify-center transition-colors mb-2.5">
-                <Users size={24} weight="bold" />
+              <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-700 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 flex items-center justify-center transition-all duration-200 mb-2.5">
+                <Users size={22} weight="bold" />
               </div>
               <h3 className="font-bold text-xs sm:text-sm text-slate-900">কাস্টমার বাকি খাতা</h3>
               <p className="text-[10px] text-slate-400 mt-0.5">নগদ আদায় ও লেজার</p>
@@ -222,10 +222,10 @@ export default async function DashboardPage() {
 
             <Link
               href="/khata/suppliers"
-              className="bg-white border border-slate-200 hover:border-emerald-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
+              className="bg-white border border-slate-200/90 hover:border-slate-400 hover:shadow-xs rounded-xl p-4 transition-all flex flex-col items-center text-center group cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-xl bg-amber-50 group-hover:bg-amber-600 group-hover:text-white text-amber-700 flex items-center justify-center transition-colors mb-2.5">
-                <Truck size={24} weight="bold" />
+              <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-700 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 flex items-center justify-center transition-all duration-200 mb-2.5">
+                <Truck size={22} weight="bold" />
               </div>
               <h3 className="font-bold text-xs sm:text-sm text-slate-900">মহাজনের খাতা</h3>
               <p className="text-[10px] text-slate-400 mt-0.5">চালান ও পাওনা পরিশোধ</p>
@@ -233,10 +233,10 @@ export default async function DashboardPage() {
 
             <Link
               href="/cashbox"
-              className="bg-white border border-slate-200 hover:border-emerald-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
+              className="bg-white border border-slate-200/90 hover:border-slate-400 hover:shadow-xs rounded-xl p-4 transition-all flex flex-col items-center text-center group cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-xl bg-blue-50 group-hover:bg-blue-600 group-hover:text-white text-blue-700 flex items-center justify-center transition-colors mb-2.5">
-                <Wallet size={24} weight="bold" />
+              <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-700 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 flex items-center justify-center transition-all duration-200 mb-2.5">
+                <Wallet size={22} weight="bold" />
               </div>
               <h3 className="font-bold text-xs sm:text-sm text-slate-900">ক্যাশবাক্স ও খরচ</h3>
               <p className="text-[10px] text-slate-400 mt-0.5">ড্রয়ার ক্যাশ ক্লোজিং</p>
@@ -244,10 +244,10 @@ export default async function DashboardPage() {
 
             <Link
               href="/reports"
-              className="bg-white border border-slate-200 hover:border-emerald-600/70 rounded-xl p-4 shadow-2xs hover:shadow-xs transition-all flex flex-col items-center text-center group cursor-pointer"
+              className="bg-white border border-slate-200/90 hover:border-slate-400 hover:shadow-xs rounded-xl p-4 transition-all flex flex-col items-center text-center group cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-xl bg-purple-50 group-hover:bg-purple-600 group-hover:text-white text-purple-700 flex items-center justify-center transition-colors mb-2.5">
-                <Receipt size={24} weight="bold" />
+              <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-700 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 flex items-center justify-center transition-all duration-200 mb-2.5">
+                <Receipt size={22} weight="bold" />
               </div>
               <h3 className="font-bold text-xs sm:text-sm text-slate-900">রিপোর্ট ও প্রফিট</h3>
               <p className="text-[10px] text-slate-400 mt-0.5">লাভ-ক্ষতি ও স্টক ভ্যালু</p>

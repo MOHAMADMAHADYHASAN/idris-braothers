@@ -2,7 +2,6 @@ import { PrismaClient, SaleType } from '@prisma/client';
 import { salesService } from '../src/features/sales/sales.service';
 import { purchasesService } from '../src/features/purchases/purchases.service';
 import { customerService } from '../src/features/customers/customers.service';
-import { supplierService } from '../src/features/suppliers/suppliers.service';
 import { inventoryService } from '../src/features/inventory/inventory.service';
 import { cashboxService } from '../src/features/cashbox/cashbox.service';
 import { reportsService } from '../src/features/reports/reports.service';
@@ -11,25 +10,21 @@ const prisma = new PrismaClient();
 
 async function runTestFlow() {
   console.log('======================================================================');
-  console.log('🧪 TESTING 100% DYNAMIC UNITS, REVERSE CALCULATION & KHATA ENGINE 🧪');
+  console.log('🧪 TESTING RETAIL ERP ARCHITECTURE: VARIANTS, MULTI-UOM & KHATA 🧪');
   console.log('======================================================================\n');
 
-  // Step 0: Fetch seeded entities
-  const cardamom = await prisma.product.findFirstOrThrow({
+  // Step 0: Fetch seeded entities (Variants)
+  const cardamom = await prisma.productVariant.findFirstOrThrow({
     where: { sku: 'ELACHI-GUAT-01' },
-    include: { units: true },
+    include: { product: true, units: true },
   });
-  const dano = await prisma.product.findFirstOrThrow({
-    where: { sku: 'DANO-MILK-500G' },
-    include: { units: true },
+  const dano = await prisma.productVariant.findFirstOrThrow({
+    where: { sku: 'DANO-500G' },
+    include: { product: true, units: true },
   });
-  const chili = await prisma.product.findFirstOrThrow({
+  const chili = await prisma.productVariant.findFirstOrThrow({
     where: { sku: 'CHILI-PAN-01' },
-    include: { units: true },
-  });
-  const onion = await prisma.product.findFirstOrThrow({
-    where: { sku: 'ONION-FAR-01' },
-    include: { units: true },
+    include: { product: true, units: true },
   });
   const customer = await prisma.customer.findFirstOrThrow({
     where: { phone: '01811223344' }, // হাজী রফিকুল ইসলাম
@@ -39,9 +34,9 @@ async function runTestFlow() {
   });
 
   console.log(`Initial Status:`);
-  console.log(`- Cardamom (এলাচ): Stock = ${cardamom.stockQuantity} ${cardamom.baseUnitName} | Retail = ৳${cardamom.retailPrice}`);
-  console.log(`- Dano 500g: Stock = ${dano.stockQuantity} ${dano.baseUnitName} | Cost = ৳${dano.currentPurchasePrice}`);
-  console.log(`- Chili (মরিচ): Stock = ${chili.stockQuantity} ${chili.baseUnitName}`);
+  console.log(`- Cardamom (${cardamom.product.name} - ${cardamom.variantName}): Stock = ${cardamom.stockQuantity} ${cardamom.baseUnitName} | Retail = ৳${cardamom.retailPrice} | allowDecimalQty = ${cardamom.allowDecimalQty}`);
+  console.log(`- Dano (${dano.product.name} - ${dano.variantName}): Stock = ${dano.stockQuantity} ${dano.baseUnitName} | Cost = ৳${dano.currentPurchasePrice} | allowDecimalQty = ${dano.allowDecimalQty}`);
+  console.log(`- Chili (${chili.product.name} - ${chili.variantName}): Stock = ${chili.stockQuantity} ${chili.baseUnitName}`);
   console.log(`- Customer: ${customer.name} | Running Due = ৳${customer.currentDue}`);
   console.log(`- Supplier: ${supplier.companyName} | Payable = ৳${supplier.currentPayable}\n`);
 
@@ -59,7 +54,7 @@ async function runTestFlow() {
     note: 'খুচরা খদ্দের ২০ টাকার এলাচ নিলেন',
     items: [
       {
-        productId: cardamom.id,
+        variantId: cardamom.id,
         unitName: 'কেজি',
         conversionFactor: 1,
         customTotalPrice: 20, // ৳20
@@ -68,15 +63,15 @@ async function runTestFlow() {
   };
 
   const reverseSaleResult = await salesService.createSale(reverseSaleInput);
-  console.log(`✔ Reverse Sale Completed: Invoice #${reverseSaleResult.invoiceNumber}`);
-  console.log(`  Grand Total: ৳${reverseSaleResult.grandTotal} | Cash Paid: ৳${reverseSaleResult.paidAmount}`);
-  const soldItem = reverseSaleResult.items[0];
-  console.log(`  Sold Item: ${cardamom.name}`);
+  console.log(`✔ Reverse Sale Completed: Invoice #${reverseSaleResult.sale.invoiceNumber}`);
+  console.log(`  Grand Total: ৳${reverseSaleResult.sale.grandTotal} | Cash Paid: ৳${reverseSaleResult.sale.paidAmount}`);
+  const soldItem = reverseSaleResult.sale.items[0];
+  console.log(`  Sold Item: ${cardamom.product.name} (${cardamom.variantName})`);
   console.log(`  Auto-Calculated Weight (4 Decimals): ${soldItem.baseQuantity} KG (Expected: 0.0057 KG)`);
   console.log(`  Subtotal: ৳${soldItem.subTotal} | Cost Snapshot: ৳${soldItem.costPriceSnapshot}`);
 
-  // Verify stock deduction: dynamic check relative to initial stock
-  const cardamomAfter = await prisma.product.findUniqueOrThrow({ where: { id: cardamom.id } });
+  // Verify stock deduction
+  const cardamomAfter = await prisma.productVariant.findUniqueOrThrow({ where: { id: cardamom.id } });
   const expectedCardamomStock1 = cardamom.stockQuantity.sub(soldItem.baseQuantity);
   console.log(`  Cardamom Stock After Sale: ${cardamomAfter.stockQuantity} KG (Expected: ${expectedCardamomStock1} KG)`);
   if (!cardamomAfter.stockQuantity.equals(expectedCardamomStock1)) {
@@ -84,44 +79,68 @@ async function runTestFlow() {
   }
 
   // =========================================================================
+  // TEST 1B: PACKAGED GOODS WHOLE NUMBER PROTECTION (allowDecimalQty = false)
+  // =========================================================================
+  console.log('\n--- TEST 1B: Packaged Goods Fractional Protection (allowDecimalQty: false) ---');
+  try {
+    await salesService.createSale({
+      saleType: SaleType.RETAIL,
+      customerId: null,
+      discount: 0,
+      paidAmount: 500,
+      items: [
+        {
+          variantId: dano.id,
+          unitName: 'প্যাকেট',
+          conversionFactor: 1,
+          quantity: 1.5, // 1.5 packets of milk powder should fail!
+        },
+      ],
+    });
+    throw new Error('FAILED: System should NOT have allowed selling 1.5 packets of milk powder!');
+  } catch (err: any) {
+    console.log(`✔ Correctly Rejected Fractional Quantity on Packaged Item: "${err.message}"`);
+  }
+
+  // =========================================================================
   // TEST 2: MULTI-UNIT SACK & PALLA SALE WITH RUNNING DUE KHATA
   // =========================================================================
   console.log('\n--- TEST 2: Multi-Unit Sale (Sacks & Palla) & Customer Running Khata ---');
   const chiliSack = chili.units.find((u) => u.unitName.includes('৫০ কেজি বস্তা'))!;
-  const onionPalla = onion.units.find((u) => u.unitName.includes('৫ কেজি পাল্লা'))!;
+  const chiliPalla = chili.units.find((u) => u.unitName.includes('৫ কেজি পাল্লা'))!;
 
   const saleInput = {
     saleType: SaleType.RETAIL,
     customerId: customer.id,
     discount: 200,
     paidAmount: 20000, // Pays 20,000 cash, rest on credit
-    note: '২ বস্তা মরিচ ও ৩ পাল্লা পেঁয়াজ ক্রয়',
+    note: '১ বস্তা ও ২ পাল্লা মরিচ ক্রয়',
     items: [
       {
-        productId: chili.id,
+        variantId: chili.id,
         unitName: chiliSack.unitName,
         conversionFactor: Number(chiliSack.conversionFactor), // 50
-        quantity: 2, // 2 Sacks = 100 KG
-        unitPrice: Number(chiliSack.retailPrice!), // 17,500/sack -> Subtotal: 35,000
+        quantity: 1, // 1 Sack = 50 KG
+        unitPrice: Number(chiliSack.retailPrice!), // 17,500/sack -> Subtotal: 17,500
       },
       {
-        productId: onion.id,
-        unitName: onionPalla.unitName,
-        conversionFactor: Number(onionPalla.conversionFactor), // 5
-        quantity: 3, // 3 Palla = 15 KG
-        unitPrice: Number(onionPalla.retailPrice!), // 490/palla -> Subtotal: 1,470
+        variantId: chili.id,
+        unitName: chiliPalla.unitName,
+        conversionFactor: Number(chiliPalla.conversionFactor), // 5
+        quantity: 2, // 2 Palla = 10 KG
+        unitPrice: Number(chiliPalla.retailPrice!), // 1775/palla -> Subtotal: 3,550
       },
     ],
   };
 
   const saleResult = await salesService.createSale(saleInput);
-  console.log(`✔ Sale completed: Invoice #${saleResult.invoiceNumber}`);
-  console.log(`  Grand Total: ৳${saleResult.grandTotal} | Cash Paid: ৳${saleResult.paidAmount} | Invoice Due: ৳${saleResult.dueAmount}`);
-  console.log(`  Customer Total Running Due now: ৳${saleResult.customerCurrentDue}`);
+  console.log(`✔ Sale completed: Invoice #${saleResult.sale.invoiceNumber}`);
+  console.log(`  Grand Total: ৳${saleResult.sale.grandTotal} | Cash Paid: ৳${saleResult.sale.paidAmount} | Invoice Due: ৳${saleResult.sale.dueAmount}`);
+  console.log(`  Customer Total Running Due now: ৳${saleResult.customerDue}`);
 
-  // Chili: initial - 100 KG
-  const chiliAfter = await prisma.product.findUniqueOrThrow({ where: { id: chili.id } });
-  const expectedChiliStock = chili.stockQuantity.sub(100);
+  // Chili: initial - 60 KG (50 + 10)
+  const chiliAfter = await prisma.productVariant.findUniqueOrThrow({ where: { id: chili.id } });
+  const expectedChiliStock = chili.stockQuantity.sub(60);
   console.log(`  Chili Stock: ${chiliAfter.stockQuantity} KG (Expected: ${expectedChiliStock} KG)`);
   if (!chiliAfter.stockQuantity.equals(expectedChiliStock)) {
     throw new Error(`Stock mismatch! Expected ${expectedChiliStock}, got ${chiliAfter.stockQuantity}`);
@@ -155,7 +174,7 @@ async function runTestFlow() {
     note: 'ডানো ৫০০ গ্রাম দুধের নতুন ১৮ প্যাকেটের কার্টন চালান',
     items: [
       {
-        productId: dano.id,
+        variantId: dano.id,
         unitName: 'কার্টন (১৮ প্যাকেট)',
         conversionFactor: 18,
         quantity: 10, // 10 * 18 = 180 packets
@@ -170,10 +189,10 @@ async function runTestFlow() {
   const purchaseResult = await purchasesService.createPurchase(purchaseInput);
   console.log(`✔ Purchase completed: Chalan #${purchaseResult.purchaseNumber}`);
   console.log(`  Grand Total: ৳${purchaseResult.grandTotal} | Cash Paid: ৳${purchaseResult.paidAmount} | Due: ৳${purchaseResult.dueAmount}`);
-  console.log(`  Mahajan Total Payable Debt now: ৳${purchaseResult.supplierCurrentPayable}`);
+  console.log(`  Mahajan Total Payable Debt now: ৳${purchaseResult.supplierPayable}`);
 
   // Verify stock: initial + 180 packets
-  const danoAfter = await prisma.product.findUniqueOrThrow({
+  const danoAfter = await prisma.productVariant.findUniqueOrThrow({
     where: { id: dano.id },
     include: { units: true },
   });
@@ -189,10 +208,10 @@ async function runTestFlow() {
     throw new Error(`Replacement cost update failed! Expected 430, got ${danoAfter.currentPurchasePrice}`);
   }
 
-  // Verify that the new 18-packet carton unit was automatically saved into ProductUnit
+  // Verify that the new 18-packet carton unit was automatically saved into VariantUnit
   const savedUnit = danoAfter.units.find((u) => u.unitName === 'কার্টন (১৮ প্যাকেট)');
   if (!savedUnit) {
-    throw new Error('On-the-fly carton unit was not saved to ProductUnit!');
+    throw new Error('On-the-fly carton unit was not saved to VariantUnit!');
   }
   console.log(`✔ Verified: Custom Unit "${savedUnit.unitName}" (Factor: ${savedUnit.conversionFactor}) saved for future use!`);
 
@@ -209,7 +228,7 @@ async function runTestFlow() {
   console.log(`  Snapshot Replacement Cost: ৳${wastageResult.costPriceSnapshot}/KG`);
   console.log(`  Calculated Loss: ৳${wastageResult.lossAmount} (0.25 KG * ৳3100 = ৳775)`);
 
-  const cardamomFinal = await prisma.product.findUniqueOrThrow({ where: { id: cardamom.id } });
+  const cardamomFinal = await prisma.productVariant.findUniqueOrThrow({ where: { id: cardamom.id } });
   const expectedCardamomFinal = cardamomAfter.stockQuantity.sub(wastageResult.quantity);
   console.log(`  Cardamom Stock After Wastage: ${cardamomFinal.stockQuantity} KG (${cardamomAfter.stockQuantity} - ${wastageResult.quantity} = ${expectedCardamomFinal} KG)`);
   if (!cardamomFinal.stockQuantity.equals(expectedCardamomFinal)) {

@@ -1,56 +1,103 @@
-import { Prisma, Purchase, PurchaseItem } from '@prisma/client';
+import { Prisma, Purchase, PurchaseItem, Supplier } from '@prisma/client';
 import { prisma } from '../../config/prisma';
 import { BaseRepository } from '../../common/repositories/base.repository';
 
-export class PurchasesRepository extends BaseRepository {
+export type PurchaseItemWithVariant = PurchaseItem & {
+  variant: {
+    id: string;
+    variantName: string;
+    sku: string;
+    barcode: string | null;
+    baseUnitName: string;
+    product: {
+      id: string;
+      name: string;
+      banglaName: string | null;
+    };
+  };
+};
 
-  async create(data: Prisma.PurchaseCreateInput, tx?: Prisma.TransactionClient): Promise<Purchase & { items: PurchaseItem[] }> {
+export type PurchaseWithDetails = Purchase & {
+  items: PurchaseItemWithVariant[];
+  supplier: Supplier;
+  ledgerEntries?: any[];
+};
+
+export class PurchasesRepository extends BaseRepository {
+  async create(data: Prisma.PurchaseCreateInput, tx?: Prisma.TransactionClient): Promise<PurchaseWithDetails> {
     return await this.getDb(tx).purchase.create({
       data,
       include: {
         items: {
           include: {
-            product: {
-              select: { id: true, name: true, banglaName: true, baseUnitName: true },
+            variant: {
+              select: {
+                id: true,
+                variantName: true,
+                sku: true,
+                barcode: true,
+                baseUnitName: true,
+                product: {
+                  select: { id: true, name: true, banglaName: true },
+                },
+              },
             },
           },
         },
         supplier: true,
       },
-    });
+    }) as unknown as PurchaseWithDetails;
   }
 
-  async findById(id: string, tx?: Prisma.TransactionClient) {
+  async findById(id: string, tx?: Prisma.TransactionClient): Promise<PurchaseWithDetails | null> {
     return await this.getDb(tx).purchase.findUnique({
       where: { id },
       include: {
         items: {
           include: {
-            product: {
-              select: { id: true, name: true, banglaName: true, baseUnitName: true },
+            variant: {
+              select: {
+                id: true,
+                variantName: true,
+                sku: true,
+                barcode: true,
+                baseUnitName: true,
+                product: {
+                  select: { id: true, name: true, banglaName: true },
+                },
+              },
             },
           },
         },
         supplier: true,
         ledgerEntries: true,
       },
-    });
+    }) as unknown as PurchaseWithDetails | null;
   }
 
-  async findByPurchaseNumber(purchaseNumber: string) {
+  async findByPurchaseNumber(purchaseNumber: string): Promise<PurchaseWithDetails | null> {
     return await prisma.purchase.findUnique({
       where: { purchaseNumber },
       include: {
         items: {
           include: {
-            product: {
-              select: { id: true, name: true, banglaName: true, baseUnitName: true },
+            variant: {
+              select: {
+                id: true,
+                variantName: true,
+                sku: true,
+                barcode: true,
+                baseUnitName: true,
+                product: {
+                  select: { id: true, name: true, banglaName: true },
+                },
+              },
             },
           },
         },
         supplier: true,
       },
-    });
+    }) as unknown as PurchaseWithDetails | null;
   }
 
   async findMany(params: {

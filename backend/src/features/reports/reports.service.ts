@@ -104,11 +104,17 @@ export class ReportsService {
 
   /**
    * Current Inventory Valuation (মালের বর্তমান স্টক ও মোট মূলধন)
+   * Tracks valuation across each sellable SKU/Variant
    */
   async getInventoryValuation() {
-    const products = await prisma.product.findMany({
+    const variants = await prisma.productVariant.findMany({
       where: { isActive: true },
-      include: { units: true },
+      include: {
+        product: {
+          select: { id: true, name: true, banglaName: true },
+        },
+        units: true,
+      },
     });
 
     let totalCostValuation = new Prisma.Decimal(0);
@@ -116,28 +122,32 @@ export class ReportsService {
     let totalWholesaleValuation = new Prisma.Decimal(0);
     const lowStockItems: Array<{
       id: string;
+      variantId: string;
       name: string;
       stockQuantity: Prisma.Decimal;
       baseUnitName: string;
       lowStockAlert: Prisma.Decimal;
     }> = [];
 
-    for (const p of products) {
-      const costVal = p.stockQuantity.mul(p.currentPurchasePrice);
-      const retailVal = p.stockQuantity.mul(p.retailPrice);
-      const wholesaleVal = p.stockQuantity.mul(p.wholesalePrice);
+    for (const v of variants) {
+      const costVal = v.stockQuantity.mul(v.currentPurchasePrice);
+      const retailVal = v.stockQuantity.mul(v.retailPrice);
+      const wholesaleVal = v.stockQuantity.mul(v.wholesalePrice);
 
       totalCostValuation = totalCostValuation.add(costVal);
       totalRetailValuation = totalRetailValuation.add(retailVal);
       totalWholesaleValuation = totalWholesaleValuation.add(wholesaleVal);
 
-      if (p.stockQuantity.lessThanOrEqualTo(p.lowStockAlert)) {
+      if (v.stockQuantity.lessThanOrEqualTo(v.lowStockAlert)) {
+        const baseName = v.product.banglaName || v.product.name;
+        const variantSuffix = v.variantName !== 'Default' ? ` (${v.variantName})` : '';
         lowStockItems.push({
-          id: p.id,
-          name: p.name,
-          stockQuantity: p.stockQuantity,
-          baseUnitName: p.baseUnitName,
-          lowStockAlert: p.lowStockAlert,
+          id: v.product.id,
+          variantId: v.id,
+          name: `${baseName}${variantSuffix}`,
+          stockQuantity: v.stockQuantity,
+          baseUnitName: v.baseUnitName,
+          lowStockAlert: v.lowStockAlert,
         });
       }
     }
@@ -146,7 +156,7 @@ export class ReportsService {
     const potentialWholesaleProfit = totalWholesaleValuation.sub(totalCostValuation);
 
     return {
-      totalProductsCount: products.length,
+      totalVariantsCount: variants.length,
       valuation: {
         totalCostValuation,        // বর্তমান ক্রয়মূল্যে মোট মূলধন
         totalRetailValuation,      // খুচরা মূল্যে বিক্রয় সম্ভাবনা
@@ -224,11 +234,11 @@ export class ReportsService {
   }
 
   /**
-   * Top Selling Products
+   * Top Selling Products / SKUs
    */
   async getTopSellingProducts(limit = 10) {
     const saleItems = await prisma.saleItem.groupBy({
-      by: ['productId'],
+      by: ['variantId'],
       _sum: {
         baseQuantity: true,
         subTotal: true,
@@ -241,24 +251,31 @@ export class ReportsService {
       take: limit,
     });
 
-    const products = await prisma.product.findMany({
+    const variants = await prisma.productVariant.findMany({
       where: {
-        id: { in: saleItems.map((item) => item.productId) },
+        id: { in: saleItems.map((item) => item.variantId) },
       },
-      select: { id: true, name: true, baseUnitName: true, category: true },
+      include: {
+        product: {
+          include: { category: true },
+        },
+      },
     });
 
-    const productMap = new Map(products.map((p) => [p.id, p]));
+    const variantMap = new Map(variants.map((v) => [v.id, v]));
 
     return saleItems.map((item) => {
-      const product = productMap.get(item.productId);
+      const variant = variantMap.get(item.variantId);
+      const baseName = variant?.product.banglaName || variant?.product.name || 'Unknown';
+      const variantSuffix = variant && variant.variantName !== 'Default' ? ` (${variant.variantName})` : '';
       return {
-        productId: item.productId,
-        name: product?.name || 'Unknown',
-        category: product?.category || 'General',
-        baseUnitName: product?.baseUnitName || 'কেজি',
-        totalSoldQuantity: item._sum.baseQuantity || new Prisma.Decimal(0),
-        totalRevenue: item._sum.subTotal || new Prisma.Decimal(0),
+        variantId: item.variantId,
+        productId: variant?.product.id || '',
+        name: `${baseName}${variantSuffix}`,
+        category: variant?.product.category?.name || 'General',
+        baseUnitName: variant?.baseUnitName || 'কেজি',
+        totalSoldQuantity: item._sum?.baseQuantity || new Prisma.Decimal(0),
+        totalRevenue: item._sum?.subTotal || new Prisma.Decimal(0),
       };
     });
   }

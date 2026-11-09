@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import { SaleType } from '@prisma/client';
 import { asyncHandler } from '../../common/utils/asyncHandler';
 import { sendResponse } from '../../common/utils/apiResponse';
 import { salesService } from './sales.service';
@@ -13,7 +14,7 @@ export class SalesController {
     const { customerId, saleType, invoiceNumber, startDate, endDate, page, limit } = req.query;
     const result = await salesService.getSales({
       customerId: customerId as string,
-      saleType: saleType as string,
+      saleType: saleType as SaleType | undefined,
       invoiceNumber: invoiceNumber as string,
       startDate: startDate as string,
       endDate: endDate as string,
