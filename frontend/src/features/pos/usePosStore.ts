@@ -323,6 +323,7 @@ export const usePosStore = create<PosState>()(
             selectedCustomer: null,
             lastReceipt: invoice,
             isSubmitting: false,
+            error: null,
           });
 
           return invoice;
@@ -333,12 +334,15 @@ export const usePosStore = create<PosState>()(
       },
 
       fetchThermalReceipt: async (saleId: string) => {
+        if (!saleId) {
+          throw new Error('মেমো আইডি পাওয়া যায়নি');
+        }
         try {
           const thermalReceipt = await posService.getReceipt(saleId);
-          set({ thermalReceipt });
+          set({ thermalReceipt, error: null });
           return thermalReceipt;
         } catch (err: any) {
-          set({ error: err.message });
+          console.error('Failed to load thermal receipt:', err);
           throw err;
         }
       },

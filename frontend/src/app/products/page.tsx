@@ -1,42 +1,49 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import {
-  ArrowLeft,
-  Package,
-  Plus,
-  MagnifyingGlass,
-  Warning,
-  Coins,
-  Tag,
-  ArrowsClockwise,
-} from '@phosphor-icons/react';
+import { Package, Plus, ArrowsClockwise } from '@phosphor-icons/react';
 import { useProductStore } from '@/features/product/useProductStore';
 import { ProductListTable } from '@/features/product/components/ProductListTable';
+import { ProductMobileCard } from '@/features/product/components/ProductMobileCard';
+import { ProductKpiSummary } from '@/features/product/components/ProductKpiSummary';
+import { ProductFilterBar } from '@/features/product/components/ProductFilterBar';
 import { AddProductModal } from '@/features/product/components/AddProductModal';
-import { Product } from '@/features/product/product.types';
+import { QuickPriceModal } from '@/features/product/components/QuickPriceModal';
+import { AddUnitModal } from '@/features/product/components/AddUnitModal';
+import { RecordWastageModal } from '@/features/product/components/RecordWastageModal';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { AdminPagination } from '@/components/shared/AdminPagination';
+import { Product, ProductVariant } from '@/features/product/product.types';
 
 export default function ProductsPage() {
   const {
     products,
-    categories,
-    brands,
+    pagination,
     isLoading,
-    searchQuery,
-    selectedCategoryId,
-    selectedBrandId,
-    lowStockOnly,
     fetchProducts,
     fetchMetadata,
-    setSearchQuery,
-    setSelectedCategoryId,
-    setSelectedBrandId,
-    setLowStockOnly,
+    setPage,
+    deleteVariant,
   } = useProductStore();
 
+  // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  const [priceModalData, setPriceModalData] = useState<{
+    variant: ProductVariant;
+    productName: string;
+  } | null>(null);
+
+  const [unitModalData, setUnitModalData] = useState<{
+    variant: ProductVariant;
+    productName: string;
+  } | null>(null);
+
+  const [wastageModalData, setWastageModalData] = useState<{
+    variant: ProductVariant;
+    productName: string;
+  } | null>(null);
 
   useEffect(() => {
     fetchMetadata();
@@ -53,213 +60,163 @@ export default function ProductsPage() {
     setEditingProduct(null);
   };
 
-  // KPI Calculations with Tabular Numbers
-  const totalProducts = products.length;
-  const totalVariants = products.reduce((acc, p) => acc + (p.variants?.length || 1), 0);
-  const lowStockCount = products.filter((p) =>
-    p.variants.some((v) => v.stockQuantity <= v.lowStockAlert)
-  ).length;
-
-  const totalInventoryCapital = products.reduce((acc, p) => {
-    const pVal = p.variants.reduce((vAcc, v) => vAcc + v.stockQuantity * v.currentPurchasePrice, 0);
-    return acc + pVal;
-  }, 0);
+  const handleDeleteVariant = async (variantId: string, variantName: string) => {
+    if (!confirm(`আপনি কি নিশ্চিত যে "${variantName}" ভ্যারিয়েন্টটি মুছতে চান?`)) {
+      return;
+    }
+    try {
+      const res = await deleteVariant(variantId);
+      if (res?.deactivated) {
+        alert(
+          `ঐতিহাসিক বিক্রয় বা পারচেজ রেকর্ড থাকার কারণে "${variantName}" ভ্যারিয়েন্টটি স্থায়ীভাবে মুছে না ফেলে নিষ্ক্রিয় (Deactivated) করা হয়েছে।`
+        );
+      }
+    } catch (err: any) {
+      alert(err.message || 'ভ্যারিয়েন্ট মুছতে সমস্যা হয়েছে');
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
-      {/* Top Navigation Bar - Crisp 1px Border Header */}
-      <header className="sticky top-0 z-30 bg-white border-b border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-13 sm:h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <Link
-              href="/"
-              className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
-              title="ড্যাশবোর্ডে ফিরুন"
-            >
-              <ArrowLeft size={18} weight="bold" />
-            </Link>
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center">
-                <Package size={16} weight="bold" />
-              </div>
-              <div>
-                <h1 className="text-xs sm:text-sm font-semibold text-slate-900 tracking-tight leading-tight">
-                  পণ্য ক্যাটালগ ও ইনভেন্টরি
-                </h1>
-                <p className="text-[10px] text-slate-500 hidden sm:block tracking-tight">
-                  ইদ্রিস ব্রাদার্স • মরিচপট্টি, ফেনী বাজার
-                </p>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans pb-16">
+      {/* ১. স্টিকি পেজ হেডার (AdminPageHeader) */}
+      <div className="bg-white border-b border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+          <AdminPageHeader
+            title="পণ্য ক্যাটালগ ও ইনভেন্টরি"
+            subtitle="মরিচপট্টি, ফেনী বাজার — ঐতিহ্যবাহী মুদি ও মসলার মাল্টি-ইউনিট স্টক, রূপান্তর ও মূল্য ব্যবস্থাপনা"
+            backHref="/"
+            backTitle="ড্যাশবোর্ডে ফিরে যান"
+            icon={<Package size={16} weight="bold" />}
+            badge={
+              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                ক্যাটালগ
+              </span>
+            }
+            actions={
+              <>
+                <button
+                  type="button"
+                  onClick={() => fetchProducts()}
+                  disabled={isLoading}
+                  className="px-2.5 py-1.5 rounded-md border border-slate-200/90 bg-white hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 disabled:opacity-50 cursor-pointer"
+                  title="তালিকা রিফ্রেশ করুন"
+                >
+                  <ArrowsClockwise
+                    size={14}
+                    weight="bold"
+                    className={isLoading ? 'animate-spin' : ''}
+                  />
+                  <span className="hidden sm:inline">রিফ্রেশ</span>
+                </button>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => fetchProducts()}
-              className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
-              title="তালিকা রিফ্রেশ করুন"
-            >
-              <ArrowsClockwise size={16} weight="bold" className={isLoading ? 'animate-spin' : ''} />
-            </button>
-            <button
-              onClick={() => {
-                setEditingProduct(null);
-                setIsAddModalOpen(true);
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-md shadow-[0_1px_2px_rgba(15,23,42,0.06)] active:scale-[0.98] transition-[background-color,transform] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer"
-            >
-              <Plus size={14} weight="bold" />
-              <span>নতুন পণ্য যোগ করুন</span>
-            </button>
-          </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingProduct(null);
+                    setIsAddModalOpen(true);
+                  }}
+                  className="px-2.5 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white text-xs font-semibold flex items-center gap-1.5 transition-[background-color,transform] duration-150 shadow-[0_1px_2px_rgba(15,23,42,0.08)] cursor-pointer"
+                >
+                  <Plus size={14} weight="bold" />
+                  <span>+ নতুন পণ্য</span>
+                </button>
+              </>
+            }
+          />
         </div>
-      </header>
+      </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-4">
-        {/* KPI Summary Cards - Linear-Grade Neutral Framing */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)] flex items-center gap-3">
-            <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/70 text-slate-700 flex items-center justify-center shrink-0">
-              <Package size={17} weight="bold" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[11px] font-medium text-slate-500 tracking-tight">মোট মূল পণ্য</div>
-              <div className="text-base sm:text-lg font-bold text-slate-900 font-mono tabular-nums tracking-tight">
-                {totalProducts} টি
-              </div>
-            </div>
-          </div>
+      {/* মূল কন্টেন্ট ক্যানভাস */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-3.5">
+        {/* ১. ৪-কার্ডের সুনির্দিষ্ট ইনভেন্টরি KPI সামারি */}
+        <ProductKpiSummary />
 
-          <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)] flex items-center gap-3">
-            <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/70 text-slate-700 flex items-center justify-center shrink-0">
-              <Tag size={17} weight="bold" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[11px] font-medium text-slate-500 tracking-tight">মোট ভ্যারিয়েন্ট (SKU)</div>
-              <div className="text-base sm:text-lg font-bold text-slate-900 font-mono tabular-nums tracking-tight">
-                {totalVariants} টি
-              </div>
-            </div>
-          </div>
+        {/* ২. অ্যাকশন ও পোর্টাল ফিল্টার বার */}
+        <ProductFilterBar />
 
-          <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)] flex items-center gap-3">
-            <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/70 text-slate-700 flex items-center justify-center shrink-0">
-              <Warning size={17} weight="bold" className={lowStockCount > 0 ? 'text-rose-600' : ''} />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[11px] font-medium text-slate-500 tracking-tight">স্টক সংকট সতর্কতা</div>
-              <div
-                className={`text-base sm:text-lg font-bold font-mono tabular-nums tracking-tight ${
-                  lowStockCount > 0 ? 'text-rose-700' : 'text-slate-900'
-                }`}
-              >
-                {lowStockCount} টি
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)] flex items-center gap-3">
-            <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/70 text-slate-700 flex items-center justify-center shrink-0">
-              <Coins size={17} weight="bold" />
-            </div>
-            <div className="min-w-0">
-              <div className="text-[11px] font-medium text-slate-500 tracking-tight truncate">ক্রয়মূল্যে মোট মূলধন</div>
-              <div className="text-base sm:text-lg font-bold text-slate-900 font-mono tabular-nums tracking-tight truncate">
-                ৳{totalInventoryCapital.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-              </div>
-            </div>
-          </div>
+        {/* ৩. ডেস্কটপ টেবিল ভিউ (Golden Column Alignment) */}
+        <div className="hidden md:block">
+          <ProductListTable
+            products={products}
+            isLoading={isLoading}
+            onEditProduct={handleEditProduct}
+            onOpenPriceModal={(v, name) => setPriceModalData({ variant: v, productName: name })}
+            onOpenUnitModal={(v, name) => setUnitModalData({ variant: v, productName: name })}
+            onOpenWastageModal={(v, name) => setWastageModalData({ variant: v, productName: name })}
+          />
         </div>
 
-        {/* Filter & Search Bar */}
-        <div className="bg-white p-2.5 sm:p-3 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)] flex flex-col sm:flex-row gap-2.5 items-center justify-between">
-          <div className="relative w-full sm:w-80">
-            <MagnifyingGlass
-              size={15}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-            <input
-              type="text"
-              placeholder="পণ্য, বাংলা নাম, SKU বা বারকোড খুঁজুন..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                fetchProducts({ search: e.target.value });
-              }}
-              className="w-full pl-8.5 pr-3 py-1.5 text-xs font-medium border border-slate-200 rounded-md bg-white text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-slate-800 focus:ring-2 focus:ring-slate-900/10 transition-[border-color,box-shadow]"
+        {/* ৪. মোবাইল রেসপন্সিভ কার্ড স্ট্রিম */}
+        <div className="block md:hidden space-y-2.5">
+          {isLoading && products.length === 0 ? (
+            <div className="bg-white rounded-lg border border-slate-200/90 p-8 text-center">
+              <div className="w-6 h-6 border-2 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <p className="text-xs text-slate-500">পণ্য তালিকা লোড হচ্ছে...</p>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="bg-white rounded-lg border border-slate-200/90 p-8 text-center text-slate-500">
+              <Package size={28} weight="bold" className="mx-auto mb-2 text-slate-400" />
+              <p className="text-xs font-semibold">কোনো পণ্য পাওয়া যায়নি</p>
+            </div>
+          ) : (
+            products.map((product) => (
+              <ProductMobileCard
+                key={product.id}
+                product={product}
+                onEditProduct={handleEditProduct}
+                onOpenPriceModal={(v, name) => setPriceModalData({ variant: v, productName: name })}
+                onOpenUnitModal={(v, name) => setUnitModalData({ variant: v, productName: name })}
+                onOpenWastageModal={(v, name) => setWastageModalData({ variant: v, productName: name })}
+                onDeleteVariant={handleDeleteVariant}
+              />
+            ))
+          )}
+        </div>
+
+        {/* ৫. পেজিনেশন বার */}
+        {pagination && pagination.totalPages > 1 && (
+          <div className="bg-white rounded-lg border border-slate-200/90 p-2 shadow-2xs">
+            <AdminPagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              totalItems={pagination.total}
+              pageSize={pagination.limit}
+              onPageChange={setPage}
+              itemLabel="পণ্য"
             />
           </div>
-
-          <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
-            {/* Category Filter */}
-            <select
-              value={selectedCategoryId || ''}
-              onChange={(e) => {
-                const val = e.target.value || null;
-                setSelectedCategoryId(val);
-                fetchProducts({ categoryId: val || undefined });
-              }}
-              className="px-2.5 py-1.5 text-xs font-medium border border-slate-200 rounded-md focus:outline-hidden focus:border-slate-800 focus:ring-2 focus:ring-slate-900/10 bg-white text-slate-800"
-            >
-              <option value="">সকল ক্যাটাগরি</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.banglaName || c.name}
-                </option>
-              ))}
-            </select>
-
-            {/* Brand Filter */}
-            <select
-              value={selectedBrandId || ''}
-              onChange={(e) => {
-                const val = e.target.value || null;
-                setSelectedBrandId(val);
-                fetchProducts({ brandId: val || undefined });
-              }}
-              className="px-2.5 py-1.5 text-xs font-medium border border-slate-200 rounded-md focus:outline-hidden focus:border-slate-800 focus:ring-2 focus:ring-slate-900/10 bg-white text-slate-800"
-            >
-              <option value="">সকল ব্র্যান্ড</option>
-              {brands.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.banglaName || b.name}
-                </option>
-              ))}
-            </select>
-
-            {/* Low Stock Toggle Button */}
-            <button
-              onClick={() => {
-                const newVal = !lowStockOnly;
-                setLowStockOnly(newVal);
-                fetchProducts({ lowStockOnly: newVal });
-              }}
-              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md border transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] cursor-pointer ${
-                lowStockOnly
-                  ? 'bg-rose-50 text-rose-700 border-rose-300 font-semibold'
-                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-              }`}
-            >
-              <Warning size={13} weight={lowStockOnly ? 'fill' : 'bold'} />
-              <span>স্টক সংকট</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Product List Table */}
-        <ProductListTable
-          products={products}
-          isLoading={isLoading}
-          onEditProduct={handleEditProduct}
-        />
+        )}
       </main>
 
-      {/* Add / Edit Product Modal */}
+      {/* নতুন পণ্য তৈরি ও সম্পাদনা মডাল */}
       <AddProductModal
         isOpen={isAddModalOpen}
         onClose={handleCloseModal}
         initialProduct={editingProduct}
+      />
+
+      {/* কুইক দর পরিবর্তন মডাল */}
+      <QuickPriceModal
+        isOpen={Boolean(priceModalData)}
+        onClose={() => setPriceModalData(null)}
+        variant={priceModalData?.variant || null}
+        productName={priceModalData?.productName || ''}
+      />
+
+      {/* নতুন বস্তা/কার্টন রূপান্তর ইউনিট মডাল */}
+      <AddUnitModal
+        isOpen={Boolean(unitModalData)}
+        onClose={() => setUnitModalData(null)}
+        variant={unitModalData?.variant || null}
+        productName={unitModalData?.productName || ''}
+      />
+
+      {/* অপচয় ও শুকিয়ে যাওয়া ঘাটতি এন্ট্রি মডাল */}
+      <RecordWastageModal
+        isOpen={Boolean(wastageModalData)}
+        onClose={() => setWastageModalData(null)}
+        variant={wastageModalData?.variant || null}
+        productName={wastageModalData?.productName || ''}
       />
     </div>
   );

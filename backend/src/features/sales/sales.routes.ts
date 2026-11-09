@@ -9,5 +9,7 @@ router.post('/', validate(createSaleSchema), salesController.createSale);
 router.get('/', salesController.getSales);
 router.get('/:id', salesController.getSaleById);
 router.get('/:id/receipt', salesController.getSaleReceipt);
+router.post('/:id/cancel', salesController.cancelSale);
+router.post('/:id/return', salesController.returnSaleItems);
 
 export const salesRoutes = router;

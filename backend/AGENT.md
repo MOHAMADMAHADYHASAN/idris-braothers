@@ -4,6 +4,9 @@
 **Stack:** Node.js, Express, TypeScript, PostgreSQL, Prisma ORM  
 **Version:** 1.0.0 (Production-Ready Backend)
 
+> **🔴 MANDATORY AGENT DIRECTIVE — AUTOMATIC AGENT.MD LOGGING:**
+> **যেকোনো নতুন পরিবর্তন, ফিচার যোগ, রিফ্যাক্টরিং বা আর্কিটেকচারাল সিদ্ধান্ত বাস্তবায়নের সাথে সাথেই `AGENT.md`-তে তাৎক্ষণিকভাবে নোট (record) করতে হবে। কোনো কোড পরিবর্তন ডকুমেন্টেশন ছাড়া অসম্পূর্ণ হিসেবে গণ্য হবে।**
+
 ---
 
 ## 1. Domain Context & Business Rules (বাস্তব ব্যবসার নিয়ম)

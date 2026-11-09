@@ -1,9 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import {
-  ArrowLeft,
   ArrowClockwise,
   Package,
   TrendUp,
@@ -18,14 +17,14 @@ import {
   Receipt,
   Scales,
 } from '@phosphor-icons/react';
-import { useReportsStore, DateFilterPreset } from '@/features/reports/useReportsStore';
+import { useReportsStore } from '@/features/reports/useReportsStore';
 import { formatCurrency } from '@/lib/decimal';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { UnifiedDateRangeFilter } from '@/components/shared/UnifiedDateRangeFilter';
+import { ResolvedDateRange } from '@/lib/dateFilter';
 
 export default function ReportsPage() {
   const {
-    datePreset,
-    customStartDate,
-    customEndDate,
     profitLoss,
     inventoryValuation,
     duesSummary,
@@ -35,78 +34,66 @@ export default function ReportsPage() {
     isLoadingDues,
     isLoadingTopSelling,
     error,
-    setDatePreset,
     setCustomDateRange,
     fetchAllReports,
-    fetchProfitLoss,
   } = useReportsStore();
-
-  const [localStart, setLocalStart] = useState(customStartDate);
-  const [localEnd, setLocalEnd] = useState(customEndDate);
 
   useEffect(() => {
     fetchAllReports();
   }, [fetchAllReports]);
 
-  const handleApplyCustomDates = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCustomDateRange(localStart, localEnd);
-  };
+  const handleRangeChange = useCallback(
+    (range: ResolvedDateRange) => {
+      setCustomDateRange(range.startYmd, range.endYmd);
+    },
+    [setCustomDateRange]
+  );
 
   const isAnyLoading = isLoadingPnl || isLoadingValuation || isLoadingDues || isLoadingTopSelling;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-900 pb-16 font-sans">
-      {/* 1. Global Shell Header */}
-      <header className="bg-white border-b border-slate-200/90 sticky top-0 z-30 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 active:scale-[0.98] transition-[background-color,border-color,transform] duration-150"
-              title="ড্যাশবোর্ডে ফিরুন"
-            >
-              <ArrowLeft size={16} weight="bold" />
-            </Link>
-            <div>
+    <div className="min-h-screen bg-slate-50/50 text-slate-900 pb-16 font-sans flex flex-col">
+      {/* ১. স্টিকি পেজ হেডার (AdminPageHeader) */}
+      <div className="bg-white border-b border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+          <AdminPageHeader
+            title="ব্যবসায়িক রিপোর্ট ও আর্থিক বিশ্লেষণ"
+            subtitle="ইদ্রিস ব্রাদার্স • মরিচপট্টি, ফেনী বাজার — লাভ-ক্ষতি, ইনভেন্টরি ক্যাপিটাল ও খাতা অ্যানালিটিক্স"
+            backHref="/"
+            backTitle="ড্যাশবোর্ডে ফিরুন"
+            icon={<ChartBar size={16} weight="bold" />}
+            badge={
+              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                ERP Reports
+              </span>
+            }
+            actions={
               <div className="flex items-center gap-2">
-                <h1 className="font-bold text-xs sm:text-sm text-slate-900 leading-tight">
-                  ব্যবসায়িক রিপোর্ট ও আর্থিক বিশ্লেষণ
-                </h1>
-                <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200/80">
-                  ERP Reports
-                </span>
+                <button
+                  onClick={() => fetchAllReports()}
+                  disabled={isAnyLoading}
+                  className="px-2.5 py-1.5 rounded-md border border-slate-200/90 bg-white hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 disabled:opacity-50 cursor-pointer shadow-2xs"
+                  title="তথ্য রিফ্রেশ করুন"
+                >
+                  <ArrowClockwise size={14} weight="bold" className={isAnyLoading ? 'animate-spin' : ''} />
+                  <span className="hidden sm:inline">রিফ্রেশ</span>
+                </button>
+
+                <Link
+                  href="/pos"
+                  className="px-2.5 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 shadow-2xs"
+                >
+                  <ShoppingCart size={14} weight="bold" />
+                  <span className="hidden sm:inline">পিওএস কাউন্টার</span>
+                </Link>
               </div>
-              <p className="text-[11px] text-slate-500">
-                ইদ্রিস ব্রাদার্স • মরিচপট্টি, ফেনী বাজার
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => fetchAllReports()}
-              disabled={isAnyLoading}
-              className="px-2.5 py-1 rounded-md border border-slate-200/90 bg-white hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 disabled:opacity-50"
-              title="তথ্য রিফ্রেশ করুন"
-            >
-              <ArrowClockwise size={14} weight="bold" className={isAnyLoading ? 'animate-spin' : ''} />
-              <span className="hidden sm:inline">রিফ্রেশ</span>
-            </button>
-
-            <Link
-              href="/pos"
-              className="px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 shadow-[0_1px_2px_rgba(5,150,105,0.2)]"
-            >
-              <ShoppingCart size={14} weight="bold" />
-              <span>পিওএস কাউন্টার</span>
-            </Link>
-          </div>
+            }
+          />
         </div>
-      </header>
+      </div>
 
-      {/* 2. Main Content Canvas */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-4 space-y-4">
+      {/* ২. মেইন কন্টেন্ট ক্যানভাস - Tier 4 Canvas Spacing */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5">
         {error && (
           <div className="p-3 rounded-md bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
             <Warning size={15} weight="fill" className="shrink-0" />
@@ -115,59 +102,21 @@ export default function ReportsPage() {
         )}
 
         {/* ================================================================= */}
-        {/* SECTION 1: DATE FILTER BAR */}
+        {/* SECTION 1: DATE FILTER BAR (UnifiedDateRangeFilter) */}
         {/* ================================================================= */}
-        <div className="bg-white rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] p-3 flex flex-wrap items-center justify-between gap-2.5">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-xs font-semibold text-slate-600 mr-1 flex items-center gap-1">
-              <Calendar size={14} weight="bold" />
-              সময়কাল:
-            </span>
-            {(
-              [
-                { id: 'today', label: 'আজকে' },
-                { id: 'this_week', label: 'চলতি সপ্তাহ' },
-                { id: 'this_month', label: 'চলতি মাস' },
-                { id: 'custom', label: 'কাস্টম তারিখ' },
-              ] as const
-            ).map((item) => (
-              <button
-                key={item.id}
-                onClick={() => setDatePreset(item.id)}
-                className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-[background-color,color,box-shadow,transform] duration-150 active:scale-[0.98] ${
-                  datePreset === item.id
-                    ? 'bg-slate-900 text-white shadow-[0_1px_2px_rgba(15,23,42,0.1)]'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/80'
-                }`}
-              >
-                {item.label}
-              </button>
-            ))}
+        <div className="bg-white rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+          <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <Calendar size={16} weight="bold" className="text-slate-600" />
+            <span>রিপোর্ট ও লাভ-ক্ষতির সময়কাল:</span>
           </div>
 
-          {datePreset === 'custom' && (
-            <form onSubmit={handleApplyCustomDates} className="flex items-center gap-1.5 flex-wrap">
-              <input
-                type="date"
-                value={localStart}
-                onChange={(e) => setLocalStart(e.target.value)}
-                className="px-2 py-1 text-xs border border-slate-200 rounded-md bg-white font-mono tabular-nums"
-              />
-              <span className="text-xs text-slate-400">থেকে</span>
-              <input
-                type="date"
-                value={localEnd}
-                onChange={(e) => setLocalEnd(e.target.value)}
-                className="px-2 py-1 text-xs border border-slate-200 rounded-md bg-white font-mono tabular-nums"
-              />
-              <button
-                type="submit"
-                className="px-2.5 py-1 text-xs font-semibold bg-slate-900 text-white rounded-md hover:bg-slate-800 active:scale-[0.98] transition-[background-color,transform] duration-150"
-              >
-                প্রয়োগ
-              </button>
-            </form>
-          )}
+          <div className="overflow-x-auto pb-0.5 scrollbar-none w-full sm:w-auto">
+            <UnifiedDateRangeFilter
+              defaultFilter="today"
+              syncWithUrl={false}
+              onRangeChange={handleRangeChange}
+            />
+          </div>
         </div>
 
         {/* ================================================================= */}

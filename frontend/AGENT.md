@@ -4,6 +4,9 @@
 **Stack:** Next.js 16 (App Router), React 19, TypeScript (Strict), Tailwind CSS, Zustand  
 **Backend Reference:** `../backend/AGENT.md` (Contains exact 46-endpoint API contract)
 
+> **🔴 MANDATORY AGENT DIRECTIVE — AUTOMATIC AGENT.MD LOGGING:**
+> **যেকোনো নতুন পরিবর্তন, ফিচার যোগ, রিফ্যাক্টরিং বা আর্কিটেকচারাল সিদ্ধান্ত বাস্তবায়নের সাথে সাথেই `AGENT.md`-তে তাৎক্ষণিকভাবে নোট (record) করতে হবে। কোনো কোড পরিবর্তন ডকুমেন্টেশন ছাড়া অসম্পূর্ণ হিসেবে গণ্য হবে।**
+
 ---
 
 ## 1. Core Architectural Standards (বাধ্যতামূলক নিয়মাবলী)
@@ -80,6 +83,56 @@ src/features/[feature-name]/
 - **UI রেন্ডারিং:**
   - মুদ্রা: `formatCurrency(val)` ➔ `৳৩,৫০০.০০`
   - ওজন/পরিমাণ: `formatWeight(val, unit)` ➔ `০.০০৫৬ কেজি` (মাইক্রো-মসলার জন্য ৪ দশমিক অক্ষত থাকে).
+
+### G. Enterprise Spacing System & The 4 Proximity Tiers (Mathematical 4-Point Grid)
+ইদ্রিস ব্রাদার্স ERP / POS সিস্টেমে কোনো অনুমানের ওপর প্যাডিং বা স্পেসিং দেওয়া যাবে না। প্রতিটি কম্পোনেন্ট ৪টি সুনির্দিষ্ট প্রোক্সিমিটি স্তরে বিন্যস্ত থাকবে:
+1. **Tier 1: মাইক্রো সেপারেশন (Micro Separation - 2px to 6px):**
+   - বাটনের আইকন ও লেখার মধ্যবর্তী ফাঁকা: `gap-1.5` (6px)।
+   - ইনপুট লেবেল থেকে ফিল্ডের দূরত্ব: `mb-1.5` বা `space-y-1.5` (6px)।
+   - পণ্যের মূল টাইটেল থেকে সাবটাইটেল/বাংলা নাম/SKU: `mt-0.5` (2px)।
+   - স্ট্যাটাস ব্যাজের প্যাডিং: `px-1.5 py-0.5`।
+2. **Tier 2: রো ও ফিল্ড লেভেল (Row & Field Level - 8px to 12px):**
+   - টুলবার ও অ্যাকশন বাটনের মধ্যবর্তী গ্যাপ: `gap-2` (8px)।
+   - টেবিল সেলের প্যাডিং: `py-2.5 px-3` (নিখুঁত ৪৪ পিক্সেল স্ট্যান্ডার্ড রো হাইট নিশ্চিত করে)।
+   - মোবাইল কার্ডের রো এবং লিস্টের আইটেম স্পেসিং: `space-y-2.5` (10px)।
+3. **Tier 3: কার্ড ও মডিউল লেভেল (Card & Module Level - 16px to 20px):**
+   - কার্ড কন্টেইনার ও মডিউলের অভ্যন্তরীণ প্যাডিং: `p-3.5 sm:p-4`।
+   - KPI সামারি গ্রিড গ্যাপ: `gap-3 sm:gap-4`।
+   - ফর্মের ২-কলাম গ্রিড স্পেসিং: `gap-4` (16px)।
+4. **Tier 4: পেজ ক্যানভাস লেভেল (Page Canvas Level - 20px to 24px):**
+   - পেজের মূল আউটার প্যাডিং: `px-4 sm:px-6 lg:px-8 py-4 sm:py-6`।
+   - সেকশন-থেকে-সেকশন গ্যাপ: `space-y-4 sm:space-y-5` (বা `space-y-6`)।
+   - সার্চ ইনপুট উইডথ ক্যাপ: `max-w-sm` বা `max-w-md`।
+
+### H. Presentation-Only Table Standard (DynamicDataTable<T>)
+সমস্ত টেবিল পেজ ([`/sales`](file:///home/mahady-hasan/Desktop/idris-brothers/frontend/src/app/sales/page.tsx), [`/products`](file:///home/mahady-hasan/Desktop/idris-brothers/frontend/src/app/products/page.tsx), [`/purchases`](file:///home/mahady-hasan/Desktop/idris-brothers/frontend/src/app/purchases/page.tsx), [`/khata/customers`](file:///home/mahady-hasan/Desktop/idris-brothers/frontend/src/app/khata/customers/page.tsx), [`/khata/suppliers`](file:///home/mahady-hasan/Desktop/idris-brothers/frontend/src/app/khata/suppliers/page.tsx), [`/cashbox`](file:///home/mahady-hasan/Desktop/idris-brothers/frontend/src/app/cashbox/page.tsx)) বাধ্যতামূলকভাবে [`DynamicDataTable<T>`](file:///home/mahady-hasan/Desktop/idris-brothers/frontend/src/components/shared/DynamicDataTable.tsx) ইঞ্জিন ব্যবহার করবে:
+1. **টাইপ-সেফ কলাম কনফিগারেশন (`ColumnDef<T>`):**
+   - `header`, `renderCell`, `headerClassName`, `cellClassName`, `footerClassName`, `disableToggle`।
+2. **কলাম ভিজিবিলিটি পারসিস্টেন্স (`localStorage`):**
+   - `tableId` অনুযায়ী কলামের লুকানো/দেখানোর প্রেফারেন্স ব্রাউজারের `localStorage` (`dt_cols_${tableId}_v1`)-এ ক্র্যাশ-প্রুফভাবে সেভ থাকে।
+3. **গোল্ডেন কলাম অ্যালাইনমেন্ট রুলস:**
+   - **নাম / টাইটেল / SKU:** বামে অ্যালাইনড (`text-left`), ২-লাইন কন্টেক্সট (`font-semibold text-slate-900`, `text-[11px] text-slate-500`)।
+   - **ক্যাটাগরি / টাইপ / ব্যাজ:** সেন্টারে অ্যালাইনড (`text-center`), `inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium`।
+   - **সংখ্যা / ওজন / টাকা:** ডানে অ্যালাইনড (`text-right`), `font-mono tabular-nums tracking-tight font-black` (`JetBrains Mono`)।
+   - **অ্যাকশন বাটন:** সেন্টার/রাইট (`text-center`), পিন্ড `h-7.5` বা `h-8` বাটন।
+4. **স্বয়ংক্রিয় ফুটার সামারি (`<tfoot>`):**
+   - `renderFooterCell: (data) => ReactNode` দিয়ে পৃষ্ঠার মোট বিল, পরিশোধ ও বকেয়ার স্বয়ংক্রিয় যোগফল প্রদর্শন।
+5. **ইভেন্ট বাবলিং সেফগার্ড:**
+   - সম্পূর্ণ রো ক্লিকে ড্রয়ার বা ডিটেইল ওপেন হলেও ভেতরের বাটন, ইনপুট বা লিংকে ক্লিক করলে বাবলিং আটকে যায় (`stopPropagation` এবং `.no-row-click`)।
+6. **মাল্টি-ভ্যারিয়েন্ট সাব-টেবিল সাপোর্ট:**
+   - `renderExpandedRow` এবং `isRowExpanded` প্রপ দিয়ে প্যারেন্ট রো-এর নিচে ড্রপডাউন সাব-টেবিল রেন্ডার করা যায়।
+
+### I. Unified Administrative Page Layout & Components
+1. **`AdminPageHeader` (`src/components/shared/AdminPageHeader.tsx`):**
+   - ডেসকটপে স্ট্যাটিক ক্যানভাস উপাদান (`md:static`), মোবাইলে স্টিকি ব্লার টপবার (`sticky top-0 bg-white/95 backdrop-blur-md`)।
+   - টাইটেল, সাবটাইটেল, ব্যাক বাটন, স্ট্যাটাস ব্যাজ ও প্রাইমারি অ্যাকশন বাটন সমন্বিত।
+2. **`UnifiedDateRangeFilter` (`src/components/shared/UnifiedDateRangeFilter.tsx`):**
+   - বাংলাদেশ টাইমজোন (`Asia/Dhaka` UTC+06:00) অফসেট-সুরক্ষিত ডেট ফিল্টার।
+   - ইন্টারনাল `<Suspense>` বাউন্ডারি দিয়ে আবৃত, ফলে Next.js App Router-এ কোনো `useSearchParams()` ক্লায়েন্ট বেইলআউট এরর ঘটে না।
+3. **`AdminPagination` (`src/components/shared/AdminPagination.tsx`):**
+   - সুষম বাংলা পেজিনেশন বার ("১-১৫ / মোট ১৫০টি")।
+4. **`CustomSelect` (`src/components/shared/CustomSelect.tsx`):**
+   - React Portal (`createPortal`) ড্রপডাউন যা কোনো টেবিল বা কার্ড কন্টেইনারের `overflow-hidden` দ্বারা কখনো কেটে যায় না।
 
 ---
 

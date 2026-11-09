@@ -1,18 +1,17 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   Trash,
   PencilSimple,
   Funnel,
   Receipt,
-  CaretLeft,
-  CaretRight,
-  ArrowsClockwise,
 } from '@phosphor-icons/react';
 import { formatCurrency } from '@/lib/decimal';
 import { useCashboxStore } from '../useCashboxStore';
 import { ExpenseCategory, DailyExpense } from '../cashbox.types';
+import { AdminPagination } from '@/components/shared/AdminPagination';
+import { DynamicDataTable, ColumnDef } from '@/components/shared/DynamicDataTable';
 
 function getCategoryBadge(cat: ExpenseCategory): { label: string; badgeClass: string } {
   switch (cat) {
@@ -61,14 +60,104 @@ export function ExpenseHistoryTable() {
     }
   };
 
-  const totalExpenseToday = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const columns: ColumnDef<DailyExpense>[] = useMemo(
+    () => [
+      {
+        key: 'time',
+        header: 'সময়',
+        disableToggle: true,
+        cellClassName: 'font-mono tabular-nums text-slate-500 text-xs whitespace-nowrap',
+        renderCell: (expense) => {
+          return new Date(expense.createdAt).toLocaleTimeString('bn-BD', {
+            hour: '2-digit',
+            minute: '2-digit',
+          });
+        },
+        renderFooterCell: () => (
+          <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+            মোট খরচ:
+          </span>
+        ),
+      },
+      {
+        key: 'category',
+        header: 'খাত / ক্যাটাগরি',
+        cellClassName: 'whitespace-nowrap',
+        renderCell: (expense) => {
+          const badge = getCategoryBadge(expense.category);
+          return (
+            <span
+              className={`inline-block px-1.5 py-0.5 rounded-md text-[10px] font-semibold border ${badge.badgeClass}`}
+            >
+              {badge.label}
+            </span>
+          );
+        },
+      },
+      {
+        key: 'description',
+        header: 'খরচের বিবরণ',
+        cellClassName: 'font-medium text-slate-800',
+        renderCell: (expense) => (
+          <div>
+            <span>{expense.description}</span>
+            {expense.note && (
+              <span className="block text-[10px] text-slate-400 font-normal mt-0.5">
+                {expense.note}
+              </span>
+            )}
+          </div>
+        ),
+      },
+      {
+        key: 'amount',
+        header: 'টাকার পরিমাণ',
+        headerClassName: 'text-right',
+        cellClassName: 'text-right font-mono tabular-nums tracking-tight font-bold text-rose-600 text-xs sm:text-sm',
+        footerClassName: 'text-right font-mono tabular-nums tracking-tight font-black text-rose-700 text-xs sm:text-sm',
+        renderCell: (expense) => `-৳${formatCurrency(expense.amount)}`,
+        renderFooterCell: (data) =>
+          `-৳${formatCurrency(
+            data.reduce((sum, e) => sum + (Number(e.amount) || 0), 0)
+          )}`,
+      },
+      {
+        key: 'actions',
+        header: 'অ্যাকশন',
+        headerClassName: 'text-center',
+        cellClassName: 'text-center',
+        disableToggle: true,
+        renderCell: (expense) => (
+          <div className="flex items-center justify-center gap-1 no-row-click">
+            <button
+              type="button"
+              onClick={() => openEditModal(expense)}
+              className="p-1.5 rounded-md border border-slate-200/90 hover:bg-slate-100 active:scale-[0.98] text-slate-500 hover:text-slate-800 transition-[background-color,border-color,transform] duration-150 cursor-pointer shadow-2xs"
+              title="সম্পাদনা করুন"
+            >
+              <PencilSimple size={13} weight="bold" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleDelete(expense.id, expense.description)}
+              className="p-1.5 rounded-md border border-slate-200/90 hover:bg-rose-50 active:scale-[0.98] text-slate-400 hover:text-rose-600 transition-[background-color,border-color,transform] duration-150 cursor-pointer shadow-2xs"
+              title="মুছে ফেলুন"
+            >
+              <Trash size={13} weight="bold" />
+            </button>
+          </div>
+        ),
+      },
+    ],
+    []
+  );
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-3 p-3.5">
-      {/* হেডার ও ক্যাটাগরি ফিল্টার */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200/90 pb-2.5">
+    <div className="space-y-3">
+      {/* ফিল্টার পিলস ও শিরোনাম */}
+      <div className="bg-white rounded-lg border border-slate-200/90 p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
             <Receipt size={16} weight="bold" />
           </div>
           <div>
@@ -76,7 +165,7 @@ export function ExpenseHistoryTable() {
               দোকানের খরচের খাতা ({targetDate})
             </h4>
             <p className="text-[11px] text-slate-500">
-              মোট খরচ: <strong className="font-mono tabular-nums tracking-tight text-red-600 font-bold">৳{formatCurrency(totalExpenseToday)}</strong>
+              ক্যাশ আউট ভাউচার ও দৈনিক ছোট খরচ
             </p>
           </div>
         </div>
@@ -97,10 +186,11 @@ export function ExpenseHistoryTable() {
           ].map((cat) => (
             <button
               key={cat.label}
+              type="button"
               onClick={() => setCategoryFilter(cat.id as ExpenseCategory | undefined)}
-              className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.98] whitespace-nowrap ${
+              className={`px-2 py-0.5 rounded-md text-[11px] font-medium transition-[background-color,color,transform] duration-150 active:scale-[0.98] whitespace-nowrap cursor-pointer ${
                 categoryFilter === cat.id
-                  ? 'bg-slate-900 text-white shadow-[0_1px_2px_rgba(15,23,42,0.1)]'
+                  ? 'bg-slate-900 text-white shadow-2xs'
                   : 'bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200/80'
               }`}
             >
@@ -110,119 +200,27 @@ export function ExpenseHistoryTable() {
         </div>
       </div>
 
-      {/* খরচের টেবিল */}
-      {isLoadingExpenses && expenses.length === 0 ? (
-        <div className="py-12 text-center text-slate-400">
-          <ArrowsClockwise size={22} weight="bold" className="animate-spin mx-auto mb-2 text-slate-600" />
-          <p className="text-xs">খরচের খাতা লোড হচ্ছে...</p>
-        </div>
-      ) : expenses.length === 0 ? (
-        <div className="py-12 text-center text-slate-400">
-          <Receipt size={28} weight="bold" className="mx-auto mb-2 text-slate-300" />
-          <p className="text-xs font-medium text-slate-600">এই তারিখে কোনো খরচ রেকর্ড করা হয়নি</p>
-        </div>
-      ) : (
-        <div className="border border-slate-200/90 rounded-md overflow-hidden shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="bg-slate-50/80 border-b border-slate-200/90 text-slate-600 font-medium">
-                <th className="py-2 px-3">সময়</th>
-                <th className="py-2 px-3">খাত / ক্যাটাগরি</th>
-                <th className="py-2 px-3">খরচের বিবরণ</th>
-                <th className="py-2 px-3.5 text-right">টাকার পরিমাণ</th>
-                <th className="py-2 px-3 text-center">অ্যাকশন</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {expenses.map((expense) => {
-                const badge = getCategoryBadge(expense.category);
-                const timeStr = new Date(expense.createdAt).toLocaleTimeString('bn-BD', {
-                  hour: '2-digit',
-                  minute: '2-digit',
-                });
-
-                return (
-                  <tr key={expense.id} className="hover:bg-slate-50/70 transition-colors">
-                    {/* সময় */}
-                    <td className="py-2 px-3 font-mono tabular-nums text-slate-500 text-xs whitespace-nowrap">
-                      {timeStr}
-                    </td>
-
-                    {/* ক্যাটাগরি */}
-                    <td className="py-2 px-3 whitespace-nowrap">
-                      <span
-                        className={`inline-block px-1.5 py-0.5 rounded-md text-[10px] font-semibold border ${badge.badgeClass}`}
-                      >
-                        {badge.label}
-                      </span>
-                    </td>
-
-                    {/* বিবরণ */}
-                    <td className="py-2 px-3 font-medium text-slate-800">
-                      {expense.description}
-                      {expense.note && (
-                        <span className="block text-[10px] text-slate-400 font-normal">
-                          {expense.note}
-                        </span>
-                      )}
-                    </td>
-
-                    {/* টাকার পরিমাণ */}
-                    <td className="py-2 px-3.5 text-right font-mono tabular-nums tracking-tight font-bold text-red-600">
-                      -৳{formatCurrency(expense.amount)}
-                    </td>
-
-                    {/* অ্যাকশন বাটন */}
-                    <td className="py-2 px-3 text-center">
-                      <div className="flex items-center justify-center gap-1">
-                        <button
-                          onClick={() => openEditModal(expense)}
-                          className="p-1.5 rounded-md border border-slate-200/90 hover:bg-slate-100 active:scale-[0.98] text-slate-500 hover:text-slate-800 transition-[background-color,border-color,transform] duration-150"
-                          title="সম্পাদনা করুন"
-                        >
-                          <PencilSimple size={13} weight="bold" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(expense.id, expense.description)}
-                          className="p-1.5 rounded-md border border-slate-200/90 hover:bg-red-50 active:scale-[0.98] text-slate-400 hover:text-red-600 transition-[background-color,border-color,transform] duration-150"
-                          title="মুছে ফেলুন"
-                        >
-                          <Trash size={13} weight="bold" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {/* পেজিনেশন */}
-      {expensesMeta.totalPages > 1 && (
-        <div className="px-3 py-2 bg-slate-50/80 rounded-md border border-slate-200/90 flex items-center justify-between text-xs text-slate-500">
-          <span>
-            পৃষ্ঠা <strong className="text-slate-800 font-mono tabular-nums">{expensesMeta.page}</strong> / <span className="font-mono tabular-nums">{expensesMeta.totalPages}</span>
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => setExpensesPage(expensesMeta.page - 1)}
-              disabled={expensesMeta.page <= 1 || isLoadingExpenses}
-              className="p-1 border border-slate-200 rounded-md bg-white hover:bg-slate-50 disabled:opacity-40 active:scale-[0.98] transition-[background-color,border-color,transform] duration-150"
-            >
-              <CaretLeft size={14} weight="bold" />
-            </button>
-            <button
-              onClick={() => setExpensesPage(expensesMeta.page + 1)}
-              disabled={expensesMeta.page >= expensesMeta.totalPages || isLoadingExpenses}
-              className="p-1 border border-slate-200 rounded-md bg-white hover:bg-slate-50 disabled:opacity-40 active:scale-[0.98] transition-[background-color,border-color,transform] duration-150"
-            >
-              <CaretRight size={14} weight="bold" />
-            </button>
-          </div>
-        </div>
-      )}
+      {/* ডাইনামিক ডেটাটেবিল */}
+      <DynamicDataTable
+        tableId="cashbox-expenses-table"
+        data={expenses}
+        columns={columns}
+        keyExtractor={(e) => e.id}
+        isLoading={isLoadingExpenses}
+        pagination={
+          expensesMeta.totalPages > 1 ? (
+            <AdminPagination
+              currentPage={expensesMeta.page}
+              totalPages={expensesMeta.totalPages}
+              totalItems={expensesMeta.total}
+              pageSize={expensesMeta.limit}
+              onPageChange={setExpensesPage}
+              itemLabel="খরচ"
+              className="rounded-t-none border-t-0 p-0"
+            />
+          ) : null
+        }
+      />
     </div>
   );
 }

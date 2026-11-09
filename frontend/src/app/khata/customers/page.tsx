@@ -4,12 +4,9 @@ import React, { useEffect } from 'react';
 import Link from 'next/link';
 import {
   Storefront,
-  ArrowLeft,
-  Users,
   AddressBook,
   UserPlus,
-  CaretLeft,
-  CaretRight,
+  ArrowsClockwise,
 } from '@phosphor-icons/react';
 import { useCustomerKhataStore } from '@/features/customer-khata/useCustomerKhataStore';
 import { CustomerKpiSummary } from '@/features/customer-khata/components/CustomerKpiSummary';
@@ -20,6 +17,8 @@ import { DueCollectionModal } from '@/features/customer-khata/components/DueColl
 import { CustomerLedgerDrawer } from '@/features/customer-khata/components/CustomerLedgerDrawer';
 import { CustomerFormModal } from '@/features/customer-khata/components/CustomerFormModal';
 import { CustomerAdjustmentModal } from '@/features/customer-khata/components/CustomerAdjustmentModal';
+import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
+import { AdminPagination } from '@/components/shared/AdminPagination';
 
 export default function CustomerKhataPage() {
   const { customers, meta, isLoading, fetchCustomers, openModal, setPage } =
@@ -50,53 +49,61 @@ export default function CustomerKhataPage() {
   }, [openModal]);
 
   return (
-    <div className="min-h-screen bg-slate-50/50 flex flex-col text-slate-900">
-      {/* গ্লোবাল টপবার */}
-      <header className="sticky top-0 z-30 bg-white border-b border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-13 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link
-              href="/"
-              className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-[background-color,color] duration-150"
-              title="ড্যাশবোর্ডে ফিরে যান"
-            >
-              <ArrowLeft size={16} weight="bold" />
-            </Link>
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-md bg-slate-900 text-white flex items-center justify-center shrink-0">
-                <AddressBook size={18} weight="bold" />
-              </div>
-              <div>
-                <h1 className="font-semibold text-slate-900 text-xs sm:text-sm leading-tight">
-                  কাস্টমার খাতা ও বাকি রেজিস্টার
-                </h1>
-                <p className="text-[11px] text-slate-500">
-                  মরিচপট্টি, ফেনী বাজার — রানিং খতিয়ান ও নগদ উশুল
-                </p>
-              </div>
-            </div>
-          </div>
+    <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans pb-16">
+      {/* ১. স্টিকি পেজ হেডার (AdminPageHeader) */}
+      <div className="bg-white border-b border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+          <AdminPageHeader
+            title="কাস্টমার খাতা ও বাকি রেজিস্টার"
+            subtitle="মরিচপট্টি, ফেনী বাজার — রানিং খতিয়ান, নগদ উশুল ও বাকি সমন্বয়"
+            backHref="/"
+            backTitle="ড্যাশবোর্ডে ফিরে যান"
+            icon={<AddressBook size={16} weight="bold" />}
+            badge={
+              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                খাতা
+              </span>
+            }
+            actions={
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => fetchCustomers()}
+                  disabled={isLoading}
+                  className="px-2.5 py-1.5 rounded-md border border-slate-200/90 bg-white hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 disabled:opacity-50 cursor-pointer shadow-2xs"
+                  title="তালিকা রিফ্রেশ করুন"
+                >
+                  <ArrowsClockwise
+                    size={14}
+                    weight="bold"
+                    className={isLoading ? 'animate-spin' : ''}
+                  />
+                  <span className="hidden sm:inline">রিফ্রেশ</span>
+                </button>
 
-          <div className="flex items-center gap-2">
-            <Link
-              href="/pos"
-              className="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium flex items-center gap-1.5 transition-[background-color] duration-150 border border-slate-200/80 active:scale-[0.98]"
-            >
-              <Storefront size={15} weight="bold" />
-              <span className="hidden sm:inline">কাউন্টার বিলিং</span>
-            </Link>
-            <button
-              onClick={() => openModal('create')}
-              className="px-3.5 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium flex items-center gap-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.08)] transition-[background-color,transform] duration-150 active:scale-[0.98]"
-            >
-              <UserPlus size={15} weight="bold" />
-              <span>+ নতুন খাতা</span>
-            </button>
-          </div>
+                <Link
+                  href="/pos"
+                  className="px-2.5 py-1.5 rounded-md bg-white border border-slate-200/90 hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150"
+                >
+                  <Storefront size={14} weight="bold" />
+                  <span className="hidden sm:inline">কাউন্টার বিলিং</span>
+                </Link>
+
+                <button
+                  type="button"
+                  onClick={() => openModal('create')}
+                  className="px-2.5 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.08)] transition-[background-color,transform] duration-150 active:scale-[0.98] cursor-pointer"
+                >
+                  <UserPlus size={14} weight="bold" />
+                  <span>+ নতুন খাতা</span>
+                </button>
+              </div>
+            }
+          />
         </div>
-      </header>
+      </div>
 
-      {/* মূল কন্টেন্ট এরিয়া */}
+      {/* মূল কন্টেন্ট ক্যানভাস */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-3.5">
         {/* ১. টপ KPI সামারি */}
         <CustomerKpiSummary />
@@ -128,26 +135,15 @@ export default function CustomerKhataPage() {
 
               {/* মোবাইল পেজিনেশন */}
               {meta.totalPages > 1 && (
-                <div className="p-3 bg-white rounded-lg border border-slate-200/90 flex items-center justify-between text-xs text-slate-500 font-mono tabular-nums tracking-tight">
-                  <span>
-                    পৃষ্ঠা <strong className="text-slate-900">{meta.page}</strong> / {meta.totalPages}
-                  </span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => setPage(meta.page - 1)}
-                      disabled={meta.page <= 1}
-                      className="p-1.5 border border-slate-200 rounded-md bg-slate-50 disabled:opacity-40 transition-colors active:scale-[0.96]"
-                    >
-                      <CaretLeft size={15} weight="bold" />
-                    </button>
-                    <button
-                      onClick={() => setPage(meta.page + 1)}
-                      disabled={meta.page >= meta.totalPages}
-                      className="p-1.5 border border-slate-200 rounded-md bg-slate-50 disabled:opacity-40 transition-colors active:scale-[0.96]"
-                    >
-                      <CaretRight size={15} weight="bold" />
-                    </button>
-                  </div>
+                <div className="bg-white rounded-lg border border-slate-200/90 p-2 shadow-2xs">
+                  <AdminPagination
+                    currentPage={meta.page}
+                    totalPages={meta.totalPages}
+                    totalItems={meta.total}
+                    pageSize={meta.limit}
+                    onPageChange={setPage}
+                    itemLabel="কাস্টমার"
+                  />
                 </div>
               )}
             </>

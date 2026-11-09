@@ -114,13 +114,61 @@ export class SalesRepository extends BaseRepository {
       ...params,
       include: {
         customer: {
-          select: { id: true, name: true, phone: true },
+          select: { id: true, name: true, phone: true, address: true },
         },
         items: {
-          select: { id: true, unitName: true, quantity: true, unitPrice: true, subTotal: true },
+          select: {
+            id: true,
+            unitName: true,
+            quantity: true,
+            baseQuantity: true,
+            unitPrice: true,
+            subTotal: true,
+            variant: {
+              select: {
+                id: true,
+                variantName: true,
+                baseUnitName: true,
+                product: {
+                  select: { id: true, name: true, banglaName: true },
+                },
+              },
+            },
+          },
         },
       },
     });
+  }
+
+  async updateStatus(
+    id: string,
+    status: Prisma.EnumSaleStatusFilter | any,
+    tx?: Prisma.TransactionClient
+  ): Promise<SaleWithDetails> {
+    return (await this.getDb(tx).sale.update({
+      where: { id },
+      data: { status },
+      include: {
+        items: {
+          include: {
+            variant: {
+              select: {
+                id: true,
+                variantName: true,
+                sku: true,
+                barcode: true,
+                baseUnitName: true,
+                allowDecimalQty: true,
+                product: {
+                  select: { id: true, name: true, banglaName: true },
+                },
+              },
+            },
+          },
+        },
+        customer: true,
+      },
+    })) as unknown as SaleWithDetails;
   }
 
   async count(where?: Prisma.SaleWhereInput): Promise<number> {

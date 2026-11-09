@@ -10,6 +10,7 @@ import {
   Receipt,
   ArrowRight,
   Storefront,
+  FileText,
 } from '@phosphor-icons/react/dist/ssr';
 import { KpiCard } from '@/components/ui/KpiCard';
 import { StoreShutterHero } from '@/components/StoreShutterHero';
@@ -175,7 +176,7 @@ export default async function DashboardPage() {
             দোকানের মূল মডিউলসমূহ (Quick Management Portals)
           </h2>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
             <Link
               href="/pos"
               className="bg-white border border-slate-200/90 hover:border-slate-300 shadow-[0_1px_2px_rgba(15,23,42,0.02)] rounded-lg p-3.5 transition-[border-color,transform] duration-150 active:scale-[0.98] flex flex-col items-center text-center group cursor-pointer"
@@ -185,6 +186,17 @@ export default async function DashboardPage() {
               </div>
               <h3 className="font-semibold text-xs sm:text-sm text-slate-900">পিওএস কাউন্টার</h3>
               <p className="text-[11px] text-slate-500 mt-0.5">ক্যাশ ও বাকি বিক্রি</p>
+            </Link>
+
+            <Link
+              href="/sales"
+              className="bg-white border border-slate-200/90 hover:border-slate-300 shadow-[0_1px_2px_rgba(15,23,42,0.02)] rounded-lg p-3.5 transition-[border-color,transform] duration-150 active:scale-[0.98] flex flex-col items-center text-center group cursor-pointer"
+            >
+              <div className="w-10 h-10 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 flex items-center justify-center transition-colors duration-150 mb-2">
+                <FileText size={19} weight="bold" />
+              </div>
+              <h3 className="font-semibold text-xs sm:text-sm text-slate-900">মেমো রেজিস্টার</h3>
+              <p className="text-[11px] text-slate-500 mt-0.5">অর্ডার হিস্ট্রি ও রসিদ</p>
             </Link>
 
             <Link

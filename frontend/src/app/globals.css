@@ -76,18 +76,34 @@ select:focus-visible {
 
 /* 58mm / 80mm Thermal Receipt Directives */
 @media print {
-  /* Suppress all administrative UI chrome */
-  aside, header, nav, footer, .no-print, [class*="print:hidden"] {
+  @page {
+    size: auto;
+    margin: 0mm;
+  }
+
+  /* Suppress all administrative UI chrome & backdrops */
+  aside, header, nav, footer, .no-print, [class*="print:hidden"], .fixed.inset-0.bg-slate-900\/50 {
     display: none !important;
   }
-  body, main {
+
+  html, body, main {
     height: auto !important;
+    min-height: auto !important;
     overflow: visible !important;
     background: #FFFFFF !important;
     color: #000000 !important;
     margin: 0 !important;
     padding: 0 !important;
   }
+
+  /* Unpin modal to print cleanly on thermal slip roll */
+  .fixed.inset-0 {
+    position: static !important;
+    padding: 0 !important;
+    background: transparent !important;
+    display: block !important;
+  }
+
   /* Force solid 100% black on thermal printers */
   .thermal-receipt,
   .thermal-receipt * {
@@ -97,5 +113,10 @@ select:focus-visible {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     box-shadow: none !important;
+  }
+
+  .thermal-receipt {
+    margin: 0 auto !important;
+    padding: 2mm 3mm !important;
   }
 }

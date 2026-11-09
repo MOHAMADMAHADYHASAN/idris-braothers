@@ -1,4 +1,4 @@
-import { Prisma, SaleType, CustomerLedgerType } from '@prisma/client';
+import { Prisma, SaleType, CustomerLedgerType, SaleStatus } from '@prisma/client';
 import { AppError } from '../../common/errors/AppError';
 import { prisma } from '../../config/prisma';
 import { salesRepository } from './sales.repository';
@@ -6,6 +6,7 @@ import { inventoryRepository } from '../inventory/inventory.repository';
 import { customerRepository } from '../customers/customers.repository';
 import { getPagination, buildPaginationMeta, PaginationParams } from '../../common/utils/pagination';
 import { getDayBoundaries } from '../../common/utils/dateUtils';
+import { resolveDateFilter, ResolvedDateRange } from '../../common/utils/dateFilter';
 import { CreateSaleInput } from './sales.validation';
 
 export class SalesService {
@@ -236,11 +237,13 @@ export class SalesService {
 
   /**
    * List sales invoices with filtering & pagination
+   * Strictly timezone-safe (Asia/Dhaka UTC+06:00) with automatic previous period comparison
    */
   async getSales(query: {
     customerId?: string;
     saleType?: SaleType;
     invoiceNumber?: string;
+    filter?: string;
     startDate?: string;
     endDate?: string;
   } & PaginationParams) {
@@ -260,13 +263,19 @@ export class SalesService {
       where.invoiceNumber = { contains: query.invoiceNumber, mode: 'insensitive' };
     }
 
-    if (query.startDate || query.endDate) {
-      where.createdAt = {};
-      if (query.startDate) {
-        where.createdAt.gte = new Date(new Date(query.startDate).setHours(0, 0, 0, 0));
-      }
-      if (query.endDate) {
-        where.createdAt.lte = new Date(new Date(query.endDate).setHours(23, 59, 59, 999));
+    let dateRange: ResolvedDateRange | null = null;
+    if (query.filter || query.startDate || query.endDate) {
+      dateRange = resolveDateFilter({
+        filter: query.filter,
+        startDate: query.startDate,
+        endDate: query.endDate,
+      });
+
+      if (dateRange.filter !== 'all') {
+        where.createdAt = {
+          gte: dateRange.startDate,
+          lte: dateRange.endDate,
+        };
       }
     }
 
@@ -280,17 +289,83 @@ export class SalesService {
       }),
     ]);
 
+    // Optional period growth comparison for dashboard/analytics
+    let periodComparison: {
+      currentRevenue: number;
+      prevRevenue: number;
+      growthPercent: number | null;
+      currentOrders: number;
+      prevOrders: number;
+    } | null = null;
+
+    if (dateRange && dateRange.filter !== 'all') {
+      const prevWhere: Prisma.SaleWhereInput = {
+        ...where,
+        createdAt: {
+          gte: dateRange.prevStartDate,
+          lte: dateRange.prevEndDate,
+        },
+        status: SaleStatus.COMPLETED,
+      };
+
+      const [currentAgg, prevAgg] = await Promise.all([
+        prisma.sale.aggregate({
+          where: { ...where, status: SaleStatus.COMPLETED },
+          _sum: { grandTotal: true },
+          _count: { id: true },
+        }),
+        prisma.sale.aggregate({
+          where: prevWhere,
+          _sum: { grandTotal: true },
+          _count: { id: true },
+        }),
+      ]);
+
+      const currentRev = Number(currentAgg._sum.grandTotal || 0);
+      const prevRev = Number(prevAgg._sum.grandTotal || 0);
+      let growthPercent: number | null = null;
+      if (prevRev > 0) {
+        growthPercent = Number((((currentRev - prevRev) / prevRev) * 100).toFixed(1));
+      }
+
+      periodComparison = {
+        currentRevenue: currentRev,
+        prevRevenue: prevRev,
+        growthPercent,
+        currentOrders: currentAgg._count.id,
+        prevOrders: prevAgg._count.id,
+      };
+    }
+
     return {
       sales,
       meta: buildPaginationMeta(total, page, limit),
+      dateRange: dateRange
+        ? {
+            filter: dateRange.filter,
+            startYmd: dateRange.startYmd,
+            endYmd: dateRange.endYmd,
+            numDays: dateRange.numDays,
+          }
+        : null,
+      periodComparison,
     };
   }
 
   /**
-   * Get single sale invoice by ID
+   * Get single sale invoice by ID or Invoice Number
    */
   async getSaleById(id: string) {
-    const sale = await salesRepository.findById(id);
+    if (!id || id === 'undefined') {
+      throw new AppError('ইনভয়েস আইডি বা মেমো নম্বর প্রদান করা আবশ্যক', 400);
+    }
+
+    let sale = await salesRepository.findById(id);
+
+    // Fallback search by invoiceNumber if not found by UUID
+    if (!sale) {
+      sale = await salesRepository.findByInvoiceNumber(id);
+    }
 
     if (!sale) {
       throw new AppError('Sale invoice not found', 404);
@@ -372,6 +447,269 @@ export class SalesService {
       },
       footerNote: 'ধন্যবাদ, আবার আসবেন!',
     };
+  }
+
+  /**
+   * Cancel / Void a completed sale invoice.
+   * Atomic operations inside Prisma $transaction:
+   * 1. Check sale exists and is not already CANCELLED
+   * 2. Revert inventory: add back baseQuantity to each ProductVariant
+   * 3. If credit sale with customer, decrement customer's currentDue and record adjustment ledger entry
+   * 4. Update sale status to CANCELLED and save cancellation reason
+   */
+  async cancelSale(id: string, reason?: string) {
+    const sale = await salesRepository.findById(id);
+
+    if (!sale) {
+      throw new AppError('Sale invoice not found', 404);
+    }
+
+    if (sale.status === SaleStatus.CANCELLED) {
+      throw new AppError('Sale invoice is already cancelled', 400);
+    }
+
+    return await prisma.$transaction(async (tx) => {
+      // 1. Revert inventory stock for all items
+      for (const item of sale.items) {
+        await inventoryRepository.adjustStock(item.variantId, item.baseQuantity, 'ADD', tx);
+      }
+
+      // 2. Adjust customer dues if this invoice had unpaid credit
+      let updatedCustomerDue = null;
+      if (sale.customerId && sale.dueAmount.greaterThan(0)) {
+        // Decrease customer due by dueAmount
+        const updatedCustomer = await customerRepository.updateDue(
+          sale.customerId,
+          sale.dueAmount.negated(),
+          tx
+        );
+        updatedCustomerDue = updatedCustomer.currentDue;
+
+        await customerRepository.createLedgerEntry(
+          {
+            customer: { connect: { id: sale.customerId } },
+            sale: { connect: { id: sale.id } },
+            entryType: CustomerLedgerType.ADJUSTMENT,
+            debit: new Prisma.Decimal(0),
+            credit: sale.dueAmount,
+            balanceAfter: updatedCustomerDue,
+            note: `মেমো বাতিলজনিত কারণে বকেয়া সমন্বয় (#${sale.invoiceNumber})${reason ? `: ${reason}` : ''}`,
+          },
+          tx
+        );
+      }
+
+      // 3. Mark sale as CANCELLED
+      const noteUpdate = reason ? `${sale.note ? sale.note + ' | ' : ''}বাতিলের কারণ: ${reason}` : sale.note;
+      const cancelledSale = await tx.sale.update({
+        where: { id: sale.id },
+        data: {
+          status: SaleStatus.CANCELLED,
+          note: noteUpdate,
+        },
+        include: {
+          items: {
+            include: {
+              variant: {
+                select: {
+                  id: true,
+                  variantName: true,
+                  sku: true,
+                  barcode: true,
+                  baseUnitName: true,
+                  allowDecimalQty: true,
+                  product: {
+                    select: { id: true, name: true, banglaName: true },
+                  },
+                },
+              },
+            },
+          },
+          customer: true,
+        },
+      });
+
+      return {
+        sale: cancelledSale,
+        customerDue: updatedCustomerDue,
+      };
+    });
+  }
+
+  /**
+   * Process Partial / Full Sales Return
+   * 1. Validate returned items & quantities (must not exceed sold quantities)
+   * 2. Transactionally add returned baseQuantity back to inventory stock
+   * 3. Update or adjust SaleItem line quantities and sub-totals
+   * 4. Deduct refund from customer dues (if credit) or cash paid
+   * 5. Record CustomerLedger adjustment entry if customer due was reduced
+   */
+  async returnSaleItems(data: {
+    saleId: string;
+    items: { saleItemId: string; returnQuantity: number }[];
+    refundMethod: 'CASH' | 'CUSTOMER_DUE_ADJUSTMENT';
+    reason?: string;
+  }) {
+    if (!data.items || data.items.length === 0) {
+      throw new AppError('কমপক্ষে একটি পণ্য ফেরত হিসেবে নির্বাচন করতে হবে', 400);
+    }
+
+    const sale = await salesRepository.findById(data.saleId);
+    if (!sale) {
+      throw new AppError('Sale invoice not found', 404);
+    }
+
+    if (sale.status === SaleStatus.CANCELLED) {
+      throw new AppError('বাতিলকৃত মেমো থেকে পণ্য ফেরত নেওয়া সম্ভব নয়', 400);
+    }
+
+    return await prisma.$transaction(async (tx) => {
+      let totalRefundAmount = new Prisma.Decimal(0);
+      const returnLogMessages: string[] = [];
+
+      for (const reqItem of data.items) {
+        const saleItem = sale.items.find((i) => i.id === reqItem.saleItemId);
+        if (!saleItem) {
+          throw new AppError(`আইটেমটি এই মেমোর অন্তর্ভুক্ত নয় (${reqItem.saleItemId})`, 400);
+        }
+
+        const returnQty = new Prisma.Decimal(reqItem.returnQuantity);
+        if (returnQty.lessThanOrEqualTo(0)) {
+          continue; // skip zero quantities
+        }
+
+        if (returnQty.greaterThan(saleItem.quantity)) {
+          throw new AppError(
+            `ফেরতের পরিমাণ (${returnQty}) বিক্রিত পরিমাণের (${saleItem.quantity}) চেয়ে বেশি হতে পারে না`,
+            400
+          );
+        }
+
+        // Base unit quantity to return to inventory
+        const returnBaseQty = returnQty.mul(saleItem.conversionFactor);
+        await inventoryRepository.adjustStock(saleItem.variantId, returnBaseQty, 'ADD', tx);
+
+        // Refund calculation for this item
+        const itemRefundAmount = returnQty.mul(saleItem.unitPrice);
+        totalRefundAmount = totalRefundAmount.add(itemRefundAmount);
+
+        // Remaining quantities for this line item
+        const newQty = saleItem.quantity.sub(returnQty);
+        const newBaseQty = saleItem.baseQuantity.sub(returnBaseQty);
+        const newSubTotal = saleItem.subTotal.sub(itemRefundAmount);
+
+        await tx.saleItem.update({
+          where: { id: saleItem.id },
+          data: {
+            quantity: newQty,
+            baseQuantity: newBaseQty,
+            subTotal: newSubTotal,
+          },
+        });
+
+        const prodName = saleItem.variant?.product?.banglaName || saleItem.variant?.product?.name || saleItem.unitName;
+        returnLogMessages.push(
+          `${prodName} ${returnQty.toString()} ${saleItem.unitName} (৳${itemRefundAmount.toFixed(2)})`
+        );
+      }
+
+      if (totalRefundAmount.equals(0)) {
+        throw new AppError('ফেরতের জন্য কমপক্ষে একটি পণ্যের পরিমাণ ১ বা তার বেশি হতে হবে', 400);
+      }
+
+      // Financial adjustments
+      const newSubTotal = sale.subTotal.sub(totalRefundAmount);
+      const newGrandTotal = Prisma.Decimal.max(new Prisma.Decimal(0), newSubTotal.sub(sale.discount));
+
+      let newPaidAmount = sale.paidAmount;
+      let newDueAmount = sale.dueAmount;
+      let updatedCustomerDue: Prisma.Decimal | null = null;
+
+      if (data.refundMethod === 'CUSTOMER_DUE_ADJUSTMENT' && sale.customerId) {
+        // Reduce customer ledger due
+        const customer = await customerRepository.findById(sale.customerId, tx);
+        if (customer) {
+          const dueDeduction = Prisma.Decimal.min(totalRefundAmount, customer.currentDue);
+          if (dueDeduction.greaterThan(0)) {
+            const updatedCustomer = await customerRepository.updateDue(
+              sale.customerId,
+              dueDeduction.negated(),
+              tx
+            );
+            updatedCustomerDue = updatedCustomer.currentDue;
+
+            await customerRepository.createLedgerEntry(
+              {
+                customer: { connect: { id: sale.customerId } },
+                sale: { connect: { id: sale.id } },
+                entryType: CustomerLedgerType.ADJUSTMENT,
+                debit: new Prisma.Decimal(0),
+                credit: dueDeduction,
+                balanceAfter: updatedCustomerDue,
+                note: `পণ্য ফেরতজনিত বকেয়া সমন্বয় (মেমো #${sale.invoiceNumber}): ${returnLogMessages.join(', ')}`,
+              },
+              tx
+            );
+          }
+        }
+
+        // Adjust due on this sale
+        newDueAmount = Prisma.Decimal.max(new Prisma.Decimal(0), sale.dueAmount.sub(totalRefundAmount));
+      } else {
+        // CASH refund: deducted from store's paid cash on this memo
+        newPaidAmount = Prisma.Decimal.max(new Prisma.Decimal(0), sale.paidAmount.sub(totalRefundAmount));
+      }
+
+      // Check if all items in the invoice are now 0
+      const remainingItems = await tx.saleItem.findMany({
+        where: { saleId: sale.id },
+      });
+      const allZero = remainingItems.every((i) => i.quantity.equals(0));
+      const nextStatus = allZero ? SaleStatus.CANCELLED : sale.status;
+
+      const returnSummaryNote = `[ফেরত: ${returnLogMessages.join(', ')} | রিফান্ড ৳${totalRefundAmount.toFixed(2)} (${
+        data.refundMethod === 'CASH' ? 'নগদ রিফান্ড' : 'বকেয়া সমন্বয়'
+      })${data.reason ? ` - কারণ: ${data.reason}` : ''}]`;
+
+      const updatedSale = await tx.sale.update({
+        where: { id: sale.id },
+        data: {
+          subTotal: newSubTotal,
+          grandTotal: newGrandTotal,
+          paidAmount: newPaidAmount,
+          dueAmount: newDueAmount,
+          status: nextStatus,
+          note: sale.note ? `${sale.note} | ${returnSummaryNote}` : returnSummaryNote,
+        },
+        include: {
+          items: {
+            include: {
+              variant: {
+                select: {
+                  id: true,
+                  variantName: true,
+                  sku: true,
+                  barcode: true,
+                  baseUnitName: true,
+                  allowDecimalQty: true,
+                  product: {
+                    select: { id: true, name: true, banglaName: true },
+                  },
+                },
+              },
+            },
+          },
+          customer: true,
+        },
+      });
+
+      return {
+        sale: updatedSale,
+        totalRefundAmount,
+        refundMethod: data.refundMethod,
+        customerDue: updatedCustomerDue,
+      };
+    });
   }
 }
 

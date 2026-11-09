@@ -33,9 +33,12 @@ interface ProductState {
   selectedCategoryId: string | null;
   selectedBrandId: string | null;
   lowStockOnly: boolean;
+  page: number;
+  limit: number;
 
   // Actions
   fetchProducts: (params?: ProductFilterParams) => Promise<void>;
+  setPage: (page: number) => void;
   fetchProductById: (id: string) => Promise<Product | null>;
   fetchVariantById: (variantId: string) => Promise<ProductVariant | null>;
   fetchProductByBarcode: (barcode: string) => Promise<{ variant: ProductVariant; matchedUnit?: VariantUnit } | null>;
@@ -77,22 +80,39 @@ export const useProductStore = create<ProductState>((set, get) => ({
   selectedCategoryId: null,
   selectedBrandId: null,
   lowStockOnly: false,
+  page: 1,
+  limit: 15,
 
   fetchProducts: async (params) => {
     set({ isLoading: true, error: null });
     try {
+      const state = get();
+      const targetPage = params?.page ?? state.page;
+      const targetLimit = params?.limit ?? state.limit;
       const mergedParams: ProductFilterParams = {
-        search: get().searchQuery || undefined,
-        categoryId: get().selectedCategoryId || undefined,
-        brandId: get().selectedBrandId || undefined,
-        lowStockOnly: get().lowStockOnly || undefined,
+        page: targetPage,
+        limit: targetLimit,
+        search: params?.search !== undefined ? params.search : (state.searchQuery || undefined),
+        categoryId: params?.categoryId !== undefined ? params.categoryId : (state.selectedCategoryId || undefined),
+        brandId: params?.brandId !== undefined ? params.brandId : (state.selectedBrandId || undefined),
+        lowStockOnly: params?.lowStockOnly !== undefined ? params.lowStockOnly : (state.lowStockOnly || undefined),
         ...params,
       };
       const { products, meta } = await productService.getProducts(mergedParams);
-      set({ products, pagination: meta || null, isLoading: false });
+      set({
+        products,
+        pagination: meta || null,
+        page: targetPage,
+        isLoading: false,
+      });
     } catch (err: any) {
       set({ error: err.message || 'পণ্য তালিকা লোড করতে সমস্যা হয়েছে', isLoading: false });
     }
+  },
+
+  setPage: (page: number) => {
+    set({ page });
+    get().fetchProducts({ page });
   },
 
   fetchProductById: async (id: string) => {
@@ -303,10 +323,10 @@ export const useProductStore = create<ProductState>((set, get) => ({
     }
   },
 
-  setSearchQuery: (searchQuery) => set({ searchQuery }),
-  setSelectedCategoryId: (selectedCategoryId) => set({ selectedCategoryId }),
-  setSelectedBrandId: (selectedBrandId) => set({ selectedBrandId }),
-  setLowStockOnly: (lowStockOnly) => set({ lowStockOnly }),
+  setSearchQuery: (searchQuery) => set({ searchQuery, page: 1 }),
+  setSelectedCategoryId: (selectedCategoryId) => set({ selectedCategoryId, page: 1 }),
+  setSelectedBrandId: (selectedBrandId) => set({ selectedBrandId, page: 1 }),
+  setLowStockOnly: (lowStockOnly) => set({ lowStockOnly, page: 1 }),
   setSelectedProduct: (selectedProduct) => set({ selectedProduct }),
   clearError: () => set({ error: null }),
 }));

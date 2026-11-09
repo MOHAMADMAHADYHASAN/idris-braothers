@@ -56,6 +56,8 @@ interface PurchaseState {
 
   // Actions - History
   setFilter: (key: keyof PurchaseFilterParams, val: any) => void;
+  setDateRange: (start?: string, end?: string) => void;
+  setPage: (page: number) => void;
   fetchPurchases: () => Promise<void>;
   openDetailModal: (purchase: Purchase) => void;
   closeDetailModal: () => void;
@@ -214,6 +216,24 @@ export const usePurchaseStore = create<PurchaseState>((set, get) => ({
   setFilter: (key, val) => {
     set((state) => ({
       filters: { ...state.filters, [key]: val, page: 1 },
+    }));
+    get().fetchPurchases();
+  },
+
+  setDateRange: (start?: string, end?: string) => {
+    const state = get();
+    if (state.filters.startDate === start && state.filters.endDate === end) {
+      return;
+    }
+    set((s) => ({
+      filters: { ...s.filters, startDate: start, endDate: end, page: 1 },
+    }));
+    get().fetchPurchases();
+  },
+
+  setPage: (page: number) => {
+    set((s) => ({
+      filters: { ...s.filters, page },
     }));
     get().fetchPurchases();
   },

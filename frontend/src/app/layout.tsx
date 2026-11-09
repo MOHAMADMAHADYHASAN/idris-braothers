@@ -29,9 +29,13 @@ export default function RootLayout({
   return (
     <html
       lang="bn"
+      suppressHydrationWarning
       className={`${notoSansBengali.variable} ${jetbrainsMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-surface-canvas text-ink-primary">
+      <body
+        suppressHydrationWarning
+        className="min-h-full flex flex-col bg-surface-canvas text-ink-primary"
+      >
         {children}
       </body>
     </html>

@@ -48,6 +48,8 @@ export const API_ENDPOINTS = {
     BASE: `${API_BASE_URL}/sales`,
     BY_ID: (id: string) => `${API_BASE_URL}/sales/${id}`,
     RECEIPT: (id: string) => `${API_BASE_URL}/sales/${id}/receipt`,
+    CANCEL: (id: string) => `${API_BASE_URL}/sales/${id}/cancel`,
+    RETURN: (id: string) => `${API_BASE_URL}/sales/${id}/return`,
   },
 
   // Purchases & Supplier Challans (On-the-fly Carton & Replacement Cost)

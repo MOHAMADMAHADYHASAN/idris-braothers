@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, ShoppingCart, GridFour } from '@phosphor-icons/react';
+import { ArrowLeft, ShoppingCart, GridFour, Receipt, Barcode } from '@phosphor-icons/react';
 import { usePosStore } from '@/features/pos/usePosStore';
 import { PosHeaderModeBar } from '@/components/ui/PosHeaderModeBar';
 import { PosProductCatalog } from '@/features/pos/components/PosProductCatalog';
@@ -10,9 +10,12 @@ import { PosCartTable } from '@/features/pos/components/PosCartTable';
 import { PosSettlementPanel } from '@/features/pos/components/PosSettlementPanel';
 import { ThermalReceipt } from '@/components/shared/ThermalReceipt';
 import { ThermalReceiptData } from '@/features/pos/pos.types';
+import { useBarcodeScanner } from '@/features/pos/hooks/useBarcodeScanner';
+import { BarcodeScanNotification } from '@/features/pos/components/BarcodeScanNotification';
 
 export default function PosPage() {
   const { saleType, setSaleType, cart, fetchThermalReceipt, getGrandTotal } = usePosStore();
+  const { lastScan, isScannerReady, dismissScanFeedback } = useBarcodeScanner();
 
   const [mobileTab, setMobileTab] = useState<'catalog' | 'settlement'>('catalog');
   const [activeThermalReceipt, setActiveThermalReceipt] = useState<ThermalReceiptData | null>(null);
@@ -39,6 +42,10 @@ export default function PosPage() {
   }, []);
 
   const handleSaleSuccess = async (saleId: string) => {
+    if (!saleId) {
+      console.warn('handleSaleSuccess called without a valid saleId');
+      return;
+    }
     try {
       const receipt = await fetchThermalReceipt(saleId);
       setActiveThermalReceipt(receipt);
@@ -80,8 +87,27 @@ export default function PosPage() {
           />
         </div>
 
-        {/* Cart Quick Status Pill */}
+        {/* Cart Quick Status Pill & Sales Register */}
         <div className="flex items-center gap-2">
+          {/* Hardware Barcode Scanner Status Indicator */}
+          <div
+            className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-50/80 border border-emerald-200/90 text-emerald-800 text-[11px] font-medium"
+            title="ইউএসবি বা ব্লুটুথ বারকোড স্ক্যানার গান সক্রিয়। যেকোনো পণ্য সরাসরি স্ক্যান করুন।"
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
+            <Barcode size={13} weight="bold" />
+            <span>স্ক্যানার প্রস্তুত</span>
+          </div>
+
+          <Link
+            href="/sales"
+            className="px-2.5 py-1.5 rounded-md border border-slate-200/90 hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5 active:scale-[0.98] transition-[background-color,border-color,transform] duration-150"
+            title="বিগত বিক্রয় মেমো খাতা ও হিস্ট্রি"
+          >
+            <Receipt size={14} weight="bold" className="text-slate-500" />
+            <span className="hidden sm:inline">মেমো খাতা</span>
+          </Link>
+
           <div className="text-right hidden sm:block">
             <span className="text-[10px] text-slate-500 block font-medium">মোট বিল:</span>
             <span className="font-bold text-xs sm:text-sm text-slate-900 font-mono tabular-nums tracking-tight">
@@ -168,6 +194,12 @@ export default function PosPage() {
           onClose={() => setActiveThermalReceipt(null)}
         />
       )}
+
+      {/* 4. Global Barcode Fast Scan Toast Notification */}
+      <BarcodeScanNotification
+        scan={lastScan}
+        onDismiss={dismissScanFeedback}
+      />
     </div>
   );
 }
