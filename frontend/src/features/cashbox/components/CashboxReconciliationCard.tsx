@@ -6,9 +6,7 @@ import {
   ArrowsClockwise,
   CheckCircle,
   Warning,
-  Coins,
   Receipt,
-  Truck,
   ArrowDownLeft,
   ArrowUpRight,
 } from '@phosphor-icons/react';
@@ -49,80 +47,80 @@ export function CashboxReconciliationCard() {
   const mismatch = countedTotal - netCashInHand;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-start">
       {/* বাঁয়ে: ইনফ্লো ও আউটফ্লোর বিস্তারিত অডিট হিসাব (৭ কলাম) */}
-      <div className="lg:col-span-7 bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 shadow-xs space-y-4">
-        <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+      <div className="lg:col-span-7 bg-white rounded-lg border border-slate-200/90 p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-3.5">
+        <div className="border-b border-slate-200/90 pb-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 flex items-center justify-center">
-              <Receipt size={18} weight="bold" />
+            <div className="w-7 h-7 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center">
+              <Receipt size={16} weight="bold" />
             </div>
             <div>
-              <h3 className="font-bold text-xs sm:text-sm text-ink-primary">
+              <h3 className="font-bold text-xs sm:text-sm text-slate-900">
                 ক্যাশ ইনফ্লো বনাম আউটফ্লো বিস্তারিত বিবরণী
               </h3>
-              <p className="text-[11px] text-ink-muted">আজকের প্রতিটি খাতের নগদ আদান-প্রদান</p>
+              <p className="text-[11px] text-slate-500">আজকের প্রতিটি খাতের নগদ আদান-প্রদান</p>
             </div>
           </div>
         </div>
 
         {/* ইনফ্লো বিবরণী */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1">
-            <ArrowDownLeft size={14} weight="bold" />
+            <ArrowDownLeft size={13} weight="bold" />
             <span>নগদ গ্রহণ (Cash Inflow Breakdown)</span>
           </div>
-          <div className="bg-emerald-50/40 rounded-xl p-3 border border-emerald-100 space-y-2 text-xs">
+          <div className="bg-slate-50/80 rounded-md p-3 border border-slate-200/90 space-y-2 text-xs">
             <div className="flex items-center justify-between text-slate-700">
               <span>কাউন্টার নগদ বিক্রি ({summary?.inflow.salesCount || 0} টি মেমো):</span>
-              <strong className="font-mono font-bold text-emerald-700 text-sm tabular-nums">
-                +{formatCurrency(summary?.inflow.cashFromSales || 0)}
+              <strong className="font-mono tabular-nums tracking-tight font-bold text-emerald-700 text-sm">
+                +৳{formatCurrency(summary?.inflow.cashFromSales || 0)}
               </strong>
             </div>
             <div className="flex items-center justify-between text-slate-700">
               <span>কাস্টমার বকেয়া আদায় ({summary?.inflow.customerRepaymentsCount || 0} জন):</span>
-              <strong className="font-mono font-bold text-emerald-700 text-sm tabular-nums">
-                +{formatCurrency(summary?.inflow.cashFromCustomerRepayments || 0)}
+              <strong className="font-mono tabular-nums tracking-tight font-bold text-emerald-700 text-sm">
+                +৳{formatCurrency(summary?.inflow.cashFromCustomerRepayments || 0)}
               </strong>
             </div>
-            <div className="border-t border-emerald-200/60 pt-2 flex items-center justify-between font-bold text-ink-primary">
+            <div className="border-t border-slate-200 pt-2 flex items-center justify-between font-bold text-slate-900">
               <span>সর্বমোট নগদ জমা (Total Cash In):</span>
-              <span className="font-mono text-emerald-800 text-base tabular-nums">
-                +{formatCurrency(summary?.inflow.totalCashIn || 0)}
+              <span className="font-mono tabular-nums tracking-tight text-emerald-800 text-base">
+                +৳{formatCurrency(summary?.inflow.totalCashIn || 0)}
               </span>
             </div>
           </div>
         </div>
 
         {/* আউটফ্লো বিবরণী */}
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <div className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1">
-            <ArrowUpRight size={14} weight="bold" />
+            <ArrowUpRight size={13} weight="bold" />
             <span>নগদ প্রদান ও খরচ (Cash Outflow Breakdown)</span>
           </div>
-          <div className="bg-amber-50/40 rounded-xl p-3 border border-amber-100 space-y-2 text-xs">
+          <div className="bg-slate-50/80 rounded-md p-3 border border-slate-200/90 space-y-2 text-xs">
             <div className="flex items-center justify-between text-slate-700">
               <span>চালান মাল কেনার নগদ প্রদান ({summary?.outflow.purchasesCount || 0} টি চালান):</span>
-              <strong className="font-mono font-bold text-amber-800 text-sm tabular-nums">
-                -{formatCurrency(summary?.outflow.cashForPurchases || 0)}
+              <strong className="font-mono tabular-nums tracking-tight font-bold text-amber-800 text-sm">
+                -৳{formatCurrency(summary?.outflow.cashForPurchases || 0)}
               </strong>
             </div>
             <div className="flex items-center justify-between text-slate-700">
               <span>মহাজনদের দেনা শোধ ({summary?.outflow.supplierRepaymentsCount || 0} টি পেমেন্ট):</span>
-              <strong className="font-mono font-bold text-amber-800 text-sm tabular-nums">
-                -{formatCurrency(summary?.outflow.cashForSupplierRepayments || 0)}
+              <strong className="font-mono tabular-nums tracking-tight font-bold text-amber-800 text-sm">
+                -৳{formatCurrency(summary?.outflow.cashForSupplierRepayments || 0)}
               </strong>
             </div>
             <div className="flex items-center justify-between text-slate-700">
               <span>দোকানের দৈনন্দিন খরচ ({summary?.outflow.expensesCount || 0} টি ভাউচার):</span>
-              <strong className="font-mono font-bold text-red-600 text-sm tabular-nums">
-                -{formatCurrency(summary?.outflow.totalExpenses || 0)}
+              <strong className="font-mono tabular-nums tracking-tight font-bold text-red-600 text-sm">
+                -৳{formatCurrency(summary?.outflow.totalExpenses || 0)}
               </strong>
             </div>
-            <div className="border-t border-amber-200/60 pt-2 flex items-center justify-between font-bold text-ink-primary">
+            <div className="border-t border-slate-200 pt-2 flex items-center justify-between font-bold text-slate-900">
               <span>সর্বমোট নগদ ব্যয় (Total Cash Out):</span>
-              <span className="font-mono text-amber-800 text-base tabular-nums">
-                -{formatCurrency(summary?.outflow.totalCashOut || 0)}
+              <span className="font-mono tabular-nums tracking-tight text-amber-800 text-base">
+                -৳{formatCurrency(summary?.outflow.totalCashOut || 0)}
               </span>
             </div>
           </div>
@@ -130,7 +128,7 @@ export function CashboxReconciliationCard() {
 
         {/* খরচের ক্যাটাগরি ব্রেকডাউন */}
         {summary?.outflow.expenseBreakdown && summary.outflow.expenseBreakdown.length > 0 && (
-          <div className="pt-2 border-t border-slate-100">
+          <div className="pt-2 border-t border-slate-200/90">
             <span className="text-[11px] font-semibold text-slate-500 block mb-1.5">
               আজকের খরচের খাতভিত্তিক বিভাজন:
             </span>
@@ -138,10 +136,10 @@ export function CashboxReconciliationCard() {
               {summary.outflow.expenseBreakdown.map((b) => (
                 <div
                   key={b.category}
-                  className="px-2.5 py-1 rounded-lg bg-slate-100 border border-slate-200 text-xs flex items-center gap-1.5"
+                  className="px-2 py-0.5 rounded-md bg-slate-50 border border-slate-200/90 text-xs flex items-center gap-1.5"
                 >
-                  <span className="text-slate-600">{getCategoryBangla(b.category)}:</span>
-                  <strong className="font-mono text-slate-900 tabular-nums">
+                  <span className="text-slate-600 text-[11px]">{getCategoryBangla(b.category)}:</span>
+                  <strong className="font-mono tabular-nums tracking-tight text-slate-900 text-xs">
                     ৳{formatCurrency(b.amount)}
                   </strong>
                 </div>
@@ -152,29 +150,29 @@ export function CashboxReconciliationCard() {
       </div>
 
       {/* ডানে: ফিজিক্যাল নোট গণক ও মিলকরণ (৫ কলাম) */}
-      <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 shadow-xs space-y-4">
-        <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
+      <div className="lg:col-span-5 bg-white rounded-lg border border-slate-200/90 p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-3.5">
+        <div className="border-b border-slate-200/90 pb-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
-              <Calculator size={18} weight="bold" />
+            <div className="w-7 h-7 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center">
+              <Calculator size={16} weight="bold" />
             </div>
             <div>
-              <h3 className="font-bold text-xs sm:text-sm text-ink-primary">
+              <h3 className="font-bold text-xs sm:text-sm text-slate-900">
                 ক্যাশ ড্রয়ার নোট গণক (Physical Cash Counter)
               </h3>
-              <p className="text-[11px] text-ink-muted">ক্যাশ ড্রয়ারের নোট গুনে লিখুন</p>
+              <p className="text-[11px] text-slate-500">ক্যাশ ড্রয়ারের নোট গুনে লিখুন</p>
             </div>
           </div>
           <button
             onClick={resetDenominations}
-            className="text-[11px] text-slate-400 hover:text-slate-700 underline font-medium"
+            className="text-[11px] text-slate-500 hover:text-slate-800 underline font-medium active:scale-[0.98] transition-colors"
           >
             রিসেট
           </button>
         </div>
 
         {/* নোট ইনপুট গ্রিড */}
-        <div className="space-y-2 text-xs">
+        <div className="space-y-1.5 text-xs">
           {[
             { key: 'n1000' as const, note: 1000, label: '১০০০ টাকার নোট' },
             { key: 'n500' as const, note: 500, label: '৫০০ টাকার নোট' },
@@ -190,7 +188,7 @@ export function CashboxReconciliationCard() {
             return (
               <div
                 key={item.key}
-                className="flex items-center justify-between gap-2 p-1.5 rounded-lg hover:bg-slate-50 transition-colors"
+                className="flex items-center justify-between gap-2 px-2 py-1 rounded-md hover:bg-slate-50 transition-colors"
               >
                 <span className="font-medium text-slate-700 w-36 truncate">{item.label}</span>
                 <div className="flex items-center gap-1.5">
@@ -201,11 +199,11 @@ export function CashboxReconciliationCard() {
                     value={count || ''}
                     onChange={(e) => setDenomination(item.key, Number(e.target.value))}
                     placeholder="০"
-                    className="w-16 px-2 py-1 bg-slate-50 border border-slate-200 rounded text-center font-mono font-bold text-ink-primary focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:bg-white"
+                    className="w-16 px-2 py-1 bg-white border border-slate-200 rounded-md text-center font-mono tabular-nums font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-[border-color,box-shadow] duration-150"
                   />
                   <span className="text-slate-400 text-[11px]">=</span>
-                  <span className="font-mono font-bold text-slate-900 w-20 text-right tabular-nums">
-                    {formatCurrency(sub)}
+                  <span className="font-mono tabular-nums tracking-tight font-bold text-slate-900 w-20 text-right">
+                    ৳{formatCurrency(sub)}
                   </span>
                 </div>
               </div>
@@ -214,25 +212,25 @@ export function CashboxReconciliationCard() {
         </div>
 
         {/* গণনা ফলাফল ও অমিল স্ট্যাটাস বক্স */}
-        <div className="pt-3 border-t border-slate-200 space-y-2">
+        <div className="pt-2.5 border-t border-slate-200/90 space-y-2">
           <div className="flex justify-between items-center text-xs">
             <span className="text-slate-600">গণনাকৃত মোট ক্যাশ:</span>
-            <span className="font-mono font-black text-base text-ink-primary tabular-nums">
-              {formatCurrency(countedTotal)}
+            <span className="font-mono tabular-nums tracking-tight font-black text-base text-slate-900">
+              ৳{formatCurrency(countedTotal)}
             </span>
           </div>
 
           <div className="flex justify-between items-center text-xs">
             <span className="text-slate-600">সফটওয়্যার ব্যালেন্স:</span>
-            <span className="font-mono font-bold text-sm text-slate-700 tabular-nums">
-              {formatCurrency(netCashInHand)}
+            <span className="font-mono tabular-nums tracking-tight font-bold text-sm text-slate-700">
+              ৳{formatCurrency(netCashInHand)}
             </span>
           </div>
 
           {/* মিল / অমিল সতর্কতা */}
           {countedTotal > 0 && (
             <div
-              className={`p-3 rounded-xl border flex items-center gap-2 text-xs font-semibold ${
+              className={`p-2.5 rounded-md border flex items-center gap-2 text-xs font-semibold ${
                 mismatch === 0
                   ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
                   : mismatch > 0
@@ -242,17 +240,17 @@ export function CashboxReconciliationCard() {
             >
               {mismatch === 0 ? (
                 <>
-                  <CheckCircle size={18} weight="fill" className="text-emerald-600 shrink-0" />
+                  <CheckCircle size={16} weight="fill" className="text-emerald-600 shrink-0" />
                   <span>ক্যাশবাক্সের হিসাব ১০০% মিলেছে (Balanced ✅)</span>
                 </>
               ) : mismatch > 0 ? (
                 <>
-                  <CheckCircle size={18} weight="fill" className="text-blue-600 shrink-0" />
+                  <CheckCircle size={16} weight="fill" className="text-blue-600 shrink-0" />
                   <span>ড্রয়ারে ৳{formatCurrency(mismatch)} ক্যাশ উদ্বৃত্ত আছে</span>
                 </>
               ) : (
                 <>
-                  <Warning size={18} weight="fill" className="text-red-600 shrink-0" />
+                  <Warning size={16} weight="fill" className="text-red-600 shrink-0" />
                   <span>ড্রয়ারে ৳{formatCurrency(Math.abs(mismatch))} ক্যাশ ঘাটতি দেখা যাচ্ছে!</span>
                 </>
               )}

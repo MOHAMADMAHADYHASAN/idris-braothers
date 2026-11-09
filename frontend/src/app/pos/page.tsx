@@ -50,23 +50,23 @@ export default function PosPage() {
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-surface-canvas text-ink-primary select-none">
+    <div className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-slate-50 text-slate-900 select-none">
       {/* 1. Sticky Top Navigation Bar */}
-      <header className="px-3 sm:px-4 py-2 bg-white border-b border-slate-200/90 shadow-2xs shrink-0 flex items-center justify-between gap-3 z-30">
-        <div className="flex items-center gap-2">
+      <header className="px-3 sm:px-4 py-2 bg-white border-b border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)] shrink-0 flex items-center justify-between gap-3 z-30">
+        <div className="flex items-center gap-2.5">
           <Link
             href="/"
-            className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
-            title="ড্যাশবোর্ডে ফিরে যান"
+            className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
+            title="ড্যাশবোর্ডে ফিরুন"
           >
-            <ArrowLeft size={20} weight="bold" />
+            <ArrowLeft size={18} weight="bold" />
           </Link>
           <div>
-            <h1 className="font-bold text-sm sm:text-base text-slate-900 leading-tight">
-              ইদ্রিস ব্রাদার্স পিওএস টার্মিনাল
+            <h1 className="font-semibold text-xs sm:text-sm text-slate-900 tracking-tight leading-tight">
+              ইদ্রিস ব্রাদার্স পিওএস কাউন্টার
             </h1>
-            <p className="text-[10px] text-slate-400 hidden sm:block">
-              মরিচপট্টি, ফেনী বাজার • দ্রুত বিক্রয় কাউন্টার
+            <p className="text-[10px] text-slate-500 hidden sm:block tracking-tight">
+              মরিচপট্টি, ফেনী বাজার • দ্রুত বিক্রয় ও ক্যাশ টার্মিনাল
             </p>
           </div>
         </div>
@@ -83,37 +83,37 @@ export default function PosPage() {
         {/* Cart Quick Status Pill */}
         <div className="flex items-center gap-2">
           <div className="text-right hidden sm:block">
-            <span className="text-[10px] text-slate-400 block font-bold">মোট বিল</span>
-            <span className="font-black text-sm text-slate-900 tabular-numbers">
+            <span className="text-[10px] text-slate-500 block font-medium">মোট বিল:</span>
+            <span className="font-bold text-xs sm:text-sm text-slate-900 font-mono tabular-nums tracking-tight">
               ৳{getGrandTotal().toLocaleString('en-BD')}
             </span>
           </div>
 
           {/* Mobile Segmented Switcher Pill */}
-          <div className="md:hidden flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+          <div className="md:hidden flex bg-slate-100 p-0.5 rounded-md border border-slate-200/80">
             <button
               type="button"
               onClick={() => setMobileTab('catalog')}
-              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-2.5 py-1 rounded text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${
                 mobileTab === 'catalog'
                   ? 'bg-white text-slate-900 shadow-2xs'
-                  : 'text-slate-500'
+                  : 'text-slate-600'
               }`}
             >
-              <GridFour size={15} weight="bold" />
-              পণ্য
+              <GridFour size={14} weight="bold" />
+              <span>পণ্য</span>
             </button>
             <button
               type="button"
               onClick={() => setMobileTab('settlement')}
-              className={`px-3 py-1.5 rounded-md text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-2.5 py-1 rounded text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${
                 mobileTab === 'settlement'
-                  ? 'bg-emerald-600 text-white shadow-2xs'
-                  : 'text-slate-500'
+                  ? 'bg-slate-900 text-white shadow-2xs'
+                  : 'text-slate-600'
               }`}
             >
-              <ShoppingCart size={15} weight="bold" />
-              কার্ট ({cart.length})
+              <ShoppingCart size={14} weight="bold" />
+              <span>কার্ট ({cart.length})</span>
             </button>
           </div>
         </div>
@@ -129,15 +129,15 @@ export default function PosPage() {
       </div>
 
       {/* 2. Main Workspace (Desktop Split vs Mobile Segmented) */}
-      <main className="flex-1 overflow-hidden p-2 sm:p-3">
+      <main className="flex-1 overflow-hidden p-2 sm:p-2.5">
         {/* Desktop 2-Column Grid (Left: 60% Catalog, Right: 40% Cart & Checkout) */}
-        <div className="hidden md:grid md:grid-cols-12 gap-3 h-full">
+        <div className="hidden md:grid md:grid-cols-12 gap-2.5 h-full">
           <div className="md:col-span-7 lg:col-span-8 h-full overflow-hidden">
             <PosProductCatalog />
           </div>
 
-          <div className="md:col-span-5 lg:col-span-4 h-full flex flex-col gap-3 overflow-y-auto">
-            <div className="flex-1 min-h-[220px] overflow-hidden">
+          <div className="md:col-span-5 lg:col-span-4 h-full flex flex-col gap-2.5 overflow-y-auto">
+            <div className="flex-1 min-h-[200px] overflow-hidden">
               <PosCartTable />
             </div>
             <div className="shrink-0">
@@ -153,7 +153,7 @@ export default function PosPage() {
               <PosProductCatalog />
             </div>
           ) : (
-            <div className="h-full flex flex-col gap-3 overflow-y-auto pb-4">
+            <div className="h-full flex flex-col gap-2.5 overflow-y-auto pb-4">
               <PosCartTable />
               <PosSettlementPanel onSaleSuccess={handleSaleSuccess} />
             </div>

@@ -49,27 +49,27 @@ export default function SupplierKhataPage() {
   }, [openModal]);
 
   return (
-    <div className="min-h-screen bg-surface-canvas flex flex-col">
+    <div className="min-h-screen bg-slate-50/50 flex flex-col text-slate-900">
       {/* গ্লোবাল টপবার */}
-      <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-white border-b border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-13 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+              className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-[background-color,color] duration-150"
               title="ড্যাশবোর্ডে ফিরে যান"
             >
-              <ArrowLeft size={18} weight="bold" />
+              <ArrowLeft size={16} weight="bold" />
             </Link>
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-amber-600 text-white flex items-center justify-center shadow-xs">
-                <Truck size={20} weight="bold" />
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-md bg-slate-900 text-white flex items-center justify-center shrink-0">
+                <Truck size={18} weight="bold" />
               </div>
               <div>
-                <h1 className="font-bold text-ink-primary text-sm sm:text-base leading-tight">
+                <h1 className="font-semibold text-slate-900 text-xs sm:text-sm leading-tight">
                   মহাজন খাতা ও দেনা রেজিস্টার
                 </h1>
-                <p className="text-[11px] text-ink-muted">
+                <p className="text-[11px] text-slate-500">
                   মরিচপট্টি, ফেনী বাজার — মোকাম চালান ও নগদ দেনা পরিশোধ
                 </p>
               </div>
@@ -79,16 +79,16 @@ export default function SupplierKhataPage() {
           <div className="flex items-center gap-2">
             <Link
               href="/purchases"
-              className="px-3 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-semibold flex items-center gap-1.5 transition-colors border border-amber-200"
+              className="px-3 py-1.5 rounded-md bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium flex items-center gap-1.5 transition-[background-color] duration-150 border border-slate-200/80 active:scale-[0.98]"
             >
-              <Package size={16} weight="bold" />
+              <Package size={15} weight="bold" />
               <span className="hidden sm:inline">চালান এন্ট্রি</span>
             </Link>
             <button
               onClick={() => openModal('create')}
-              className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs active:scale-95"
+              className="px-3.5 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium flex items-center gap-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.08)] transition-[background-color,transform] duration-150 active:scale-[0.98]"
             >
-              <UserPlus size={16} weight="bold" />
+              <UserPlus size={15} weight="bold" />
               <span>+ নতুন মহাজন</span>
             </button>
           </div>
@@ -96,7 +96,7 @@ export default function SupplierKhataPage() {
       </header>
 
       {/* মূল কন্টেন্ট এরিয়া */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-4">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-3.5">
         {/* ১. টপ KPI সামারি */}
         <SupplierKpiSummary />
 
@@ -110,13 +110,13 @@ export default function SupplierKhataPage() {
         </div>
 
         {/* মোবাইল কার্ড স্ট্রিম (< 768px) */}
-        <div className="block md:hidden space-y-3">
+        <div className="block md:hidden space-y-2.5">
           {isLoading && suppliers.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-xs text-ink-muted">
+            <div className="bg-white rounded-lg border border-slate-200/90 p-8 text-center text-xs text-slate-400">
               মহাজনদের খাতা লোড হচ্ছে...
             </div>
           ) : suppliers.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-xs text-ink-muted">
+            <div className="bg-white rounded-lg border border-slate-200/90 p-8 text-center text-xs text-slate-400">
               কোনো মহাজন পাওয়া যায়নি
             </div>
           ) : (
@@ -127,24 +127,24 @@ export default function SupplierKhataPage() {
 
               {/* মোবাইল পেজিনেশন */}
               {meta.totalPages > 1 && (
-                <div className="p-3 bg-white rounded-xl border border-slate-200 flex items-center justify-between text-xs text-ink-muted">
+                <div className="p-3 bg-white rounded-lg border border-slate-200/90 flex items-center justify-between text-xs text-slate-500 font-mono tabular-nums tracking-tight">
                   <span>
-                    পৃষ্ঠা <strong className="text-ink-primary">{meta.page}</strong> / {meta.totalPages}
+                    পৃষ্ঠা <strong className="text-slate-900">{meta.page}</strong> / {meta.totalPages}
                   </span>
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => setPage(meta.page - 1)}
                       disabled={meta.page <= 1}
-                      className="p-1.5 border border-slate-200 rounded-md bg-slate-50 disabled:opacity-40"
+                      className="p-1.5 border border-slate-200 rounded-md bg-slate-50 disabled:opacity-40 transition-colors active:scale-[0.96]"
                     >
-                      <CaretLeft size={16} weight="bold" />
+                      <CaretLeft size={15} weight="bold" />
                     </button>
                     <button
                       onClick={() => setPage(meta.page + 1)}
                       disabled={meta.page >= meta.totalPages}
-                      className="p-1.5 border border-slate-200 rounded-md bg-slate-50 disabled:opacity-40"
+                      className="p-1.5 border border-slate-200 rounded-md bg-slate-50 disabled:opacity-40 transition-colors active:scale-[0.96]"
                     >
-                      <CaretRight size={16} weight="bold" />
+                      <CaretRight size={15} weight="bold" />
                     </button>
                   </div>
                 </div>

@@ -8,7 +8,6 @@ import {
   Plus,
   MagnifyingGlass,
   Warning,
-  Funnel,
   Coins,
   Tag,
   ArrowsClockwise,
@@ -54,7 +53,7 @@ export default function ProductsPage() {
     setEditingProduct(null);
   };
 
-  // KPI Calculations
+  // KPI Calculations with Tabular Numbers
   const totalProducts = products.length;
   const totalVariants = products.reduce((acc, p) => acc + (p.variants?.length || 1), 0);
   const lowStockCount = products.filter((p) =>
@@ -67,27 +66,27 @@ export default function ProductsPage() {
   }, 0);
 
   return (
-    <div className="min-h-screen bg-surface-canvas flex flex-col">
-      {/* Top Navigation Bar */}
-      <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col">
+      {/* Top Navigation Bar - Crisp 1px Border Header */}
+      <header className="sticky top-0 z-30 bg-white border-b border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-13 sm:h-14 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
             <Link
               href="/"
-              className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
-              title="ড্যাশবোর্ডে ফিরে যান"
+              className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
+              title="ড্যাশবোর্ডে ফিরুন"
             >
               <ArrowLeft size={18} weight="bold" />
             </Link>
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/70 text-slate-800 flex items-center justify-center shadow-xs">
-                <Package size={20} weight="bold" />
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center">
+                <Package size={16} weight="bold" />
               </div>
               <div>
-                <h1 className="text-sm sm:text-base font-bold text-slate-900 leading-tight">
+                <h1 className="text-xs sm:text-sm font-semibold text-slate-900 tracking-tight leading-tight">
                   পণ্য ক্যাটালগ ও ইনভেন্টরি
                 </h1>
-                <p className="text-[11px] text-slate-500 hidden sm:block">
+                <p className="text-[10px] text-slate-500 hidden sm:block tracking-tight">
                   ইদ্রিস ব্রাদার্স • মরিচপট্টি, ফেনী বাজার
                 </p>
               </div>
@@ -97,19 +96,19 @@ export default function ProductsPage() {
           <div className="flex items-center gap-2">
             <button
               onClick={() => fetchProducts()}
-              className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-colors"
+              className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
               title="তালিকা রিফ্রেশ করুন"
             >
-              <ArrowsClockwise size={18} weight="bold" className={isLoading ? 'animate-spin' : ''} />
+              <ArrowsClockwise size={16} weight="bold" className={isLoading ? 'animate-spin' : ''} />
             </button>
             <button
               onClick={() => {
                 setEditingProduct(null);
                 setIsAddModalOpen(true);
               }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-xs transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-white bg-slate-900 hover:bg-slate-800 rounded-md shadow-[0_1px_2px_rgba(15,23,42,0.06)] active:scale-[0.98] transition-[background-color,transform] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer"
             >
-              <Plus size={15} weight="bold" />
+              <Plus size={14} weight="bold" />
               <span>নতুন পণ্য যোগ করুন</span>
             </button>
           </div>
@@ -117,48 +116,56 @@ export default function ProductsPage() {
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* KPI Summary Cards (Neutral Framing, Strict Compliance with AGENT.md) */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200/70 text-slate-700 flex items-center justify-center">
-              <Package size={20} weight="bold" />
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-4">
+        {/* KPI Summary Cards - Linear-Grade Neutral Framing */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)] flex items-center gap-3">
+            <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/70 text-slate-700 flex items-center justify-center shrink-0">
+              <Package size={17} weight="bold" />
             </div>
-            <div>
-              <div className="text-[11px] font-medium text-slate-500">মোট মূল পণ্য</div>
-              <div className="text-lg font-bold text-slate-900 font-mono">{totalProducts} টি</div>
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200/70 text-slate-700 flex items-center justify-center">
-              <Tag size={20} weight="bold" />
-            </div>
-            <div>
-              <div className="text-[11px] font-medium text-slate-500">মোট ভ্যারিয়েন্ট (SKU)</div>
-              <div className="text-lg font-bold text-slate-900 font-mono">{totalVariants} টি</div>
+            <div className="min-w-0">
+              <div className="text-[11px] font-medium text-slate-500 tracking-tight">মোট মূল পণ্য</div>
+              <div className="text-base sm:text-lg font-bold text-slate-900 font-mono tabular-nums tracking-tight">
+                {totalProducts} টি
+              </div>
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200/70 text-slate-700 flex items-center justify-center">
-              <Warning size={20} weight="bold" className={lowStockCount > 0 ? 'text-rose-600' : ''} />
+          <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)] flex items-center gap-3">
+            <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/70 text-slate-700 flex items-center justify-center shrink-0">
+              <Tag size={17} weight="bold" />
             </div>
-            <div>
-              <div className="text-[11px] font-medium text-slate-500">স্টক সংকট সতর্কতা</div>
-              <div className={`text-lg font-bold font-mono ${lowStockCount > 0 ? 'text-rose-600' : 'text-slate-900'}`}>
+            <div className="min-w-0">
+              <div className="text-[11px] font-medium text-slate-500 tracking-tight">মোট ভ্যারিয়েন্ট (SKU)</div>
+              <div className="text-base sm:text-lg font-bold text-slate-900 font-mono tabular-nums tracking-tight">
+                {totalVariants} টি
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)] flex items-center gap-3">
+            <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/70 text-slate-700 flex items-center justify-center shrink-0">
+              <Warning size={17} weight="bold" className={lowStockCount > 0 ? 'text-rose-600' : ''} />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[11px] font-medium text-slate-500 tracking-tight">স্টক সংকট সতর্কতা</div>
+              <div
+                className={`text-base sm:text-lg font-bold font-mono tabular-nums tracking-tight ${
+                  lowStockCount > 0 ? 'text-rose-700' : 'text-slate-900'
+                }`}
+              >
                 {lowStockCount} টি
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200/70 text-slate-700 flex items-center justify-center">
-              <Coins size={20} weight="bold" />
+          <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)] flex items-center gap-3">
+            <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/70 text-slate-700 flex items-center justify-center shrink-0">
+              <Coins size={17} weight="bold" />
             </div>
-            <div>
-              <div className="text-[11px] font-medium text-slate-500">বর্তমান ক্রয়মূল্যে মোট মূলধন</div>
-              <div className="text-lg font-bold text-slate-900 font-mono">
+            <div className="min-w-0">
+              <div className="text-[11px] font-medium text-slate-500 tracking-tight truncate">ক্রয়মূল্যে মোট মূলধন</div>
+              <div className="text-base sm:text-lg font-bold text-slate-900 font-mono tabular-nums tracking-tight truncate">
                 ৳{totalInventoryCapital.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
               </div>
             </div>
@@ -166,10 +173,10 @@ export default function ProductsPage() {
         </div>
 
         {/* Filter & Search Bar */}
-        <div className="bg-white p-3.5 rounded-xl border border-slate-200/80 shadow-xs flex flex-col sm:flex-row gap-3 items-center justify-between">
+        <div className="bg-white p-2.5 sm:p-3 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)] flex flex-col sm:flex-row gap-2.5 items-center justify-between">
           <div className="relative w-full sm:w-80">
             <MagnifyingGlass
-              size={16}
+              size={15}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
             />
             <input
@@ -180,11 +187,11 @@ export default function ProductsPage() {
                 setSearchQuery(e.target.value);
                 fetchProducts({ search: e.target.value });
               }}
-              className="w-full pl-9 pr-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800"
+              className="w-full pl-8.5 pr-3 py-1.5 text-xs font-medium border border-slate-200 rounded-md bg-white text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-slate-800 focus:ring-2 focus:ring-slate-900/10 transition-[border-color,box-shadow]"
             />
           </div>
 
-          <div className="flex items-center gap-2.5 w-full sm:w-auto flex-wrap">
+          <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap">
             {/* Category Filter */}
             <select
               value={selectedCategoryId || ''}
@@ -193,7 +200,7 @@ export default function ProductsPage() {
                 setSelectedCategoryId(val);
                 fetchProducts({ categoryId: val || undefined });
               }}
-              className="px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 bg-white"
+              className="px-2.5 py-1.5 text-xs font-medium border border-slate-200 rounded-md focus:outline-hidden focus:border-slate-800 focus:ring-2 focus:ring-slate-900/10 bg-white text-slate-800"
             >
               <option value="">সকল ক্যাটাগরি</option>
               {categories.map((c) => (
@@ -211,7 +218,7 @@ export default function ProductsPage() {
                 setSelectedBrandId(val);
                 fetchProducts({ brandId: val || undefined });
               }}
-              className="px-3 py-1.5 text-xs border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800 bg-white"
+              className="px-2.5 py-1.5 text-xs font-medium border border-slate-200 rounded-md focus:outline-hidden focus:border-slate-800 focus:ring-2 focus:ring-slate-900/10 bg-white text-slate-800"
             >
               <option value="">সকল ব্র্যান্ড</option>
               {brands.map((b) => (
@@ -228,13 +235,13 @@ export default function ProductsPage() {
                 setLowStockOnly(newVal);
                 fetchProducts({ lowStockOnly: newVal });
               }}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md border transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] cursor-pointer ${
                 lowStockOnly
                   ? 'bg-rose-50 text-rose-700 border-rose-300 font-semibold'
                   : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
               }`}
             >
-              <Warning size={14} weight={lowStockOnly ? 'fill' : 'bold'} />
+              <Warning size={13} weight={lowStockOnly ? 'fill' : 'bold'} />
               <span>স্টক সংকট</span>
             </button>
           </div>

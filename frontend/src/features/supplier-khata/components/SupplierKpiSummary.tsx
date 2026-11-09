@@ -16,66 +16,66 @@ export function SupplierKpiSummary() {
   const payableCount = suppliers.filter((s) => s.currentPayable > 0).length;
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
       {/* ১. মোট মহাজন দেনা */}
-      <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+      <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-xs sm:text-sm font-medium text-ink-muted">মোট মহাজন দেনা</span>
-          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/60 text-slate-600 flex items-center justify-center">
-            <Truck size={18} weight="bold" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">মোট মহাজন দেনা</span>
+          <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+            <Truck size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-bold font-mono text-amber-700 tabular-nums">
-            {formatCurrency(totalPayable)}
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-amber-700">
+            ৳{formatCurrency(totalPayable)}
           </div>
-          <p className="text-[11px] text-ink-muted mt-0.5">মোকাম ও মিলে মোট অপরিশোধিত পাওনা</p>
+          <p className="text-[11px] text-slate-400 mt-0.5">মোকাম ও মিলে মোট অপরিশোধিত পাওনা</p>
         </div>
       </div>
 
       {/* ২. পাওনাদার মহাজনের সংখ্যা */}
-      <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+      <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-xs sm:text-sm font-medium text-ink-muted">পাওনাদার আড়তদার</span>
-          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/60 text-slate-600 flex items-center justify-center">
-            <HandCoins size={18} weight="bold" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">পাওনাদার আড়তদার</span>
+          <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+            <HandCoins size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-bold font-mono text-ink-primary tabular-nums">
-            {payableCount} <span className="text-xs font-normal text-ink-muted">টি গদি</span>
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900">
+            {payableCount} <span className="text-xs font-normal text-slate-400">টি গদি</span>
           </div>
-          <p className="text-[11px] text-ink-muted mt-0.5">যাদের পাওনা এখনো বাকি রয়েছে</p>
+          <p className="text-[11px] text-slate-400 mt-0.5">যাদের পাওনা এখনো বাকি রয়েছে</p>
         </div>
       </div>
 
       {/* ৩. মোট নিবন্ধিত মহাজন */}
-      <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+      <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-xs sm:text-sm font-medium text-ink-muted">মোট তালিকাভুক্ত মহাজন</span>
-          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/60 text-slate-600 flex items-center justify-center">
-            <Users size={18} weight="bold" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">মোট তালিকাভুক্ত মহাজন</span>
+          <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+            <Users size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-bold font-mono text-ink-primary tabular-nums">
-            {meta.total} <span className="text-xs font-normal text-ink-muted">জন</span>
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900">
+            {meta.total} <span className="text-xs font-normal text-slate-400">জন</span>
           </div>
-          <p className="text-[11px] text-ink-muted mt-0.5">খাতুনগঞ্জ, মৌলভীবাজার ও স্থানীয় মিল</p>
+          <p className="text-[11px] text-slate-400 mt-0.5">খাতুনগঞ্জ, মৌলভীবাজার ও স্থানীয় মিল</p>
         </div>
       </div>
 
       {/* ৪. নতুন মহাজন এন্ট্রি বোতাম */}
-      <div className="bg-amber-50/60 border border-amber-200/70 p-3.5 sm:p-4 rounded-xl flex flex-col justify-between">
+      <div className="bg-slate-50/70 border border-slate-200/90 p-3.5 rounded-lg shadow-[0_1px_2px_rgba(15,23,42,0.02)] flex flex-col justify-between">
         <div>
-          <span className="text-xs sm:text-sm font-semibold text-amber-900">নতুন মহাজন যুক্ত করুন</span>
-          <p className="text-[11px] text-amber-700/90 mt-0.5">নতুন আড়ত, মিল বা আমদানিকারক</p>
+          <span className="text-xs font-semibold text-slate-900">নতুন মহাজন যুক্ত করুন</span>
+          <p className="text-[11px] text-slate-500 mt-0.5">নতুন আড়ত, মিল বা আমদানিকারক</p>
         </div>
         <button
           onClick={() => openModal('create')}
-          className="mt-3 w-full py-2 px-3 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors shadow-xs active:scale-98"
+          className="mt-2.5 w-full py-1.5 px-3 rounded-md bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs flex items-center justify-center gap-1.5 transition-[background-color,transform] duration-150 shadow-[0_1px_2px_rgba(15,23,42,0.08)] active:scale-[0.98]"
         >
-          <UserPlus size={16} weight="bold" />
+          <UserPlus size={15} weight="bold" />
           <span>+ নতুন মহাজন খাতা</span>
         </button>
       </div>

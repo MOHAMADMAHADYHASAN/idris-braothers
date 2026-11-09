@@ -72,9 +72,9 @@ export function StoreShutterHero({
         <button
           onClick={rollDownShutter}
           title="দোকানের শাটার নামান (দোকান বন্ধ করুন)"
-          className="fixed top-3.5 right-4 z-50 flex items-center gap-2 bg-slate-900/90 hover:bg-slate-800 text-slate-200 hover:text-white px-3.5 py-1.5 rounded-full border border-slate-700 shadow-xl backdrop-blur-md text-xs font-semibold transition-all duration-200 active:scale-95 cursor-pointer"
+          className="fixed top-3.5 right-4 z-50 flex items-center gap-2 bg-slate-900 text-slate-200 hover:text-white px-3 py-1.5 rounded-md border border-slate-700 shadow-md text-xs font-medium transition-[background-color,transform] duration-150 active:scale-[0.98] cursor-pointer"
         >
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
           <span>শাটার নামান (দোকান বন্ধ)</span>
           <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7" />
@@ -121,33 +121,33 @@ export function StoreShutterHero({
         <div className="relative z-10 flex flex-col items-center justify-between h-full px-6 py-10 md:py-14 text-center">
           
           {/* Top Shop Status Badge */}
-          <div className="inline-flex items-center gap-2 bg-black/70 backdrop-blur-md px-4 py-1.5 rounded-full border border-amber-500/30 text-xs font-semibold tracking-wide text-amber-300 shadow-lg">
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+          <div className="inline-flex items-center gap-2 bg-slate-950/80 px-3 py-1 rounded-md border border-amber-500/30 text-xs font-medium tracking-wide text-amber-300 shadow-sm">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
             <span>দোকানের শাটার নামানো • সকালের কাউন্টার শুরু করুন</span>
           </div>
 
           {/* Main Shutter Branding Box */}
-          <div className="max-w-2xl mx-auto space-y-4 px-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-400/40 text-amber-400 shadow-xl backdrop-blur-md mb-2">
-              <svg className="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="max-w-2xl mx-auto space-y-3 px-4">
+            <div className="inline-flex items-center justify-center w-14 h-14 rounded-lg bg-amber-500/20 border border-amber-400/40 text-amber-400 shadow-lg mb-1">
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-white drop-shadow-2xl">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white drop-shadow-lg">
               {storeName}
             </h1>
-            <p className="text-slate-200 text-sm sm:text-base font-medium drop-shadow-md">
+            <p className="text-slate-300 text-xs sm:text-sm font-medium drop-shadow-sm">
               {storeTagline}
             </p>
 
             {/* Shutter Pull Button */}
-            <div className="pt-4 flex flex-col items-center">
+            <div className="pt-3 flex flex-col items-center">
               <button
                 onClick={rollUpShutter}
-                className="group relative inline-flex items-center gap-3 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-extrabold text-sm sm:text-base px-8 py-3.5 rounded-2xl shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer border border-amber-300/60"
+                className="group relative inline-flex items-center gap-2.5 bg-amber-400 hover:bg-amber-300 text-slate-950 font-bold text-xs sm:text-sm px-6 py-2.5 rounded-md shadow-lg transition-[background-color,transform] duration-150 active:scale-[0.98] cursor-pointer border border-amber-300"
               >
-                <svg className="w-5 h-5 transition-transform duration-300 group-hover:-translate-y-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 transition-transform duration-150 group-hover:-translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18" />
                 </svg>
                 <span>শাটার তুলুন (দোকান খুলুন)</span>

@@ -13,66 +13,66 @@ export function CustomerKpiSummary() {
   const dueHoldersCount = customers.filter((c) => c.currentDue > 0).length;
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
       {/* 1. মোট বকেয়া */}
-      <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+      <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-xs sm:text-sm font-medium text-ink-muted">মোট বাজার বকেয়া</span>
-          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/60 text-slate-600 flex items-center justify-center">
-            <Coins size={18} weight="bold" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">মোট বাজার বকেয়া</span>
+          <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+            <Coins size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-bold font-mono text-red-600 tabular-nums">
-            {formatCurrency(totalDue)}
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-rose-700">
+            ৳{formatCurrency(totalDue)}
           </div>
-          <p className="text-[11px] text-ink-muted mt-0.5">বর্তমান ফিল্টারে থাকা মোট পাওনা</p>
+          <p className="text-[11px] text-slate-400 mt-0.5">বর্তমান ফিল্টারে থাকা মোট পাওনা</p>
         </div>
       </div>
 
       {/* 2. বকেয়াদার সংখ্যা */}
-      <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+      <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-xs sm:text-sm font-medium text-ink-muted">বকেয়াদার কাস্টমার</span>
-          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/60 text-slate-600 flex items-center justify-center">
-            <Receipt size={18} weight="bold" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">বকেয়াদার কাস্টমার</span>
+          <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+            <Receipt size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-bold font-mono text-ink-primary tabular-nums">
-            {dueHoldersCount} <span className="text-xs font-normal text-ink-muted">জন</span>
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900">
+            {dueHoldersCount} <span className="text-xs font-normal text-slate-400">জন</span>
           </div>
-          <p className="text-[11px] text-ink-muted mt-0.5">যাদের কাছে বাকি পাওনা আছে</p>
+          <p className="text-[11px] text-slate-400 mt-0.5">যাদের কাছে বাকি পাওনা আছে</p>
         </div>
       </div>
 
       {/* 3. মোট রেজিস্টার্ড কাস্টমার */}
-      <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200/80 shadow-xs flex flex-col justify-between">
+      <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-xs sm:text-sm font-medium text-ink-muted">মোট নিবন্ধিত খাতা</span>
-          <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/60 text-slate-600 flex items-center justify-center">
-            <Users size={18} weight="bold" />
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">মোট নিবন্ধিত খাতা</span>
+          <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+            <Users size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-bold font-mono text-ink-primary tabular-nums">
-            {meta.total} <span className="text-xs font-normal text-ink-muted">জন</span>
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900">
+            {meta.total} <span className="text-xs font-normal text-slate-400">জন</span>
           </div>
-          <p className="text-[11px] text-ink-muted mt-0.5">খুচরা ও পাইকারি সর্বমোট কাস্টমার</p>
+          <p className="text-[11px] text-slate-400 mt-0.5">খুচরা ও পাইকারি সর্বমোট কাস্টমার</p>
         </div>
       </div>
 
       {/* 4. নতুন কাস্টমার খাতা খোলার বাটন */}
-      <div className="bg-emerald-50/60 border border-emerald-200/70 p-3.5 sm:p-4 rounded-xl flex flex-col justify-between">
+      <div className="bg-slate-50/70 border border-slate-200/90 p-3.5 rounded-lg shadow-[0_1px_2px_rgba(15,23,42,0.02)] flex flex-col justify-between">
         <div>
-          <span className="text-xs sm:text-sm font-semibold text-emerald-900">নতুন খাতা তৈরি</span>
-          <p className="text-[11px] text-emerald-700/90 mt-0.5">নতুন গ্রাহক বা দোকানদার যুক্ত করুন</p>
+          <span className="text-xs font-semibold text-slate-900">নতুন খাতা তৈরি</span>
+          <p className="text-[11px] text-slate-500 mt-0.5">নতুন গ্রাহক বা দোকানদার যুক্ত করুন</p>
         </div>
         <button
           onClick={() => openModal('create')}
-          className="mt-3 w-full py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs sm:text-sm flex items-center justify-center gap-1.5 transition-colors shadow-xs active:scale-98"
+          className="mt-2.5 w-full py-1.5 px-3 rounded-md bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs flex items-center justify-center gap-1.5 transition-[background-color,transform] duration-150 shadow-[0_1px_2px_rgba(15,23,42,0.08)] active:scale-[0.98]"
         >
-          <UserPlus size={16} weight="bold" />
+          <UserPlus size={15} weight="bold" />
           <span>+ নতুন কাস্টমার</span>
         </button>
       </div>

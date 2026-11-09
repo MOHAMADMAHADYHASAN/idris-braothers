@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
 import { X, UserPlus, PencilSimple, WarningCircle, CheckCircle } from '@phosphor-icons/react';
 import { useCustomerKhataStore } from '../useCustomerKhataStore';
 import { CustomerType } from '../customerKhata.types';
@@ -75,19 +76,25 @@ export function CustomerFormModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-in fade-in duration-150">
-      <div className="bg-white w-full max-w-md rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40">
+      <motion.div
+        initial={{ opacity: 0, y: 6, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 4, scale: 0.98 }}
+        transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
+        className="bg-white w-full max-w-md rounded-lg shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1),0_8px_10px_-6px_rgba(15,23,42,0.05)] border border-slate-200/90 overflow-hidden"
+      >
         {/* হেডার */}
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center">
-              {isEdit ? <PencilSimple size={18} weight="bold" /> : <UserPlus size={18} weight="bold" />}
+        <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+              {isEdit ? <PencilSimple size={17} weight="bold" /> : <UserPlus size={17} weight="bold" />}
             </div>
             <div>
-              <h3 className="font-bold text-ink-primary text-sm sm:text-base">
+              <h3 className="font-semibold text-slate-900 text-xs sm:text-sm leading-tight">
                 {isEdit ? 'কাস্টমার তথ্য সম্পাদনা' : 'নতুন কাস্টমার খাতা তৈরি'}
               </h3>
-              <p className="text-[11px] text-ink-muted">
+              <p className="text-[11px] text-slate-500">
                 {isEdit ? selectedCustomer?.name : 'গ্রাহকের নাম ও লেনদেনের ধরন নির্ধারণ করুন'}
               </p>
             </div>
@@ -95,26 +102,26 @@ export function CustomerFormModal() {
           <button
             type="button"
             onClick={closeModal}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
+            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-[background-color,color] duration-150"
           >
-            <X size={18} weight="bold" />
+            <X size={16} weight="bold" />
           </button>
         </div>
 
         {/* ফর্ম */}
         <form onSubmit={handleSubmit}>
-          <div className="p-5 space-y-4">
+          <div className="p-4 space-y-3.5">
             {error && (
-              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
-                <WarningCircle size={16} weight="bold" className="shrink-0" />
+              <div className="p-2.5 rounded-md bg-rose-50 border border-rose-200/80 text-rose-700 text-xs flex items-center gap-2">
+                <WarningCircle size={15} weight="bold" className="shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             {/* নাম */}
             <div>
-              <label className="block text-xs font-semibold text-ink-primary mb-1">
-                গ্রাহকের নাম <span className="text-red-500">*</span>
+              <label className="block text-xs font-medium text-slate-700 mb-1">
+                গ্রাহকের নাম <span className="text-rose-500">*</span>
               </label>
               <input
                 type="text"
@@ -123,7 +130,7 @@ export function CustomerFormModal() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="যেমন: হাজী আব্দুল কাদের / ভাই ভাই স্টোর"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white"
+                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
               />
             </div>
 
@@ -137,7 +144,7 @@ export function CustomerFormModal() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="যেমন: 018XXXXXXXX"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm font-mono text-ink-primary focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white"
+                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm font-mono tabular-nums tracking-tight text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
               />
             </div>
 
@@ -151,7 +158,7 @@ export function CustomerFormModal() {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="যেমন: ফেনী বড় বাজার / দাগনভূঞা"
-                className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm text-ink-primary focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white"
+                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
               />
             </div>
 
@@ -164,10 +171,10 @@ export function CustomerFormModal() {
                 <button
                   type="button"
                   onClick={() => setCustomerType('RETAIL')}
-                  className={`py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                  className={`py-1.5 px-3 rounded-md border text-xs font-medium flex items-center justify-center gap-1.5 transition-[background-color,color] duration-150 active:scale-[0.98] ${
                     customerType === 'RETAIL'
-                      ? 'border-slate-800 bg-slate-900 text-white shadow-xs'
-                      : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                      ? 'border-slate-900 bg-slate-900 text-white shadow-2xs'
+                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                   }`}
                 >
                   <span>খুচরা ক্রেতা</span>
@@ -176,10 +183,10 @@ export function CustomerFormModal() {
                 <button
                   type="button"
                   onClick={() => setCustomerType('WHOLESALE')}
-                  className={`py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
+                  className={`py-1.5 px-3 rounded-md border text-xs font-medium flex items-center justify-center gap-1.5 transition-[background-color,color] duration-150 active:scale-[0.98] ${
                     customerType === 'WHOLESALE'
-                      ? 'border-amber-500 bg-amber-500 text-white shadow-xs'
-                      : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                      ? 'border-slate-900 bg-slate-900 text-white shadow-2xs'
+                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
                   }`}
                 >
                   <span>পাইকারি বেপারী/দোকান</span>
@@ -194,7 +201,7 @@ export function CustomerFormModal() {
                   সফটওয়্যার চালুর পূর্বের বকেয়া (টাকা)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
                     ৳
                   </span>
                   <input
@@ -203,10 +210,10 @@ export function CustomerFormModal() {
                     value={openingDueStr}
                     onChange={(e) => setOpeningDueStr(e.target.value)}
                     placeholder="০"
-                    className="w-full pl-7 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-mono text-ink-primary focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white"
+                    className="w-full pl-6 pr-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs font-mono tabular-nums tracking-tight text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
                   />
                 </div>
-                <p className="text-[10px] text-slate-400 mt-1">
+                <p className="text-[11px] text-slate-400 mt-1">
                   যদি এই গ্রাহকের কাছে আগে থেকেই কোনো বাকি পাওনা থাকে, তা এখানে লিখুন। না থাকলে ০ রাখুন।
                 </p>
               </div>
@@ -214,26 +221,26 @@ export function CustomerFormModal() {
           </div>
 
           {/* ফুটার */}
-          <div className="px-5 py-3.5 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+          <div className="px-4 py-3 bg-slate-50/70 border-t border-slate-100 flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={closeModal}
               disabled={isSubmitting}
-              className="px-4 py-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-xs font-medium text-ink-muted transition-colors"
+              className="px-3.5 py-1.5 rounded-md border border-slate-200 hover:bg-slate-100 text-xs font-medium text-slate-600 transition-[background-color,color] duration-150 active:scale-[0.98]"
             >
               বাতিল
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !name.trim()}
-              className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition-colors shadow-xs active:scale-98 disabled:opacity-50"
+              className="px-4 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium flex items-center gap-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.08)] transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50"
             >
-              <CheckCircle size={16} weight="bold" />
+              <CheckCircle size={15} weight="bold" />
               <span>{isSubmitting ? 'সংরক্ষণ হচ্ছে...' : isEdit ? 'আপডেট সম্পন্ন' : 'খাতা তৈরি করুন'}</span>
             </button>
           </div>
         </form>
-      </div>
+      </motion.div>
     </div>
   );
 }

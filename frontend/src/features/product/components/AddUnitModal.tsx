@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Package, Plus, Trash } from '@phosphor-icons/react';
+import { motion } from 'motion/react';
+import { X, Package, Plus, Trash, Calculator } from '@phosphor-icons/react';
 import { ProductVariant } from '../product.types';
 import { useProductStore } from '../useProductStore';
 
@@ -64,32 +65,43 @@ export function AddUnitModal({ isOpen, onClose, variant, productName }: AddUnitM
     }
   };
 
+  const factorNum = parseFloat(conversionFactor) || 0;
+  const suggestedRetail = factorNum > 0 ? factorNum * variant.retailPrice : 0;
+  const suggestedWholesale = factorNum > 0 ? factorNum * variant.wholesalePrice : 0;
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-      <div className="bg-white rounded-xl shadow-xl border border-slate-200 max-w-lg w-full overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 6, scale: 0.98 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 4, scale: 0.98 }}
+        transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
+        className="bg-white rounded-lg shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1),0_8px_10px_-6px_rgba(15,23,42,0.05)] border border-slate-200/90 max-w-lg w-full overflow-hidden"
+      >
+        <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/70 text-slate-700 flex items-center justify-center">
-              <Package size={18} weight="bold" />
+            <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+              <Package size={17} weight="bold" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">পাইকারি ও কাস্টম ইউনিট রূপান্তর</h3>
-              <p className="text-xs text-slate-500 truncate max-w-[280px]">
-                {productName} {variant.variantName !== 'Default' ? `(${variant.variantName})` : ''} | বেস ইউনিট: {variant.baseUnitName}
+              <h3 className="text-xs font-semibold text-slate-900 leading-tight">পাইকারি ও কাস্টম ইউনিট রূপান্তর</h3>
+              <p className="text-[11px] text-slate-500 truncate max-w-[280px]">
+                {productName} {variant.variantName !== 'Default' ? `(${variant.variantName})` : ''} · বেস: {variant.baseUnitName}
               </p>
             </div>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-[background-color,color] duration-150"
           >
-            <X size={18} weight="bold" />
+            <X size={16} weight="bold" />
           </button>
         </div>
 
-        <div className="p-5 space-y-5">
+        <div className="p-4 space-y-4 max-h-[80vh] overflow-y-auto">
           {error && (
-            <div className="p-3 text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg">
+            <div className="p-2.5 text-xs text-rose-700 bg-rose-50 border border-rose-200/80 rounded-md">
               {error}
             </div>
           )}
@@ -98,47 +110,68 @@ export function AddUnitModal({ isOpen, onClose, variant, productName }: AddUnitM
           <div>
             <h4 className="text-xs font-semibold text-slate-700 mb-2">বর্তমান সংযুক্ত ইউনিটসমূহ:</h4>
             {variant.units && variant.units.length > 0 ? (
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 {variant.units.map((u) => (
                   <div
                     key={u.id}
-                    className="p-3 rounded-lg border border-slate-200 bg-slate-50/40 flex items-center justify-between text-xs"
+                    className="p-2.5 rounded-md border border-slate-200/80 bg-slate-50/50 flex items-center justify-between text-xs"
                   >
                     <div>
-                      <div className="font-semibold text-slate-800">
-                        {u.unitName}
-                        <span className="ml-2 font-normal text-slate-500">
-                          (১ {u.unitName} = {u.conversionFactor} {variant.baseUnitName})
+                      <div className="font-semibold text-slate-900 flex items-center gap-2">
+                        <span>{u.unitName}</span>
+                        <span className="font-mono tabular-nums tracking-tight text-[11px] font-normal text-slate-500 bg-white px-1.5 py-0.5 rounded border border-slate-200/60">
+                          ১ {u.unitName} = {u.conversionFactor} {variant.baseUnitName}
                         </span>
                       </div>
-                      <div className="text-slate-500 text-[11px] mt-0.5 flex gap-3">
-                        {u.retailPrice && <span>খুচরা: ৳{u.retailPrice}</span>}
-                        {u.wholesalePrice && <span>পাইকারি: ৳{u.wholesalePrice}</span>}
-                        {u.barcode && <span>বারকোড: {u.barcode}</span>}
+                      <div className="text-slate-500 text-[11px] mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono tabular-nums tracking-tight">
+                        {u.retailPrice && (
+                          <span>
+                            খুচরা: <strong className="text-slate-700 font-semibold">৳{u.retailPrice.toFixed(2)}</strong>
+                          </span>
+                        )}
+                        {u.wholesalePrice && (
+                          <span>
+                            পাইকারি: <strong className="text-slate-700 font-semibold">৳{u.wholesalePrice.toFixed(2)}</strong>
+                          </span>
+                        )}
+                        {u.barcode && (
+                          <span className="text-slate-400 font-normal">
+                            বারকোড: {u.barcode}
+                          </span>
+                        )}
                       </div>
                     </div>
                     <button
+                      type="button"
                       onClick={() => handleDelete(u.id)}
-                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                      className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-[background-color,color] duration-150 active:scale-[0.96]"
                       title="ইউনিট মুছে ফেলুন"
                     >
-                      <Trash size={15} />
+                      <Trash size={14} />
                     </button>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-xs text-slate-400 italic bg-slate-50 p-3 rounded-lg border border-slate-100">
+              <p className="text-xs text-slate-400 italic bg-slate-50/70 p-3 rounded-md border border-slate-200/70">
                 শুধুমাত্র মূল এককে ({variant.baseUnitName}) কেনাবেচা চলছে। নিচে নতুন বস্তা বা কার্টন ইউনিট যোগ করুন।
               </p>
             )}
           </div>
 
           {/* Add New Unit Form */}
-          <form onSubmit={handleSubmit} className="border-t border-slate-100 pt-4 space-y-3">
-            <h4 className="text-xs font-semibold text-slate-800">নতুন ইউনিট যোগ করুন:</h4>
+          <form onSubmit={handleSubmit} className="border-t border-slate-100 pt-3.5 space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-semibold text-slate-900">নতুন ইউনিট যোগ করুন</h4>
+              {factorNum > 0 && (
+                <div className="text-[11px] font-mono tabular-nums tracking-tight text-slate-500 flex items-center gap-1">
+                  <Calculator size={13} className="text-slate-400" />
+                  অটো রেট: খুচরা ৳{suggestedRetail.toFixed(0)} | পাইকারি ৳{suggestedWholesale.toFixed(0)}
+                </div>
+              )}
+            </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2.5">
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1">
                   ইউনিটের নাম *
@@ -149,7 +182,7 @@ export function AddUnitModal({ isOpen, onClose, variant, productName }: AddUnitM
                   placeholder="e.g. ৫০ কেজি বস্তা বা কার্টন"
                   value={unitName}
                   onChange={(e) => setUnitName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800"
+                  className="w-full px-2.5 py-1.5 text-xs border border-slate-200 rounded-md bg-white focus:outline-hidden focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-[border-color,box-shadow]"
                 />
               </div>
 
@@ -164,12 +197,12 @@ export function AddUnitModal({ isOpen, onClose, variant, productName }: AddUnitM
                   placeholder="e.g. 50 বা 24"
                   value={conversionFactor}
                   onChange={(e) => setConversionFactor(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800"
+                  className="w-full px-2.5 py-1.5 text-xs font-mono tabular-nums tracking-tight border border-slate-200 rounded-md bg-white focus:outline-hidden focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-[border-color,box-shadow]"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-3 gap-2.5">
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1">
                   খুচরা দর (ঐচ্ছিক)
@@ -177,10 +210,10 @@ export function AddUnitModal({ isOpen, onClose, variant, productName }: AddUnitM
                 <input
                   type="number"
                   step="0.01"
-                  placeholder="খালি রাখলে স্বয়ংক্রিয়"
+                  placeholder={factorNum > 0 ? `৳${suggestedRetail.toFixed(0)}` : 'স্বয়ংক্রিয়'}
                   value={retailPrice}
                   onChange={(e) => setRetailPrice(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800"
+                  className="w-full px-2.5 py-1.5 text-xs font-mono tabular-nums tracking-tight border border-slate-200 rounded-md bg-white focus:outline-hidden focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-[border-color,box-shadow]"
                 />
               </div>
 
@@ -191,10 +224,10 @@ export function AddUnitModal({ isOpen, onClose, variant, productName }: AddUnitM
                 <input
                   type="number"
                   step="0.01"
-                  placeholder="খালি রাখলে স্বয়ংক্রিয়"
+                  placeholder={factorNum > 0 ? `৳${suggestedWholesale.toFixed(0)}` : 'স্বয়ংক্রিয়'}
                   value={wholesalePrice}
                   onChange={(e) => setWholesalePrice(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800"
+                  className="w-full px-2.5 py-1.5 text-xs font-mono tabular-nums tracking-tight border border-slate-200 rounded-md bg-white focus:outline-hidden focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-[border-color,box-shadow]"
                 />
               </div>
 
@@ -204,19 +237,19 @@ export function AddUnitModal({ isOpen, onClose, variant, productName }: AddUnitM
                 </label>
                 <input
                   type="text"
-                  placeholder="কার্টনের নিজস্ব কোড"
+                  placeholder="বারকোড স্ক্যান"
                   value={barcode}
                   onChange={(e) => setBarcode(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-slate-200 rounded-lg focus:outline-hidden focus:ring-2 focus:ring-slate-900/10 focus:border-slate-800"
+                  className="w-full px-2.5 py-1.5 text-xs font-mono tabular-nums tracking-tight border border-slate-200 rounded-md bg-white focus:outline-hidden focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-[border-color,box-shadow]"
                 />
               </div>
             </div>
 
-            <div className="pt-2 flex items-center justify-end">
+            <div className="pt-2 flex items-center justify-end border-t border-slate-100">
               <button
                 type="submit"
                 disabled={isSaving}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-lg shadow-xs transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-md shadow-[0_1px_2px_rgba(15,23,42,0.08)] transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50"
               >
                 <Plus size={14} weight="bold" />
                 {isSaving ? 'যুক্ত হচ্ছে...' : 'ইউনিট যুক্ত করুন'}
@@ -224,7 +257,7 @@ export function AddUnitModal({ isOpen, onClose, variant, productName }: AddUnitM
             </div>
           </form>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
