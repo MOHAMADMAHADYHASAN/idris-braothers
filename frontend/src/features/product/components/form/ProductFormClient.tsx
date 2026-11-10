@@ -7,9 +7,9 @@ import { Product, CreateProductDTO, UpdateProductDTO, CreateVariantDTO } from '.
 import { ProductStickyHeader } from './ProductStickyHeader';
 import { BasicInfoCard } from './BasicInfoCard';
 import { TaxonomyCard } from './TaxonomyCard';
-import { InventorySettingsCard } from './InventorySettingsCard';
+import { InventorySettingsCard, ProductCodeCard } from './InventorySettingsCard';
 import { PricingMarginCard } from './PricingMarginCard';
-import { PackagingUnitsCard, FormUnitItem } from './PackagingUnitsCard';
+import { FormUnitItem } from './PackagingUnitsCard';
 import { VariantsStockMatrixCard, FormVariantItem } from './VariantsStockMatrixCard';
 import { WarningCircle, Spinner } from '@phosphor-icons/react';
 import { generateRandom6Digits } from '@/lib/skuGenerator';
@@ -478,7 +478,7 @@ export function ProductFormClient({ productId, initialProduct }: ProductFormClie
               isEditMode={isEditMode}
             />
 
-            {/* যদি একক পণ্য হয়: কার্ড ২ (দর ও লাভ মার্জিন) এবং কার্ড ৩ (কার্টন রূপান্তর) */}
+            {/* যদি একক পণ্য হয়: কার্ড ২ (দর ও লাভ মার্জিন) এবং কার্ড ৩ (একক ও স্টক পরিমাণ) */}
             {!hasVariants && (
               <>
                 <PricingMarginCard
@@ -500,13 +500,28 @@ export function ProductFormClient({ productId, initialProduct }: ProductFormClie
                   baseUnitName={baseUnitName}
                 />
 
-                <PackagingUnitsCard
-                  units={simpleUnits}
-                  setUnits={(action) => {
-                    setSimpleUnits(action);
+                <InventorySettingsCard
+                  baseUnitName={baseUnitName}
+                  setBaseUnitName={(v) => {
+                    setBaseUnitName(v);
                     setIsDirty(true);
                   }}
-                  baseUnitName={baseUnitName}
+                  allowDecimalQty={allowDecimalQty}
+                  setAllowDecimalQty={(v) => {
+                    setAllowDecimalQty(v);
+                    setIsDirty(true);
+                  }}
+                  stockQuantity={stockQuantity}
+                  setStockQuantity={(v) => {
+                    setStockQuantity(v);
+                    setIsDirty(true);
+                  }}
+                  lowStockAlert={lowStockAlert}
+                  setLowStockAlert={(v) => {
+                    setLowStockAlert(v);
+                    setIsDirty(true);
+                  }}
+                  isEditMode={isEditMode}
                 />
               </>
             )}
@@ -532,29 +547,9 @@ export function ProductFormClient({ productId, initialProduct }: ProductFormClie
               onCreateBrand={createBrand}
             />
 
-            {/* যদি একক পণ্য হয়: কার্ড ৫ (ইনভেন্টরি ও বেস ইউনিট) */}
+            {/* যদি একক পণ্য হয়: SKU ও বারকোড */}
             {!hasVariants && (
-              <InventorySettingsCard
-                baseUnitName={baseUnitName}
-                setBaseUnitName={(v) => {
-                  setBaseUnitName(v);
-                  setIsDirty(true);
-                }}
-                allowDecimalQty={allowDecimalQty}
-                setAllowDecimalQty={(v) => {
-                  setAllowDecimalQty(v);
-                  setIsDirty(true);
-                }}
-                stockQuantity={stockQuantity}
-                setStockQuantity={(v) => {
-                  setStockQuantity(v);
-                  setIsDirty(true);
-                }}
-                lowStockAlert={lowStockAlert}
-                setLowStockAlert={(v) => {
-                  setLowStockAlert(v);
-                  setIsDirty(true);
-                }}
+              <ProductCodeCard
                 sku={sku}
                 setSku={(v) => {
                   setSku(v);
@@ -565,7 +560,6 @@ export function ProductFormClient({ productId, initialProduct }: ProductFormClie
                   setBarcode(v);
                   setIsDirty(true);
                 }}
-                isEditMode={isEditMode}
               />
             )}
           </div>
@@ -581,7 +575,6 @@ export function ProductFormClient({ productId, initialProduct }: ProductFormClie
                 setIsDirty(true);
               }}
               defaultBaseUnit={baseUnitName}
-              productName={name}
               simpleSku={sku}
             />
           </div>

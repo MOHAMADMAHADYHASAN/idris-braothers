@@ -14,34 +14,41 @@ export interface CustomerOption {
 }
 
 export interface CartItem {
-  id: string; // unique cart item key (e.g. productId_unitName)
+  id: string; // unique cart item key (e.g. variantId_unitName)
   productId: string;
+  variantId?: string;
   productName: string;
   banglaName?: string | null;
+  variantName?: string | null;
+  allowDecimalQty: boolean;
   sku?: string | null;
   barcode?: string | null;
-  baseUnitName: string; // e.g. "কেজি", "প্যাকেট", "লিটার"
+  baseUnitName: string; // e.g. "কেজি", "প্যাকেট", "বোতল", "পিস"
   
   // Unit Selection
-  selectedUnitName: string; // e.g. "কেজি", "৫০ কেজি বস্তা", "৫ কেজি পাল্লা", "কার্টন"
-  conversionFactor: number; // 1 for base, 50 for sack, 5 for palla, 24 for carton
+  selectedUnitName: string; // e.g. "কেজি", "প্যাকেট", "পিস", "বোতল"
+  conversionFactor: number; // 1 for direct kg / pcs
   
   // Pricing
-  unitPrice: number; // Price per selected unit (Retail or Wholesale)
+  retailUnitPrice: number;
+  wholesaleUnitPrice: number;
+  unitPrice: number; // Active price per selected unit (or custom overridden)
+  isCustomPrice?: boolean;
   costPriceSnapshot: number; // Cost price per base unit at time of sale
   
   // Quantities & Reverse Calculation
-  quantity: number; // e.g. 2 sacks or 1.5 KG
+  quantity: number; // e.g. 24 pcs or 66.5 kg
   baseQuantity: number; // quantity * conversionFactor (or reverse calculated)
-  isReverseCalculated: boolean; // True if customer asked for "20 TK Cardamom"
-  customTotalPrice?: number; // e.g. 20
+  isReverseCalculated: boolean; // True if customer asked for e.g. "700 TK Rice"
+  customTotalPrice?: number;
   
   // Totals
   subTotal: number;
 }
 
 export interface CreateSaleItemPayload {
-  productId: string;
+  variantId?: string;
+  productId?: string;
   unitName: string;
   conversionFactor: number;
   quantity?: number;

@@ -9,7 +9,7 @@ import {
   SaleInvoiceReceipt,
   ThermalReceiptData,
 } from './pos.types';
-import { Product, ProductUnit } from '../product/product.types';
+import { Product, ProductUnit, ProductVariant } from '../product/product.types';
 
 interface PosState {
   // Billing Mode
@@ -32,10 +32,12 @@ interface PosState {
 
   // Actions
   setSaleType: (type: SaleType) => void;
-  addItem: (product: Product, unit?: ProductUnit, quantity?: number) => void;
-  addReversePriceItem: (product: Product, customTotalPrice: number) => void;
+  addItem: (product: Product, variant?: ProductVariant, unit?: ProductUnit, quantity?: number) => void;
+  addReversePriceItem: (product: Product, customTotalPrice: number, variant?: ProductVariant) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
-  updateUnit: (itemId: string, product: Product, unit: ProductUnit) => void;
+  updateUnitPrice: (itemId: string, price: number) => void;
+  resetCustomPrice: (itemId: string) => void;
+  updateUnit: (itemId: string, product: Product, unit: ProductUnit, variant?: ProductVariant) => void;
   removeItem: (itemId: string) => void;
   clearCart: () => void;
   
@@ -74,15 +76,18 @@ export const usePosStore = create<PosState>()(
 
       setSaleType: (saleType) => {
         set((state) => {
-          // Re-evaluate cart items pricing under the new saleType
+          const isRetail = saleType === 'RETAIL';
           const updatedCart = state.cart.map((item) => {
-            if (item.isReverseCalculated) {
+            if (item.isReverseCalculated || item.isCustomPrice) {
               return item;
             }
+            const nextUnitPrice = isRetail
+              ? (item.retailUnitPrice ?? item.unitPrice)
+              : (item.wholesaleUnitPrice ?? item.unitPrice);
             return {
               ...item,
-              // When mode changes, recalculate subTotal based on updated rate
-              subTotal: parseFloat((item.quantity * item.unitPrice).toFixed(2)),
+              unitPrice: nextUnitPrice,
+              subTotal: parseFloat((item.quantity * nextUnitPrice).toFixed(2)),
             };
           });
 
@@ -90,55 +95,72 @@ export const usePosStore = create<PosState>()(
         });
       },
 
-      addItem: (product, unit, quantity = 1) => {
+      addItem: (product, variant, unit, quantity = 1) => {
         set((state) => {
           const isRetail = state.saleType === 'RETAIL';
-          const unitName = unit ? unit.unitName : product.baseUnitName;
+          const targetVariant = variant || product.variants?.[0];
+          const baseUnitName = targetVariant?.baseUnitName || product.baseUnitName || 'কেজি';
+          const allowDecimalQty = targetVariant ? targetVariant.allowDecimalQty : true;
+          const unitName = unit ? unit.unitName : baseUnitName;
           const factor = unit ? unit.conversionFactor : 1;
-          
-          let unitPrice = 0;
-          if (unit) {
-            unitPrice = isRetail
-              ? (unit.retailPrice ?? product.retailPrice * factor)
-              : (unit.wholesalePrice ?? product.wholesalePrice * factor);
-          } else {
-            unitPrice = isRetail ? product.retailPrice : product.wholesalePrice;
-          }
 
-          const cartItemId = `${product.id}_${unitName}`;
+          const baseRetail = targetVariant?.retailPrice ?? product.retailPrice;
+          const baseWholesale = targetVariant?.wholesalePrice ?? product.wholesalePrice;
+          const baseCost = targetVariant?.currentPurchasePrice ?? product.currentPurchasePrice;
+
+          const retailUnitPrice = unit
+            ? (unit.retailPrice ?? parseFloat((baseRetail * factor).toFixed(2)))
+            : baseRetail;
+          const wholesaleUnitPrice = unit
+            ? (unit.wholesalePrice ?? parseFloat((baseWholesale * factor).toFixed(2)))
+            : baseWholesale;
+          const unitPrice = isRetail ? retailUnitPrice : wholesaleUnitPrice;
+
+          const safeQty = allowDecimalQty ? quantity : Math.max(1, Math.round(quantity));
+          const keyPrefix = targetVariant?.id || product.id;
+          const cartItemId = `${keyPrefix}_${unitName}`;
           const existingIndex = state.cart.findIndex((i) => i.id === cartItemId && !i.isReverseCalculated);
 
           if (existingIndex > -1) {
-            // Increment existing item
             const newCart = [...state.cart];
             const existing = newCart[existingIndex];
-            const newQty = existing.quantity + quantity;
+            const newQty = allowDecimalQty
+              ? parseFloat((existing.quantity + safeQty).toFixed(4))
+              : Math.round(existing.quantity + safeQty);
             newCart[existingIndex] = {
               ...existing,
               quantity: newQty,
               baseQuantity: parseFloat((newQty * factor).toFixed(4)),
-              subTotal: parseFloat((newQty * unitPrice).toFixed(2)),
+              subTotal: parseFloat((newQty * existing.unitPrice).toFixed(2)),
             };
             return { cart: newCart, error: null };
           }
 
-          // Add new item to cart
           const newItem: CartItem = {
             id: cartItemId,
             productId: product.id,
+            variantId: targetVariant?.id,
             productName: product.name,
             banglaName: product.banglaName,
-            sku: product.sku,
-            barcode: product.barcode,
-            baseUnitName: product.baseUnitName,
+            variantName:
+              targetVariant?.variantName && targetVariant.variantName !== 'Default'
+                ? targetVariant.variantName
+                : null,
+            allowDecimalQty,
+            sku: targetVariant?.sku ?? product.sku,
+            barcode: targetVariant?.barcode ?? product.barcode,
+            baseUnitName,
             selectedUnitName: unitName,
             conversionFactor: factor,
+            retailUnitPrice,
+            wholesaleUnitPrice,
             unitPrice,
-            costPriceSnapshot: product.currentPurchasePrice,
-            quantity,
-            baseQuantity: parseFloat((quantity * factor).toFixed(4)),
+            isCustomPrice: false,
+            costPriceSnapshot: baseCost,
+            quantity: safeQty,
+            baseQuantity: parseFloat((safeQty * factor).toFixed(4)),
             isReverseCalculated: false,
-            subTotal: parseFloat((quantity * unitPrice).toFixed(2)),
+            subTotal: parseFloat((safeQty * unitPrice).toFixed(2)),
           };
 
           return { cart: [newItem, ...state.cart], error: null };
@@ -146,33 +168,45 @@ export const usePosStore = create<PosState>()(
       },
 
       /**
-       * Reverse Price-to-Weight calculation ("২০ টাকার এলাচ বিক্রি").
-       * When a customer asks for ৳20 worth of Cardamom:
-       * baseQuantity = 20 / unitPrice (to 4 decimal places).
+       * Reverse Price-to-Weight calculation ("টাকার অংকে বিক্রি").
        */
-      addReversePriceItem: (product, customTotalPrice) => {
+      addReversePriceItem: (product, customTotalPrice, variant) => {
         if (!customTotalPrice || customTotalPrice <= 0) return;
 
         set((state) => {
           const isRetail = state.saleType === 'RETAIL';
-          const unitPrice = isRetail ? product.retailPrice : product.wholesalePrice;
-          
-          // Calculate exact micro-weight to 4 decimal places
+          const targetVariant = variant || product.variants?.[0];
+          const baseUnitName = targetVariant?.baseUnitName || product.baseUnitName || 'কেজি';
+          const baseRetail = targetVariant?.retailPrice ?? product.retailPrice;
+          const baseWholesale = targetVariant?.wholesalePrice ?? product.wholesalePrice;
+          const baseCost = targetVariant?.currentPurchasePrice ?? product.currentPurchasePrice;
+          const unitPrice = isRetail ? baseRetail : baseWholesale;
+
           const baseQuantity = parseFloat((customTotalPrice / unitPrice).toFixed(4));
-          const cartItemId = `${product.id}_reverse_${Date.now()}`;
+          const keyPrefix = targetVariant?.id || product.id;
+          const cartItemId = `${keyPrefix}_reverse_${Date.now()}`;
 
           const newItem: CartItem = {
             id: cartItemId,
             productId: product.id,
+            variantId: targetVariant?.id,
             productName: product.name,
             banglaName: product.banglaName,
-            sku: product.sku,
-            barcode: product.barcode,
-            baseUnitName: product.baseUnitName,
-            selectedUnitName: product.baseUnitName,
+            variantName:
+              targetVariant?.variantName && targetVariant.variantName !== 'Default'
+                ? targetVariant.variantName
+                : null,
+            allowDecimalQty: true,
+            sku: targetVariant?.sku ?? product.sku,
+            barcode: targetVariant?.barcode ?? product.barcode,
+            baseUnitName,
+            selectedUnitName: baseUnitName,
             conversionFactor: 1,
+            retailUnitPrice: baseRetail,
+            wholesaleUnitPrice: baseWholesale,
             unitPrice,
-            costPriceSnapshot: product.currentPurchasePrice,
+            isCustomPrice: false,
+            costPriceSnapshot: baseCost,
             quantity: 1,
             baseQuantity,
             isReverseCalculated: true,
@@ -185,7 +219,7 @@ export const usePosStore = create<PosState>()(
       },
 
       updateQuantity: (itemId, quantity) => {
-        if (quantity <= 0) {
+        if (isNaN(quantity) || quantity <= 0) {
           get().removeItem(itemId);
           return;
         }
@@ -193,23 +227,65 @@ export const usePosStore = create<PosState>()(
         set((state) => ({
           cart: state.cart.map((item) => {
             if (item.id !== itemId) return item;
+            const safeQty = item.allowDecimalQty === false
+              ? Math.max(1, Math.round(quantity))
+              : parseFloat(quantity.toFixed(4));
             return {
               ...item,
-              quantity,
-              baseQuantity: parseFloat((quantity * item.conversionFactor).toFixed(4)),
-              subTotal: parseFloat((quantity * item.unitPrice).toFixed(2)),
+              quantity: safeQty,
+              baseQuantity: parseFloat((safeQty * item.conversionFactor).toFixed(4)),
+              subTotal: parseFloat((safeQty * item.unitPrice).toFixed(2)),
             };
           }),
         }));
       },
 
-      updateUnit: (itemId, product, unit) => {
+      updateUnitPrice: (itemId, price) => {
+        if (isNaN(price) || price <= 0) return;
+        const safePrice = parseFloat(price.toFixed(2));
+        set((state) => ({
+          cart: state.cart.map((item) => {
+            if (item.id !== itemId || item.isReverseCalculated) return item;
+            return {
+              ...item,
+              unitPrice: safePrice,
+              isCustomPrice: true,
+              subTotal: parseFloat((item.quantity * safePrice).toFixed(2)),
+            };
+          }),
+        }));
+      },
+
+      resetCustomPrice: (itemId) => {
         set((state) => {
           const isRetail = state.saleType === 'RETAIL';
+          return {
+            cart: state.cart.map((item) => {
+              if (item.id !== itemId || item.isReverseCalculated) return item;
+              const restoredPrice = isRetail
+                ? (item.retailUnitPrice ?? item.unitPrice)
+                : (item.wholesaleUnitPrice ?? item.unitPrice);
+              return {
+                ...item,
+                unitPrice: restoredPrice,
+                isCustomPrice: false,
+                subTotal: parseFloat((item.quantity * restoredPrice).toFixed(2)),
+              };
+            }),
+          };
+        });
+      },
+
+      updateUnit: (itemId, product, unit, variant) => {
+        set((state) => {
+          const isRetail = state.saleType === 'RETAIL';
+          const targetVariant = variant || product.variants?.[0];
+          const baseRetail = targetVariant?.retailPrice ?? product.retailPrice;
+          const baseWholesale = targetVariant?.wholesalePrice ?? product.wholesalePrice;
           const factor = unit.conversionFactor;
-          const unitPrice = isRetail
-            ? (unit.retailPrice ?? product.retailPrice * factor)
-            : (unit.wholesalePrice ?? product.wholesalePrice * factor);
+          const retailUnitPrice = unit.retailPrice ?? parseFloat((baseRetail * factor).toFixed(2));
+          const wholesaleUnitPrice = unit.wholesalePrice ?? parseFloat((baseWholesale * factor).toFixed(2));
+          const unitPrice = isRetail ? retailUnitPrice : wholesaleUnitPrice;
 
           return {
             cart: state.cart.map((item) => {
@@ -218,7 +294,10 @@ export const usePosStore = create<PosState>()(
                 ...item,
                 selectedUnitName: unit.unitName,
                 conversionFactor: factor,
+                retailUnitPrice,
+                wholesaleUnitPrice,
                 unitPrice,
+                isCustomPrice: false,
                 baseQuantity: parseFloat((item.quantity * factor).toFixed(4)),
                 subTotal: parseFloat((item.quantity * unitPrice).toFixed(2)),
               };
@@ -296,13 +375,16 @@ export const usePosStore = create<PosState>()(
             items: state.cart.map((item) => {
               if (item.isReverseCalculated) {
                 return {
+                  variantId: item.variantId,
                   productId: item.productId,
                   unitName: item.selectedUnitName,
                   conversionFactor: item.conversionFactor,
+                  unitPrice: item.unitPrice,
                   customTotalPrice: item.customTotalPrice,
                 };
               }
               return {
+                variantId: item.variantId,
                 productId: item.productId,
                 unitName: item.selectedUnitName,
                 conversionFactor: item.conversionFactor,

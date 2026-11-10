@@ -13,7 +13,7 @@ import {
 } from '@phosphor-icons/react';
 import { productService } from '@/features/product/product.service';
 import { Product, ProductVariant } from '@/features/product/product.types';
-import { formatCurrency, formatNumber } from '@/lib/decimal';
+import { formatCurrency, formatNumber, formatWeight } from '@/lib/decimal';
 import { usePurchaseStore } from '../../usePurchaseStore';
 import { PurchaseItemDTO } from '../../purchase.types';
 
@@ -112,6 +112,11 @@ export function ChallanItemPickerCard() {
 
     if (isNaN(qty) || qty <= 0) {
       setValidationError('পরিমাণ অবশ্যই ০ এর বেশি হতে হবে');
+      return;
+    }
+
+    if (selectedVariant && !selectedVariant.allowDecimalQty && conversionFactor === 1 && !Number.isInteger(qty)) {
+      setValidationError(`${baseUnitName} পণ্যের পরিমাণ অবশ্যই পূর্ণসংখ্যা হতে হবে (যেমন: ১, ১২, ২৪)`);
       return;
     }
 
@@ -225,19 +230,22 @@ export function ChallanItemPickerCard() {
                       className="w-full p-2.5 text-left text-xs hover:bg-brand-soft/50 flex items-center justify-between transition-colors cursor-pointer"
                     >
                       <div>
-                        <span className="font-bold text-ink-primary">{product.name}</span>
+                        <span className="font-bold text-ink-primary">{product.banglaName || product.name}</span>
                         <span className="ml-2 px-2 py-0.5 rounded text-xs font-bold bg-brand-soft text-brand-deep border border-brand-light">
                           {v.variantName}
                         </span>
                         {v.sku && <span className="ml-2 font-mono text-xs text-ink-secondary">{v.sku}</span>}
                       </div>
                       <div className="text-right font-mono text-xs text-ink-secondary">
-                        বর্তমান কেনা: {formatCurrency(v.currentPurchasePrice, false)}
+                        <span>স্টক: {formatWeight(v.stockQuantity, v.baseUnitName)}</span>
+                        <span className="mx-1.5">•</span>
+                        <span>কেনা: {formatCurrency(v.currentPurchasePrice, false)}</span>
                       </div>
                     </button>
                   ));
                 }
 
+                const primaryV = product.variants[0];
                 return (
                   <button
                     key={product.id}
@@ -246,13 +254,15 @@ export function ChallanItemPickerCard() {
                     className="w-full p-2.5 text-left text-xs hover:bg-brand-soft/50 flex items-center justify-between transition-colors cursor-pointer"
                   >
                     <div>
-                      <span className="font-bold text-ink-primary">{product.name}</span>
+                      <span className="font-bold text-ink-primary">{product.banglaName || product.name}</span>
                       {product.banglaName && (
-                        <span className="ml-2 text-ink-secondary font-normal">({product.banglaName})</span>
+                        <span className="ml-2 text-ink-secondary font-normal">({product.name})</span>
                       )}
                     </div>
                     <div className="text-right font-mono text-xs text-ink-secondary">
-                      বর্তমান কেনা: {formatCurrency(product.variants[0]?.currentPurchasePrice || 0, false)}
+                      <span>স্টক: {formatWeight(primaryV?.stockQuantity || 0, primaryV?.baseUnitName || product.baseUnitName)}</span>
+                      <span className="mx-1.5">•</span>
+                      <span>কেনা: {formatCurrency(primaryV?.currentPurchasePrice || 0, false)}</span>
                     </div>
                   </button>
                 );
@@ -264,35 +274,48 @@ export function ChallanItemPickerCard() {
         {/* নির্বাচিত পণ্যের ইনপুট ম্যাট্রিক্স */}
         {selectedProduct && (
           <div className="p-4 rounded-xl border border-brand-light bg-brand-soft/40 space-y-3.5 animate-in fade-in duration-150">
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-ink-body mb-1">
-                  ক্রয় একক
-                </label>
-                <select
-                  value={selectedUnitName}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    setSelectedUnitName(val);
-                    if (val === baseUnitName) {
-                      setConversionFactor(1);
-                    } else {
-                      const matched = availableUnits.find((u) => u.unitName === val);
-                      if (matched) {
-                        setConversionFactor(matched.conversionFactor);
+            <div className="flex items-center justify-between text-xs pb-1 border-b border-brand-light/60">
+              <span className="font-semibold text-ink-body">
+                একক: <strong className="text-brand-deep">{baseUnitName}</strong>
+              </span>
+              {selectedVariant && (
+                <span className="font-mono font-semibold text-ink-secondary">
+                  বর্তমান মজুত: {formatWeight(selectedVariant.stockQuantity, selectedVariant.baseUnitName)}
+                </span>
+              )}
+            </div>
+
+            <div className={`grid grid-cols-1 gap-3 ${availableUnits.length > 0 ? 'sm:grid-cols-4' : 'sm:grid-cols-3'}`}>
+              {availableUnits.length > 0 && (
+                <div>
+                  <label className="block text-xs font-semibold text-ink-body mb-1">
+                    ক্রয় একক
+                  </label>
+                  <select
+                    value={selectedUnitName}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setSelectedUnitName(val);
+                      if (val === baseUnitName) {
+                        setConversionFactor(1);
+                      } else {
+                        const matched = availableUnits.find((u) => u.unitName === val);
+                        if (matched) {
+                          setConversionFactor(matched.conversionFactor);
+                        }
                       }
-                    }
-                  }}
-                  className="w-full px-2.5 py-2 rounded-lg border border-border-strong bg-surface-card font-medium text-xs text-ink-primary focus:outline-none focus:ring-2 focus:ring-brand-deep"
-                >
-                  <option value={baseUnitName}>{baseUnitName} (মূল একক)</option>
-                  {availableUnits.map((u) => (
-                    <option key={u.id} value={u.unitName}>
-                      {u.unitName} (১ {u.unitName} = {formatNumber(u.conversionFactor)} {baseUnitName})
-                    </option>
-                  ))}
-                </select>
-              </div>
+                    }}
+                    className="w-full px-2.5 py-2 rounded-lg border border-border-strong bg-surface-card font-medium text-xs text-ink-primary focus:outline-none focus:ring-2 focus:ring-brand-deep"
+                  >
+                    <option value={baseUnitName}>{baseUnitName}</option>
+                    {availableUnits.map((u) => (
+                      <option key={u.id} value={u.unitName}>
+                        {u.unitName} ({formatNumber(u.conversionFactor)} {baseUnitName})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-semibold text-ink-body mb-1">
@@ -301,7 +324,7 @@ export function ChallanItemPickerCard() {
                 <div className="relative">
                   <input
                     type="number"
-                    step="any"
+                    step={selectedVariant?.allowDecimalQty === false ? '1' : 'any'}
                     min="0"
                     required
                     value={quantityStr}

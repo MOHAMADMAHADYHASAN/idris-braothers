@@ -6,12 +6,7 @@ import {
   Plus,
   Trash,
   Lightning,
-  Package,
-  Barcode,
-  Scales,
   Coins,
-  Warehouse,
-  X,
   Sparkle,
   ArrowsClockwise,
 } from '@phosphor-icons/react';
@@ -44,11 +39,13 @@ interface VariantsStockMatrixCardProps {
   variants: FormVariantItem[];
   setVariants: React.Dispatch<React.SetStateAction<FormVariantItem[]>>;
   defaultBaseUnit: string;
-  productName: string;
   simpleSku?: string;
 }
 
 const COMMON_SIZE_PRESETS = [
+  '৫৳ প্যাক',
+  '১০৳ প্যাক',
+  '৫ মি.লি.',
   '২৫০ গ্রাম',
   '৫০০ গ্রাম',
   '১ কেজি',
@@ -61,22 +58,60 @@ const COMMON_SIZE_PRESETS = [
   '৫ লিটার',
 ];
 
+const VARIANT_UNIT_PRESETS = ['প্যাকেট', 'বোতল', 'পিস', 'কেজি'] as const;
+
+function inferVariantUnitAndDecimal(sizeName: string, preferredUnit: string): { baseUnitName: string; allowDecimalQty: boolean } {
+  if (sizeName.includes('মিলি') || sizeName.includes('মি.লি.') || sizeName.includes('লিটার')) {
+    return {
+      baseUnitName: sizeName.includes('৫ মি.লি.') ? 'পিস' : 'বোতল',
+      allowDecimalQty: false,
+    };
+  }
+  if (sizeName.includes('প্যাক')) {
+    return { baseUnitName: 'প্যাকেট', allowDecimalQty: false };
+  }
+  if (sizeName.includes('গ্রাম') || sizeName.includes('কেজি')) {
+    return {
+      baseUnitName: preferredUnit === 'কেজি' ? 'প্যাকেট' : preferredUnit,
+      allowDecimalQty: false,
+    };
+  }
+  return {
+    baseUnitName: preferredUnit,
+    allowDecimalQty: preferredUnit === 'কেজি',
+  };
+}
+
 export function VariantsStockMatrixCard({
   variants,
   setVariants,
   defaultBaseUnit,
-  productName,
   simpleSku,
 }: VariantsStockMatrixCardProps) {
+  const [defaultVariantUnit, setDefaultVariantUnit] = useState<string>(
+    defaultBaseUnit === 'কেজি' ? 'প্যাকেট' : defaultBaseUnit || 'পিস'
+  );
+
   // বাল্ক অ্যাপ্লিকেটর স্টেট
   const [bulkPurchase, setBulkPurchase] = useState('');
   const [bulkWholesale, setBulkWholesale] = useState('');
   const [bulkRetail, setBulkRetail] = useState('');
   const [bulkStock, setBulkStock] = useState('');
-  const [bulkAlert, setBulkAlert] = useState('');
 
-  // ভ্যারিয়েন্ট ইউনিট মোডাল স্টেট
-  const [activeVariantForUnits, setActiveVariantForUnits] = useState<number | null>(null);
+  // সব রো-এর ডিফল্ট একক পরিবর্তন
+  const handleSelectDefaultUnit = (unit: string) => {
+    setDefaultVariantUnit(unit);
+    const isDecimal = unit === 'কেজি';
+    if (variants.length > 0) {
+      setVariants((prev) =>
+        prev.map((v) => ({
+          ...v,
+          baseUnitName: unit,
+          allowDecimalQty: isDecimal,
+        }))
+      );
+    }
+  };
 
   // কুইক প্রিসেট দিয়ে নতুন ভ্যারিয়েন্ট যোগ (অটো ৬-ডিজিট SKU সহ)
   const handleAddPreset = (sizeName: string) => {
@@ -86,6 +121,8 @@ export function VariantsStockMatrixCard({
       return;
     }
 
+    const { baseUnitName, allowDecimalQty } = inferVariantUnitAndDecimal(sizeName, defaultVariantUnit);
+
     setVariants((prev) => {
       const autoSku = generateSingleVariantSku(sizeName, prev, prev.length, simpleSku);
       return [
@@ -94,13 +131,13 @@ export function VariantsStockMatrixCard({
           variantName: sizeName,
           sku: autoSku,
           barcode: '',
-          baseUnitName: defaultBaseUnit || 'কেজি',
-          allowDecimalQty: true,
+          baseUnitName,
+          allowDecimalQty,
           currentPurchasePrice: bulkPurchase || '',
           wholesalePrice: bulkWholesale || '',
           retailPrice: bulkRetail || '',
           stockQuantity: bulkStock || '0',
-          lowStockAlert: bulkAlert || '10',
+          lowStockAlert: '10',
           units: [],
         },
       ];
@@ -115,13 +152,13 @@ export function VariantsStockMatrixCard({
         variantName: '',
         sku: '',
         barcode: '',
-        baseUnitName: defaultBaseUnit || 'কেজি',
-        allowDecimalQty: true,
+        baseUnitName: defaultVariantUnit || 'পিস',
+        allowDecimalQty: defaultVariantUnit === 'কেজি',
         currentPurchasePrice: bulkPurchase || '',
         wholesalePrice: bulkWholesale || '',
         retailPrice: bulkRetail || '',
         stockQuantity: bulkStock || '0',
-        lowStockAlert: bulkAlert || '10',
+        lowStockAlert: '10',
         units: [],
       },
     ]);
@@ -180,8 +217,7 @@ export function VariantsStockMatrixCard({
       !bulkPurchase &&
       !bulkWholesale &&
       !bulkRetail &&
-      !bulkStock &&
-      !bulkAlert
+      !bulkStock
     ) {
       alert('বাল্ক বারে অন্তত একটি মান (দর বা স্টক) লিখুন!');
       return;
@@ -194,7 +230,6 @@ export function VariantsStockMatrixCard({
         wholesalePrice: bulkWholesale ? bulkWholesale : v.wholesalePrice,
         retailPrice: bulkRetail ? bulkRetail : v.retailPrice,
         stockQuantity: bulkStock ? bulkStock : v.stockQuantity,
-        lowStockAlert: bulkAlert ? bulkAlert : v.lowStockAlert,
       }))
     );
   };
@@ -203,21 +238,37 @@ export function VariantsStockMatrixCard({
     <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden">
       {/* কার্ড হেডার */}
       <div className="px-5 py-4 bg-surface-subtle/70 border-b border-border-default flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <span className="p-1.5 rounded-lg bg-brand-soft text-brand-deep shadow-2xs">
             <Stack size={18} weight="bold" />
           </span>
-          <div>
-            <h2 className="text-sm sm:text-base font-bold text-ink-primary flex items-center gap-2 flex-wrap">
-              ভ্যারিয়েন্ট সাইজ ও স্টক ম্যাট্রিক্স
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-soft text-brand-deep border border-brand-light">
-                {formatNumber(variants.length)}টি ভ্যারিয়েন্ট
-              </span>
-            </h2>
-          </div>
+          <h2 className="text-sm sm:text-base font-bold text-ink-primary flex items-center gap-2 flex-wrap">
+            ভ্যারিয়েন্ট সাইজ ও স্টক ম্যাট্রিক্স
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-soft text-brand-deep border border-brand-light">
+              {formatNumber(variants.length)}টি ভ্যারিয়েন্ট
+            </span>
+          </h2>
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto">
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          <div className="flex items-center gap-1 bg-surface-card border border-border-default rounded-lg p-0.5 text-xs">
+            <span className="px-2 text-ink-secondary font-medium">একক:</span>
+            {VARIANT_UNIT_PRESETS.map((u) => (
+              <button
+                key={u}
+                type="button"
+                onClick={() => handleSelectDefaultUnit(u)}
+                className={`px-2 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
+                  defaultVariantUnit === u
+                    ? 'bg-brand-deep text-white'
+                    : 'text-ink-body hover:bg-brand-soft hover:text-brand-deep'
+                }`}
+              >
+                {u}
+              </button>
+            ))}
+          </div>
+
           {variants.length > 0 && (
             <button
               type="button"
@@ -316,7 +367,7 @@ export function VariantsStockMatrixCard({
             <h4 className="text-sm font-bold text-ink-primary">কোনো ভ্যারিয়েন্ট তৈরি করা হয়নি</h4>
           </div>
         ) : (
-          <table className="w-full text-left border-collapse text-xs min-w-[900px]">
+          <table className="w-full text-left border-collapse text-xs min-w-[820px]">
             <thead>
               <tr className="bg-surface-subtle/80 border-b border-border-default text-xs font-bold text-ink-secondary">
                 <th className="py-2.5 px-3">ভ্যারিয়েন্ট সাইজ *</th>
@@ -327,7 +378,6 @@ export function VariantsStockMatrixCard({
                 <th className="py-2.5 px-3">ক্রয়দর (৳) *</th>
                 <th className="py-2.5 px-3">পাইকারি (৳) *</th>
                 <th className="py-2.5 px-3">খুচরা (৳) *</th>
-                <th className="py-2.5 px-3 text-center">কার্টন ইউনিট</th>
                 <th className="py-2.5 px-3 text-center w-10">মুছুন</th>
               </tr>
             </thead>
@@ -385,7 +435,7 @@ export function VariantsStockMatrixCard({
                         type="text"
                         value={v.baseUnitName}
                         onChange={(e) => handleUpdateVariant(idx, 'baseUnitName', e.target.value)}
-                        className="w-14 px-1.5 py-1 rounded border border-border-strong text-center font-medium text-xs bg-surface-card text-ink-primary"
+                        className="w-16 px-1.5 py-1 rounded border border-border-strong text-center font-medium text-xs bg-surface-card text-ink-primary"
                         title="মূল একক"
                       />
                       <button
@@ -470,23 +520,7 @@ export function VariantsStockMatrixCard({
                     />
                   </td>
 
-                  {/* ৯. কার্টন ইউনিট বাটন */}
-                  <td className="py-2.5 px-3 text-center w-[100px]">
-                    <button
-                      type="button"
-                      onClick={() => setActiveVariantForUnits(idx)}
-                      className={`px-2.5 py-1 rounded-md text-xs font-semibold border flex items-center justify-center gap-1 mx-auto cursor-pointer transition-colors ${
-                        v.units && v.units.length > 0
-                          ? 'bg-wholesale-bg text-wholesale-text border-wholesale-border/70'
-                          : 'bg-surface-card text-ink-body border-border-default hover:bg-surface-subtle'
-                      }`}
-                    >
-                      <Package size={12} weight="bold" />
-                      <span>{v.units?.length ? `${formatNumber(v.units.length)}টি ইউনিট` : '+ কার্টন'}</span>
-                    </button>
-                  </td>
-
-                  {/* ১০. অ্যাকশন (ডিলিট) */}
+                  {/* ৯. অ্যাকশন (ডিলিট) */}
                   <td className="py-2.5 px-3 text-center w-10">
                     <button
                       type="button"
@@ -511,163 +545,6 @@ export function VariantsStockMatrixCard({
             </tbody>
           </table>
         )}
-      </div>
-
-      {/* ভ্যারিয়েন্ট কার্টন ইউনিট এডিটর পপআপ */}
-      {activeVariantForUnits !== null && variants[activeVariantForUnits] && (
-        <VariantUnitsModal
-          variantName={variants[activeVariantForUnits].variantName || `ভ্যারিয়েন্ট #${formatNumber(activeVariantForUnits + 1)}`}
-          baseUnitName={variants[activeVariantForUnits].baseUnitName}
-          units={variants[activeVariantForUnits].units || []}
-          onSave={(newUnits) => {
-            handleUpdateVariant(activeVariantForUnits, 'units', newUnits);
-            setActiveVariantForUnits(null);
-          }}
-          onClose={() => setActiveVariantForUnits(null)}
-        />
-      )}
-    </div>
-  );
-}
-
-// সাব-কম্পোনেন্ট: ভ্যারিয়েন্ট স্পেসিফিক কার্টন ইউনিট মোডাল
-function VariantUnitsModal({
-  variantName,
-  baseUnitName,
-  units,
-  onSave,
-  onClose,
-}: {
-  variantName: string;
-  baseUnitName: string;
-  units: FormUnitItem[];
-  onSave: (units: FormUnitItem[]) => void;
-  onClose: () => void;
-}) {
-  const [localUnits, setLocalUnits] = useState<FormUnitItem[]>(units);
-
-  const handleAdd = () => {
-    setLocalUnits((prev) => [
-      ...prev,
-      { unitName: '', conversionFactor: '', wholesalePrice: '', retailPrice: '', barcode: '' },
-    ]);
-  };
-
-  const handleUpdate = (idx: number, field: keyof FormUnitItem, val: string) => {
-    setLocalUnits((prev) =>
-      prev.map((item, i) => (i === idx ? { ...item, [field]: val } : item))
-    );
-  };
-
-  const handleRemove = (idx: number) => {
-    setLocalUnits((prev) => prev.filter((_, i) => i !== idx));
-  };
-
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4">
-      <div
-        className="bg-surface-card rounded-xl shadow-2xl border border-border-default w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-150"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="px-5 py-3.5 bg-surface-subtle border-b border-border-default flex items-center justify-between">
-          <div>
-            <h3 className="font-bold text-ink-primary text-sm">
-              কার্টন রূপান্তর ইউনিট: {variantName}
-            </h3>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-colors cursor-pointer"
-          >
-            <X size={16} weight="bold" />
-          </button>
-        </div>
-
-        <div className="p-5 max-h-[60vh] overflow-y-auto space-y-3">
-          <div className="flex justify-between items-center">
-            <span className="text-xs font-bold text-ink-body">ইউনিট তালিকা</span>
-            <button
-              type="button"
-              onClick={handleAdd}
-              className="text-xs font-semibold text-brand-deep hover:text-brand-hover flex items-center gap-1 cursor-pointer"
-            >
-              <Plus size={13} weight="bold" />
-              <span>নতুন ইউনিট</span>
-            </button>
-          </div>
-
-          {localUnits.length === 0 ? (
-            <div className="text-center py-6 text-ink-secondary text-xs border border-dashed border-border-default rounded-lg">
-              কোনো কার্টন ইউনিট নেই।
-            </div>
-          ) : (
-            localUnits.map((u, i) => (
-              <div key={i} className="p-3 rounded-lg border border-border-default bg-surface-subtle/50 space-y-2">
-                <div className="flex justify-between items-center">
-                  <span className="text-xs font-bold text-ink-body">ইউনিট #{formatNumber(i + 1)}</span>
-                  <button
-                    type="button"
-                    onClick={() => handleRemove(i)}
-                    className="text-ink-secondary hover:text-due-text p-1 rounded hover:bg-due-bg transition-colors cursor-pointer"
-                  >
-                    <Trash size={14} weight="bold" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    placeholder="ইউনিটের নাম"
-                    value={u.unitName}
-                    onChange={(e) => handleUpdate(i, 'unitName', e.target.value)}
-                    className="px-2.5 py-1.5 rounded-md border border-border-strong text-xs bg-surface-card text-ink-primary"
-                  />
-                  <input
-                    type="number"
-                    step="any"
-                    placeholder={`পরিমাণ (${baseUnitName})`}
-                    value={u.conversionFactor}
-                    onChange={(e) => handleUpdate(i, 'conversionFactor', e.target.value)}
-                    className="px-2.5 py-1.5 rounded-md border border-border-strong text-xs font-mono bg-surface-card text-ink-primary"
-                  />
-                  <input
-                    type="number"
-                    step="any"
-                    placeholder="পাইকারি দর ৳"
-                    value={u.wholesalePrice}
-                    onChange={(e) => handleUpdate(i, 'wholesalePrice', e.target.value)}
-                    className="px-2.5 py-1.5 rounded-md border border-border-strong text-xs font-mono bg-surface-card text-ink-primary"
-                  />
-                  <input
-                    type="number"
-                    step="any"
-                    placeholder="খুচরা দর ৳"
-                    value={u.retailPrice}
-                    onChange={(e) => handleUpdate(i, 'retailPrice', e.target.value)}
-                    className="px-2.5 py-1.5 rounded-md border border-border-strong text-xs font-mono bg-surface-card text-ink-primary"
-                  />
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-
-        <div className="px-5 py-3 bg-surface-subtle border-t border-border-default flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-3.5 py-2 rounded-lg border border-border-strong text-xs font-semibold text-ink-body hover:bg-surface-card cursor-pointer"
-          >
-            বাতিল
-          </button>
-          <button
-            type="button"
-            onClick={() => onSave(localUnits)}
-            className="px-4 py-2 rounded-lg bg-brand-deep text-white text-xs font-semibold hover:bg-brand-hover cursor-pointer"
-          >
-            সম্পন্ন
-          </button>
-        </div>
       </div>
     </div>
   );

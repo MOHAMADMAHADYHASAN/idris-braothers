@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, ShoppingCart, GridFour, Receipt, Barcode } from '@phosphor-icons/react';
 import { usePosStore } from '@/features/pos/usePosStore';
+import { useProductStore } from '@/features/product/useProductStore';
 import { PosHeaderModeBar } from '@/components/ui/PosHeaderModeBar';
 import { PosProductCatalog } from '@/features/pos/components/PosProductCatalog';
 import { PosCartTable } from '@/features/pos/components/PosCartTable';
@@ -50,6 +51,8 @@ export default function PosPage() {
     try {
       const receipt = await fetchThermalReceipt(saleId);
       setActiveThermalReceipt(receipt);
+      // Refresh live product/variant stock in catalog immediately after checkout
+      void useProductStore.getState().fetchProducts({ page: 1, limit: 100 });
     } catch (err) {
       console.error('Failed to load receipt:', err);
     }

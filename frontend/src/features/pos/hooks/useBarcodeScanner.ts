@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { usePosStore } from '../usePosStore';
 import { useProductStore } from '@/features/product/useProductStore';
-import { Product, ProductUnit } from '@/features/product/product.types';
+import { Product, ProductUnit, ProductVariant } from '@/features/product/product.types';
 
 export interface ScanFeedback {
   type: 'success' | 'error';
@@ -90,19 +90,11 @@ export function useBarcodeScanner() {
       if (!cleanCode) return;
 
       let matchedProduct: Product | null = null;
+      let matchedVariant: ProductVariant | undefined = undefined;
       let matchedUnit: ProductUnit | undefined = undefined;
 
-      // 1. Direct match on product barcode or SKU
+      // 1. Check variants & unit-level barcodes first, then product fallback
       for (const p of products) {
-        if (
-          (p.barcode && p.barcode.toLowerCase() === cleanCode.toLowerCase()) ||
-          (p.sku && p.sku.toLowerCase() === cleanCode.toLowerCase())
-        ) {
-          matchedProduct = p;
-          break;
-        }
-
-        // 2. Check variants
         if (p.variants && p.variants.length > 0) {
           for (const v of p.variants) {
             if (
@@ -110,20 +102,18 @@ export function useBarcodeScanner() {
               (v.sku && v.sku.toLowerCase() === cleanCode.toLowerCase())
             ) {
               matchedProduct = p;
-              // Check if variant has a default unit or matching unit
-              if (v.units && v.units.length > 0) {
-                matchedUnit = v.units.find((u) => u.isDefault) || v.units[0];
-              }
+              matchedVariant = v;
               break;
             }
 
-            // 3. Check unit-level barcodes (e.g. 50kg sack barcode vs 1kg packet)
+            // Check unit-level barcodes (fallback for existing packaged barcodes)
             if (v.units && v.units.length > 0) {
               const uMatch = v.units.find(
                 (u) => u.barcode && u.barcode.toLowerCase() === cleanCode.toLowerCase()
               );
               if (uMatch) {
                 matchedProduct = p;
+                matchedVariant = v;
                 matchedUnit = uMatch;
                 break;
               }
@@ -132,19 +122,35 @@ export function useBarcodeScanner() {
         }
 
         if (matchedProduct) break;
+
+        if (
+          (p.barcode && p.barcode.toLowerCase() === cleanCode.toLowerCase()) ||
+          (p.sku && p.sku.toLowerCase() === cleanCode.toLowerCase())
+        ) {
+          matchedProduct = p;
+          matchedVariant = p.variants?.[0];
+          break;
+        }
       }
 
       if (matchedProduct) {
-        // Add to cart
-        addItem(matchedProduct, matchedUnit, 1);
+        // Add matched product/variant to cart
+        addItem(matchedProduct, matchedVariant, matchedUnit, 1);
         playSuccessTone();
 
-        const unitName = matchedUnit ? matchedUnit.unitName : matchedProduct.baseUnitName;
+        const baseName = matchedProduct.banglaName || matchedProduct.name;
+        const variantSuffix =
+          matchedVariant?.variantName && matchedVariant.variantName !== 'Default'
+            ? ` (${matchedVariant.variantName})`
+            : '';
+        const unitName = matchedUnit
+          ? matchedUnit.unitName
+          : matchedVariant?.baseUnitName || matchedProduct.baseUnitName;
         const feedback: ScanFeedback = {
           type: 'success',
           barcode: cleanCode,
-          message: `${matchedProduct.banglaName || matchedProduct.name} কার্টে যোগ হয়েছে`,
-          productName: matchedProduct.banglaName || matchedProduct.name,
+          message: `${baseName}${variantSuffix} কার্টে যোগ হয়েছে`,
+          productName: `${baseName}${variantSuffix}`,
           unitName,
           timestamp: Date.now(),
         };
