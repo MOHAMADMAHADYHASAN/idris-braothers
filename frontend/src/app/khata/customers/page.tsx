@@ -19,6 +19,8 @@ import { CustomerFormModal } from '@/features/customer-khata/components/Customer
 import { CustomerAdjustmentModal } from '@/features/customer-khata/components/CustomerAdjustmentModal';
 import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { AdminPagination } from '@/components/shared/AdminPagination';
+import { buttonClasses } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 
 export default function CustomerKhataPage() {
   const { customers, meta, isLoading, fetchCustomers, openModal, setPage } =
@@ -55,14 +57,13 @@ export default function CustomerKhataPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
           <AdminPageHeader
             title="কাস্টমার খাতা ও বাকি রেজিস্টার"
-            subtitle="মরিচপট্টি, ফেনী বাজার — রানিং খতিয়ান, নগদ উশুল ও বাকি সমন্বয়"
             backHref="/"
             backTitle="ড্যাশবোর্ডে ফিরে যান"
             icon={<AddressBook size={16} weight="bold" />}
             badge={
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+              <Badge variant="brand">
                 খাতা
-              </span>
+              </Badge>
             }
             actions={
               <div className="flex items-center gap-2">
@@ -70,20 +71,20 @@ export default function CustomerKhataPage() {
                   type="button"
                   onClick={() => fetchCustomers()}
                   disabled={isLoading}
-                  className="px-2.5 py-1.5 rounded-md border border-slate-200/90 bg-white hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 disabled:opacity-50 cursor-pointer shadow-2xs"
+                  className={buttonClasses({ variant: 'secondary', size: 'sm', className: 'gap-1.5' })}
                   title="তালিকা রিফ্রেশ করুন"
                 >
                   <ArrowsClockwise
                     size={14}
                     weight="bold"
-                    className={isLoading ? 'animate-spin' : ''}
+                    className={isLoading ? 'animate-spin text-brand-deep' : ''}
                   />
                   <span className="hidden sm:inline">রিফ্রেশ</span>
                 </button>
 
                 <Link
                   href="/pos"
-                  className="px-2.5 py-1.5 rounded-md bg-white border border-slate-200/90 hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150"
+                  className={buttonClasses({ variant: 'secondary', size: 'sm', className: 'gap-1.5' })}
                 >
                   <Storefront size={14} weight="bold" />
                   <span className="hidden sm:inline">কাউন্টার বিলিং</span>
@@ -92,7 +93,7 @@ export default function CustomerKhataPage() {
                 <button
                   type="button"
                   onClick={() => openModal('create')}
-                  className="px-2.5 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.08)] transition-[background-color,transform] duration-150 active:scale-[0.98] cursor-pointer"
+                  className={buttonClasses({ variant: 'primary', size: 'sm', className: 'gap-1.5' })}
                 >
                   <UserPlus size={14} weight="bold" />
                   <span>+ নতুন খাতা</span>
@@ -120,11 +121,11 @@ export default function CustomerKhataPage() {
         {/* মোবাইল কার্ড স্ট্রিম (< 768px) */}
         <div className="block md:hidden space-y-2.5">
           {isLoading && customers.length === 0 ? (
-            <div className="bg-white rounded-lg border border-slate-200/90 p-8 text-center text-xs text-slate-400">
+            <div className="bg-white rounded-xl border border-slate-200/90 p-8 text-center text-xs text-slate-600">
               কাস্টমার খাতা লোড হচ্ছে...
             </div>
           ) : customers.length === 0 ? (
-            <div className="bg-white rounded-lg border border-slate-200/90 p-8 text-center text-xs text-slate-400">
+            <div className="bg-white rounded-xl border border-slate-200/90 p-8 text-center text-xs text-slate-600">
               কোনো কাস্টমার পাওয়া যায়নি
             </div>
           ) : (

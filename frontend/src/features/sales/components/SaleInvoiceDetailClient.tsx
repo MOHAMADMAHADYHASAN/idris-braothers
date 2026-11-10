@@ -9,17 +9,22 @@ import {
   User,
   Phone,
   MapPin,
-  CalendarBlank,
-  CheckCircle,
   XCircle,
   ArrowCounterClockwise,
   WarningCircle,
   Spinner,
   ArrowSquareOut,
   Clock,
-  Tag,
 } from '@phosphor-icons/react';
-import { formatCurrency } from '@/lib/decimal';
+import {
+  formatCurrency,
+  formatDateBn,
+  formatNumber,
+  formatTimeBn,
+  toBanglaDigits,
+} from '@/lib/decimal';
+import { buttonClasses } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 import { SaleDetail } from '../sales.types';
 import { salesService } from '../sales.service';
 import { useSalesStore } from '../useSalesStore';
@@ -84,7 +89,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
         <h2 className="text-base font-bold text-slate-900">{error || 'মেমোটি খুঁজে পাওয়া যায়নি'}</h2>
         <Link
           href="/sales"
-          className="mt-4 px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold"
+          className={buttonClasses({ variant: 'primary', size: 'sm', className: 'mt-4' })}
         >
           বিক্রয় তালিকায় ফিরুন
         </Link>
@@ -111,43 +116,32 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight font-mono">
-                  #{sale.invoiceNumber}
+                <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight font-mono tabular-nums">
+                  #{toBanglaDigits(sale.invoiceNumber)}
                 </h1>
-                <span
-                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold border shrink-0 ${
-                    sale.saleType === 'WHOLESALE'
-                      ? 'bg-purple-50 text-purple-700 border-purple-200'
-                      : 'bg-slate-100 text-slate-700 border-slate-200'
-                  }`}
-                >
+                <Badge variant={sale.saleType === 'WHOLESALE' ? 'wholesale' : 'neutral'}>
                   {sale.saleType === 'WHOLESALE' ? 'পাইকারি বিক্রয়' : 'খুচরা বিক্রয়'}
-                </span>
-                <span
-                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold border shrink-0 ${
-                    isCancelled
-                      ? 'bg-rose-50 text-rose-700 border-rose-200'
-                      : isFullPaid
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : 'bg-amber-50 text-amber-800 border-amber-200'
-                  }`}
+                </Badge>
+                <Badge
+                  variant={isCancelled ? 'due' : isFullPaid ? 'cash' : 'wholesale'}
+                  className={isCancelled ? 'bg-rose-50 text-rose-700 border-rose-200' : undefined}
                 >
-                  {isCancelled ? 'বাতিলকৃত মেমো' : isFullPaid ? 'পরিশোধিত' : `বাকি: ${formatCurrency(sale.dueAmount)}`}
-                </span>
+                  {isCancelled
+                    ? 'বাতিলকৃত মেমো'
+                    : isFullPaid
+                      ? 'পরিশোধিত'
+                      : `বাকি: ${formatCurrency(sale.dueAmount)}`}
+                </Badge>
               </div>
-              <p className="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5 font-mono">
+              <p className="text-xs text-slate-600 flex items-center gap-1.5 mt-0.5 font-mono tabular-nums">
                 <Clock size={12} weight="bold" />
                 <span>
-                  {new Date(sale.createdAt).toLocaleDateString('bn-BD', {
+                  {formatDateBn(sale.createdAt, {
                     day: '2-digit',
                     month: 'short',
                     year: 'numeric',
                   })}{' '}
-                  •{' '}
-                  {new Date(sale.createdAt).toLocaleTimeString('bn-BD', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
+                  • {formatTimeBn(sale.createdAt)}
                 </span>
               </p>
             </div>
@@ -158,11 +152,11 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
             {!isCancelled && (
               <Link
                 href={`/sales/${sale.id}/return`}
-                className="px-3 py-1.5 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs"
+                className="px-3 py-1.5 h-9 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs"
                 title="এই মেমোর পণ্য ফেরত ও রিফান্ড প্রসেস করুন"
               >
                 <ArrowCounterClockwise size={14} weight="bold" />
-                <span className="hidden sm:inline">পণ্য ফেরত (Return)</span>
+                <span className="hidden sm:inline">পণ্য ফেরত</span>
                 <span className="sm:hidden">ফেরত</span>
               </Link>
             )}
@@ -171,7 +165,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
             <button
               type="button"
               onClick={() => handlePrint('A4')}
-              className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+              className={buttonClasses({ variant: 'primary', size: 'sm', className: 'gap-1.5' })}
             >
               <Printer size={14} weight="bold" />
               <span>A4 প্রিন্ট</span>
@@ -182,7 +176,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
               <button
                 type="button"
                 onClick={() => openCancelModal(sale)}
-                className="px-2.5 py-1.5 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                className={buttonClasses({ variant: 'outlineDanger', size: 'sm', className: 'gap-1' })}
                 title="ভুল মেমো বাতিল করুন"
               >
                 <XCircle size={14} weight="bold" />
@@ -193,20 +187,22 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
         </div>
       </header>
 
-      {/* ২. প্রিন্ট হেডার ও রসিদ ভিউ (প্রিন্টের সময় শুধুমাত্র এই অংশ বা ফরম্যাট রেন্ডার হবে) */}
+      {/* ২. প্রিন্ট হেডার ও রসিদ ভিউ */}
       <div className="hidden print:block p-6 max-w-4xl mx-auto border-b border-slate-300 pb-4 mb-4">
         <div className="flex justify-between items-start">
           <div>
             <h2 className="text-xl font-bold text-slate-900">মেসার্স ইদ্রিস ব্রাদার্স</h2>
             <p className="text-xs text-slate-600">মরিচপট্টি, বড় বাজার, ফেনী</p>
-            <p className="text-xs text-slate-500">বিক্রয় ইনভয়েস ও মেমো (Sales Memo Voucher)</p>
+            <p className="text-xs text-slate-600">বিক্রয় ইনভয়েস ও মেমো</p>
           </div>
           <div className="text-right">
-            <h3 className="text-base font-bold text-slate-900 font-mono">#{sale.invoiceNumber}</h3>
+            <h3 className="text-base font-bold text-slate-900 font-mono tabular-nums">
+              #{toBanglaDigits(sale.invoiceNumber)}
+            </h3>
             <p className="text-xs text-slate-600">
-              তারিখ: {new Date(sale.createdAt).toLocaleDateString('bn-BD')}
+              তারিখ: {formatDateBn(sale.createdAt)}
             </p>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-slate-600">
               ধরন: {sale.saleType === 'WHOLESALE' ? 'পাইকারি' : 'খুচরা'}
             </p>
           </div>
@@ -220,8 +216,8 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
           <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-rose-900 print:border">
             <XCircle size={20} weight="fill" className="text-rose-600 shrink-0 mt-0.5" />
             <div>
-              <h4 className="font-bold text-xs sm:text-sm">এই মেমোটি বাতিল (Void) করা হয়েছে</h4>
-              <p className="text-xs text-rose-700 mt-0.5">
+              <h4 className="font-bold text-xs sm:text-sm">এই মেমোটি বাতিল করা হয়েছে</h4>
+              <p className="text-xs text-rose-800 mt-0.5">
                 এই বিক্রয়ের পণ্যসমূহ স্বয়ংক্রিয়ভাবে ইনভেন্টরিতে ফিরিয়ে নেওয়া হয়েছে এবং ক্যাশ ও কাস্টমার লেজার ব্যালেন্স সমন্বয় করা হয়েছে।
               </p>
             </div>
@@ -234,10 +230,10 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
             <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden print:border print:shadow-none">
               <div className="p-4 border-b border-slate-100 flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <Receipt size={16} weight="bold" className="text-slate-500" />
-                  বিক্রিত পণ্যের বিবরণ ({sale.items?.length || 0} টি আইটেম)
+                  <Receipt size={16} weight="bold" className="text-brand-deep" />
+                  বিক্রিত পণ্যের বিবরণ ({formatNumber(sale.items?.length || 0)} টি আইটেম)
                 </span>
-                <span className="text-xs text-slate-500 font-mono">
+                <span className="text-xs text-slate-600 font-mono tabular-nums">
                   উপমোট: <strong className="text-slate-900">{formatCurrency(sale.subTotal)}</strong>
                 </span>
               </div>
@@ -245,7 +241,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-slate-50/80 border-b border-slate-200/90 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
+                    <tr className="bg-slate-50/80 border-b border-slate-200/90 text-slate-700 font-bold text-xs">
                       <th className="py-2.5 px-3 text-center w-10">#</th>
                       <th className="py-2.5 px-3">পণ্যের নাম ও বিবরণ</th>
                       <th className="py-2.5 px-3 text-center">ইউনিট</th>
@@ -267,8 +263,8 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
 
                       return (
                         <tr key={item.id || idx} className="hover:bg-slate-50/60 transition-colors">
-                          <td className="py-2.5 px-3 text-center font-mono text-slate-400">
-                            {idx + 1}
+                          <td className="py-2.5 px-3 text-center font-mono text-slate-600">
+                            {formatNumber(idx + 1)}
                           </td>
                           <td className="py-2.5 px-3">
                             <div className="font-bold text-slate-900 text-xs sm:text-sm">
@@ -276,24 +272,24 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                             </div>
                             <div className="flex items-center gap-1.5 mt-0.5">
                               {variantSuffix && (
-                                <span className="inline-block px-1.5 py-0.2 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                <Badge variant="brand">
                                   {variantSuffix}
-                                </span>
+                                </Badge>
                               )}
                               {item.variant?.baseUnitName && (
-                                <span className="text-[10px] text-slate-400 font-mono">
+                                <span className="text-xs text-slate-600 font-mono">
                                   বেস ইউনিট: {item.variant.baseUnitName}
                                 </span>
                               )}
                             </div>
                           </td>
                           <td className="py-2.5 px-3 text-center">
-                            <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 text-slate-700 border border-slate-200/80">
+                            <Badge variant="neutral">
                               {item.unitName}
-                            </span>
+                            </Badge>
                           </td>
                           <td className="py-2.5 px-3 text-right font-mono tabular-nums font-bold text-slate-800 text-xs sm:text-sm">
-                            {item.quantity}
+                            {formatNumber(item.quantity)}
                           </td>
                           <td className="py-2.5 px-3 text-right font-mono tabular-nums font-medium text-slate-700">
                             {formatCurrency(item.unitPrice)}
@@ -305,16 +301,16 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                       );
                     })}
                   </tbody>
-                  <tfoot className="bg-slate-50/90 border-t border-slate-200/90 font-bold text-slate-800 text-[11px]">
+                  <tfoot className="bg-slate-50/90 border-t border-slate-200/90 font-bold text-slate-800 text-xs">
                     <tr>
-                      <td colSpan={3} className="py-2.5 px-3 text-right uppercase tracking-wider">
+                      <td colSpan={3} className="py-2.5 px-3 text-right">
                         সর্বমোট আইটেম মূল্য:
                       </td>
                       <td className="py-2.5 px-3 text-right font-mono tabular-nums font-black text-slate-800">
-                        {sale.items?.reduce((sum, i) => sum + (Number(i.quantity) || 0), 0)}
+                        {formatNumber(sale.items?.reduce((sum, i) => sum + (Number(i.quantity) || 0), 0) || 0)}
                       </td>
                       <td className="py-2.5 px-3 text-right">-</td>
-                      <td className="py-2.5 px-3 text-right font-mono tabular-nums font-black text-slate-900">
+                      <td className="py-2.5 px-3 text-right font-mono tabular-nums font-black text-brand-deep">
                         {formatCurrency(sale.subTotal)}
                       </td>
                     </tr>
@@ -326,10 +322,10 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
             {/* নোট / বিবরণ */}
             {sale.note && (
               <div className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs">
-                <span className="text-slate-400 text-[10px] uppercase font-bold tracking-wider block mb-1">
+                <span className="text-slate-600 text-xs font-bold block mb-1">
                   মেমো মন্তব্য / ডেলিভারি নোট
                 </span>
-                <p className="text-xs text-slate-700">{sale.note}</p>
+                <p className="text-xs text-slate-800">{sale.note}</p>
               </div>
             )}
           </div>
@@ -340,18 +336,12 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
             <div className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs space-y-3">
               <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                 <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                  <User size={16} weight="bold" className="text-slate-500" />
-                  কাস্টমার / ক্রেতা
+                  <User size={16} weight="bold" className="text-brand-deep" />
+                  কাস্টমার ও ক্রেতা
                 </span>
-                <span
-                  className={`px-1.5 py-0.5 rounded text-[10px] font-bold border ${
-                    sale.customer
-                      ? 'bg-purple-50 text-purple-700 border-purple-200'
-                      : 'bg-slate-100 text-slate-600 border-slate-200'
-                  }`}
-                >
+                <Badge variant={sale.customer ? 'brand' : 'neutral'}>
                   {sale.customer ? 'নিবন্ধিত পার্টি' : 'সাধারণ খুচরা'}
-                </span>
+                </Badge>
               </div>
 
               <div className="space-y-2 text-xs">
@@ -363,24 +353,24 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
 
                 {sale.customer?.phone && (
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-500 flex items-center gap-1">
+                    <span className="text-slate-600 flex items-center gap-1">
                       <Phone size={13} weight="bold" /> মোবাইল:
                     </span>
                     <a
                       href={`tel:${sale.customer.phone}`}
-                      className="font-mono font-bold text-blue-600 hover:underline"
+                      className="font-mono font-bold text-brand-deep hover:underline"
                     >
-                      {sale.customer.phone}
+                      {toBanglaDigits(sale.customer.phone)}
                     </a>
                   </div>
                 )}
 
                 {sale.customer?.address && (
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-slate-500 flex items-center gap-1 shrink-0">
+                    <span className="text-slate-600 flex items-center gap-1 shrink-0">
                       <MapPin size={13} weight="bold" /> ঠিকানা:
                     </span>
-                    <span className="text-slate-700 text-right font-medium truncate max-w-[180px]">
+                    <span className="text-slate-800 text-right font-medium truncate max-w-[180px]">
                       {sale.customer.address}
                     </span>
                   </div>
@@ -391,7 +381,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                   <div className="pt-2 border-t border-slate-100">
                     <Link
                       href={`/khata/customers/${sale.customer.id}`}
-                      className="w-full py-1.5 px-3 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-800 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                      className={buttonClasses({ variant: 'secondary', size: 'sm', className: 'w-full gap-1.5' })}
                     >
                       <span>কাস্টমারের পূর্ণাঙ্গ খতিয়ান দেখুন</span>
                       <ArrowSquareOut size={13} weight="bold" />
@@ -408,8 +398,8 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
               </span>
 
               <div className="space-y-2 text-xs">
-                <div className="flex justify-between text-slate-600">
-                  <span>পণ্য উপমোট (Subtotal):</span>
+                <div className="flex justify-between text-slate-700">
+                  <span>পণ্য উপমোট:</span>
                   <span className="font-mono tabular-nums font-bold text-slate-900">
                     {formatCurrency(sale.subTotal)}
                   </span>
@@ -417,7 +407,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
 
                 {Number(sale.discount) > 0 && (
                   <div className="flex justify-between text-emerald-800">
-                    <span>প্রদত্ত মোট ছাড় (Discount):</span>
+                    <span>প্রদত্ত মোট ছাড়:</span>
                     <span className="font-mono tabular-nums font-bold">
                       -{formatCurrency(sale.discount)}
                     </span>
@@ -425,14 +415,14 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                 )}
 
                 <div className="border-t border-slate-200 pt-2 flex justify-between font-bold text-slate-900">
-                  <span className="text-xs sm:text-sm">সর্বমোট বিল (Grand Total):</span>
-                  <span className="font-mono tabular-nums tracking-tight text-sm sm:text-base font-black">
+                  <span className="text-xs sm:text-sm">সর্বমোট বিল:</span>
+                  <span className="font-mono tabular-nums tracking-tight text-sm sm:text-base font-black text-brand-deep">
                     {formatCurrency(sale.grandTotal)}
                   </span>
                 </div>
 
                 <div className="flex justify-between text-emerald-700 font-semibold">
-                  <span>নগদ গ্রহণ (Cash Paid):</span>
+                  <span>নগদ গ্রহণ:</span>
                   <span className="font-mono tabular-nums font-bold">
                     {formatCurrency(sale.paidAmount)}
                   </span>
@@ -445,12 +435,12 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                         ? 'text-rose-700'
                         : Number(sale.dueAmount) < 0
                         ? 'text-emerald-700'
-                        : 'text-slate-600'
+                        : 'text-slate-700'
                     }
                   >
                     {Number(sale.dueAmount) < 0
-                      ? 'কাস্টমারকে চেঞ্জ ফেরত (Change):'
-                      : 'এই মেমোর বাকি (Due):'}
+                      ? 'কাস্টমারকে চেঞ্জ ফেরত:'
+                      : 'এই মেমোর বাকি:'}
                   </span>
                   <span
                     className={`font-mono tabular-nums text-sm font-black ${
@@ -467,16 +457,16 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
 
                 {/* কাস্টমারের বর্তমান মোট রানিং বাকি */}
                 {receipt?.billing && (
-                  <div className="pt-2.5 border-t border-dashed border-slate-200 space-y-1 text-[11px] text-slate-500 bg-slate-50 p-2 rounded-lg">
+                  <div className="pt-2.5 border-t border-dashed border-slate-200 space-y-1 text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg">
                     <div className="flex justify-between">
                       <span>পূর্বের বকেয়া:</span>
-                      <span className="font-mono font-medium">
+                      <span className="font-mono tabular-nums font-medium">
                         {formatCurrency(receipt.billing.previousDue || 0)}
                       </span>
                     </div>
                     <div className="flex justify-between font-bold text-slate-900">
                       <span>কাস্টমারের বর্তমান মোট বকেয়া:</span>
-                      <span className="font-mono text-rose-700 font-black">
+                      <span className="font-mono tabular-nums text-rose-700 font-black">
                         {formatCurrency(receipt.billing.totalCurrentDue || 0)}
                       </span>
                     </div>

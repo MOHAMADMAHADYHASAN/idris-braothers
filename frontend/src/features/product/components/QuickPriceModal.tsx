@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Coins, FloppyDisk, ArrowRight, Percent } from '@phosphor-icons/react';
 import { ProductVariant } from '../product.types';
 import { useProductStore } from '../useProductStore';
+import { formatCurrency, formatPercent } from '@/lib/decimal';
 
 interface QuickPriceModalProps {
   isOpen: boolean;
@@ -24,20 +25,21 @@ function MarginBadge({ costStr, sellStr, label }: { costStr: string; sellStr: st
 
   return (
     <div
-      className={`text-[11px] font-medium px-2 py-0.5 rounded-md mt-1.5 inline-flex items-center gap-1.5 border transition-colors ${
+      className={`text-xs font-medium px-2 py-0.5 rounded-md mt-1.5 inline-flex items-center gap-1.5 border transition-colors ${
         isLoss
-          ? 'bg-rose-50 text-rose-700 border-rose-200/80'
+          ? 'bg-due-bg text-due-text border-due-border'
           : profit === 0
-          ? 'bg-amber-50 text-amber-700 border-amber-200/80'
-          : 'bg-emerald-50 text-emerald-800 border-emerald-200/80'
+          ? 'bg-wholesale-bg text-wholesale-text border-wholesale-border/60'
+          : 'bg-cash-bg text-cash-text border-cash-border'
       }`}
     >
-      <span className="text-slate-500">{label}:</span>
-      <span className="font-mono tabular-nums tracking-tight font-semibold">
-        {profit >= 0 ? '+' : ''}৳{profit.toFixed(2)}
+      <span className="text-ink-secondary">{label}:</span>
+      <span className="font-mono tabular-nums font-semibold">
+        {profit >= 0 ? '+' : ''}
+        {formatCurrency(profit)}
       </span>
-      <span className="font-mono tabular-nums tracking-tight text-[10px] opacity-80">
-        ({marginPct.toFixed(1)}%)
+      <span className="font-mono tabular-nums">
+        ({formatPercent(marginPct, 1)})
       </span>
     </div>
   );
@@ -91,16 +93,16 @@ export function QuickPriceModal({ isOpen, onClose, variant, productName }: Quick
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 4, scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
-        className="bg-white rounded-lg shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1),0_8px_10px_-6px_rgba(15,23,42,0.05)] border border-slate-200/90 max-w-md w-full overflow-hidden"
+        className="bg-surface-card rounded-xl shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1)] border border-border-default max-w-md w-full overflow-hidden"
       >
-        <div className="px-4 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+        <div className="px-4 py-3.5 border-b border-border-subtle flex items-center justify-between bg-surface-subtle/70">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center shrink-0">
               <Coins size={17} weight="bold" />
             </div>
             <div>
-              <h3 className="text-xs font-semibold text-slate-900 leading-tight">বাজারদর ও বিক্রয়মূল্য পরিবর্তন</h3>
-              <p className="text-[11px] text-slate-500 truncate max-w-[240px]">
+              <h3 className="text-sm font-bold text-ink-primary leading-tight">বাজারদর ও বিক্রয়মূল্য পরিবর্তন</h3>
+              <p className="text-xs text-ink-secondary truncate max-w-[240px]">
                 {productName} {variant.variantName !== 'Default' ? `(${variant.variantName})` : ''}
               </p>
             </div>
@@ -108,7 +110,7 @@ export function QuickPriceModal({ isOpen, onClose, variant, productName }: Quick
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-[background-color,color] duration-150"
+            className="p-1.5 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-colors cursor-pointer"
           >
             <X size={16} weight="bold" />
           </button>
@@ -116,82 +118,79 @@ export function QuickPriceModal({ isOpen, onClose, variant, productName }: Quick
 
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           {error && (
-            <div className="p-2.5 text-xs text-rose-700 bg-rose-50 border border-rose-200/80 rounded-md">
+            <div className="p-2.5 text-xs text-due-text bg-due-bg border border-due-border rounded-lg">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-medium text-slate-700 mb-1">
-              বর্তমান ক্রয়মূল্য / বাজারদর (Replacement Cost / {variant.baseUnitName}) *
+            <label className="block text-xs font-semibold text-ink-body mb-1">
+              বর্তমান ক্রয়মূল্য / {variant.baseUnitName} *
             </label>
             <div className="relative">
-              <span className="absolute left-3 top-2 text-slate-400 text-xs font-semibold">৳</span>
+              <span className="absolute left-3 top-2 text-ink-secondary text-xs font-semibold">৳</span>
               <input
                 type="number"
                 step="0.01"
                 required
                 value={purchasePrice}
                 onChange={(e) => setPurchasePrice(e.target.value)}
-                className="w-full pl-7 pr-3 py-1.5 text-xs font-mono tabular-nums tracking-tight font-semibold text-slate-900 border border-slate-200 rounded-md bg-white focus:outline-hidden focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-[border-color,box-shadow]"
+                className="w-full pl-7 pr-3 py-2 text-xs font-mono tabular-nums font-semibold text-ink-primary border border-border-strong rounded-lg bg-surface-card focus:outline-hidden focus:ring-1 focus:ring-brand-deep focus:border-brand-deep"
               />
             </div>
-            <p className="text-[11px] text-slate-400 mt-1">
-              মহাজন থেকে নতুন মাল কেনার রেট বা বর্তমান বাজারদর। স্টক ভ্যালুয়েশনে এটি ব্যবহৃত হবে।
-            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">
-                খুচরা বিক্রয়মূল্য (Retail / {variant.baseUnitName}) *
+              <label className="block text-xs font-semibold text-ink-body mb-1">
+                খুচরা দর / {variant.baseUnitName} *
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-2 text-slate-400 text-xs font-semibold">৳</span>
+                <span className="absolute left-3 top-2 text-ink-secondary text-xs font-semibold">৳</span>
                 <input
                   type="number"
                   step="0.01"
                   required
                   value={retailPrice}
                   onChange={(e) => setRetailPrice(e.target.value)}
-                  className="w-full pl-7 pr-3 py-1.5 text-xs font-mono tabular-nums tracking-tight font-semibold text-slate-900 border border-slate-200 rounded-md bg-white focus:outline-hidden focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-[border-color,box-shadow]"
+                  className="w-full pl-7 pr-3 py-2 text-xs font-mono tabular-nums font-semibold text-ink-primary border border-border-strong rounded-lg bg-surface-card focus:outline-hidden focus:ring-1 focus:ring-brand-deep focus:border-brand-deep"
                 />
               </div>
               <MarginBadge costStr={purchasePrice} sellStr={retailPrice} label="খুচরা মার্জিন" />
             </div>
 
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">
-                পাইকারি বিক্রয়মূল্য (Wholesale / {variant.baseUnitName}) *
+              <label className="block text-xs font-semibold text-ink-body mb-1">
+                পাইকারি দর / {variant.baseUnitName} *
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-2 text-slate-400 text-xs font-semibold">৳</span>
+                <span className="absolute left-3 top-2 text-ink-secondary text-xs font-semibold">৳</span>
                 <input
                   type="number"
                   step="0.01"
                   required
                   value={wholesalePrice}
                   onChange={(e) => setWholesalePrice(e.target.value)}
-                  className="w-full pl-7 pr-3 py-1.5 text-xs font-mono tabular-nums tracking-tight font-semibold text-slate-900 border border-slate-200 rounded-md bg-white focus:outline-hidden focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-[border-color,box-shadow]"
+                  className="w-full pl-7 pr-3 py-2 text-xs font-mono tabular-nums font-semibold text-ink-primary border border-border-strong rounded-lg bg-surface-card focus:outline-hidden focus:ring-1 focus:ring-brand-deep focus:border-brand-deep"
                 />
               </div>
               <MarginBadge costStr={purchasePrice} sellStr={wholesalePrice} label="পাইকারি মার্জিন" />
             </div>
           </div>
 
-          <div className="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
+          <div className="pt-2 flex items-center justify-end gap-2 border-t border-border-subtle">
             <button
               type="button"
               onClick={onClose}
               disabled={isSaving}
-              className="px-3.5 py-1.5 text-xs font-medium text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-md transition-[background-color,color] duration-150 active:scale-[0.98]"
+              className="px-3.5 py-2 text-xs font-semibold text-ink-body border border-border-strong hover:bg-surface-subtle rounded-lg transition-colors cursor-pointer"
             >
               বাতিল
             </button>
             <button
               type="submit"
               disabled={isSaving}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium text-white bg-slate-900 hover:bg-slate-800 rounded-md shadow-[0_1px_2px_rgba(15,23,42,0.08)] transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-brand-deep hover:bg-brand-hover rounded-lg shadow-[0_1px_2px_rgba(30,74,122,0.16)] transition-all active:scale-[0.98] disabled:opacity-50 cursor-pointer"
             >
               <FloppyDisk size={14} weight="bold" />
               {isSaving ? 'সংরক্ষণ হচ্ছে...' : 'মূল্য সংরক্ষণ করুন'}

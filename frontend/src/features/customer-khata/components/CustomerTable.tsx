@@ -11,7 +11,9 @@ import {
   Phone,
   MapPin,
 } from '@phosphor-icons/react';
-import { formatCurrency } from '@/lib/decimal';
+import { formatCurrency, toBanglaDigits } from '@/lib/decimal';
+import { Badge } from '@/components/ui/Badge';
+import { buttonClasses } from '@/components/ui/Button';
 import { useCustomerKhataStore } from '../useCustomerKhataStore';
 import { Customer } from '../customerKhata.types';
 import { AdminPagination } from '@/components/shared/AdminPagination';
@@ -39,17 +41,17 @@ export function CustomerTable() {
               {c.name}
             </div>
             {c.phone ? (
-              <div className="flex items-center gap-1 text-[11px] text-slate-500 font-mono tabular-nums tracking-tight mt-0.5">
-                <Phone size={11} weight="bold" className="text-slate-400" />
-                <span>{c.phone}</span>
+              <div className="flex items-center gap-1 text-xs text-slate-600 font-mono tabular-nums tracking-tight mt-0.5">
+                <Phone size={12} weight="bold" className="text-slate-500" />
+                <span>{toBanglaDigits(c.phone)}</span>
               </div>
             ) : (
-              <span className="text-[11px] text-slate-400 italic">মোবাইল নেই</span>
+              <span className="text-xs text-slate-600 italic">মোবাইল নেই</span>
             )}
           </div>
         ),
         renderFooterCell: () => (
-          <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+          <span className="text-xs font-bold text-slate-700">
             পৃষ্ঠার মোট:
           </span>
         ),
@@ -59,28 +61,23 @@ export function CustomerTable() {
         header: 'টাইপ',
         headerClassName: 'text-center',
         cellClassName: 'text-center',
-        renderCell: (c) =>
-          c.customerType === 'WHOLESALE' ? (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200/80">
-              পাইকারি
-            </span>
-          ) : (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200/80">
-              খুচরা
-            </span>
-          ),
+        renderCell: (c) => (
+          <Badge variant={c.customerType === 'WHOLESALE' ? 'wholesale' : 'neutral'}>
+            {c.customerType === 'WHOLESALE' ? 'পাইকারি' : 'খুচরা'}
+          </Badge>
+        ),
       },
       {
         key: 'address',
         header: 'ঠিকানা / এলাকা',
         renderCell: (c) =>
           c.address ? (
-            <div className="flex items-center gap-1 text-slate-600 text-xs">
-              <MapPin size={11} weight="bold" className="text-slate-400 shrink-0" />
+            <div className="flex items-center gap-1 text-slate-700 text-xs">
+              <MapPin size={12} weight="bold" className="text-slate-500 shrink-0" />
               <span className="truncate max-w-[200px]">{c.address}</span>
             </div>
           ) : (
-            <span className="text-slate-300">-</span>
+            <span className="text-slate-500">-</span>
           ),
       },
       {
@@ -99,7 +96,7 @@ export function CustomerTable() {
                 <span className="font-mono tabular-nums tracking-tight font-black text-rose-700 text-xs sm:text-sm">
                   {formatCurrency(c.currentDue)}
                 </span>
-                <span className="block text-[10px] text-rose-500 font-semibold uppercase tracking-wider">
+                <span className="block text-xs text-rose-700 font-semibold">
                   বকেয়া বাকি
                 </span>
               </div>
@@ -112,7 +109,7 @@ export function CustomerTable() {
                 <span className="font-mono tabular-nums tracking-tight font-black text-emerald-700 text-xs sm:text-sm">
                   {formatCurrency(Math.abs(c.currentDue))}
                 </span>
-                <span className="block text-[10px] text-emerald-600 font-semibold uppercase tracking-wider">
+                <span className="block text-xs text-emerald-700 font-semibold">
                   অগ্রিম জমা
                 </span>
               </div>
@@ -120,9 +117,9 @@ export function CustomerTable() {
           }
 
           return (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-500">
+            <Badge variant="neutral">
               পরিশোধিত (০.০০)
-            </span>
+            </Badge>
           );
         },
         renderFooterCell: (data) => {
@@ -152,7 +149,7 @@ export function CustomerTable() {
                 e.stopPropagation();
                 openModal('payment', c);
               }}
-              className="px-2 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold flex items-center gap-1 shadow-2xs transition-[background-color,transform] duration-150 active:scale-[0.98] cursor-pointer"
+              className={buttonClasses({ variant: 'cash', size: 'xs', className: 'gap-1' })}
               title="নগদ বকেয়া উশুল / জমা গ্রহণ করুন"
             >
               <HandCoins size={14} weight="bold" />
@@ -163,10 +160,10 @@ export function CustomerTable() {
             <Link
               href={`/khata/customers/${c.id}`}
               onClick={(e) => e.stopPropagation()}
-              className="px-2 py-1 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1 transition-[background-color] duration-150 active:scale-[0.98] cursor-pointer shadow-2xs"
+              className={buttonClasses({ variant: 'secondary', size: 'xs', className: 'gap-1' })}
               title="রানিং খতিয়ান ও লেনদেন স্টেটমেন্ট"
             >
-              <Scroll size={14} weight="bold" className="text-slate-500" />
+              <Scroll size={14} weight="bold" className="text-brand-deep" />
               <span>খতিয়ান</span>
             </Link>
 
@@ -177,7 +174,7 @@ export function CustomerTable() {
                 e.stopPropagation();
                 openModal('adjustment', c);
               }}
-              className="p-1 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-900 transition-[background-color,color] duration-150 active:scale-[0.96] cursor-pointer shadow-2xs"
+              className="p-1.5 rounded-md border border-slate-200 bg-white hover:bg-brand-soft/60 hover:border-brand-light text-slate-600 hover:text-brand-deep transition-[background-color,color] duration-150 active:scale-[0.96] cursor-pointer shadow-2xs"
               title="হিসাব সমন্বয় / ছাড় দিন"
             >
               <SlidersHorizontal size={14} weight="bold" />
@@ -190,7 +187,7 @@ export function CustomerTable() {
                 e.stopPropagation();
                 openModal('edit', c);
               }}
-              className="p-1 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-900 transition-[background-color,color] duration-150 active:scale-[0.96] cursor-pointer shadow-2xs"
+              className="p-1.5 rounded-md border border-slate-200 bg-white hover:bg-brand-soft/60 hover:border-brand-light text-slate-600 hover:text-brand-deep transition-[background-color,color] duration-150 active:scale-[0.96] cursor-pointer shadow-2xs"
               title="কাস্টমার তথ্য এডিট করুন"
             >
               <PencilSimple size={14} weight="bold" />

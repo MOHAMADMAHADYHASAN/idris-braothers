@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { X, WarningCircle, CheckCircle, ArrowCounterClockwise } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
-import { formatCurrency } from '@/lib/decimal';
+import { formatCurrency, toBanglaDigits } from '@/lib/decimal';
+import { buttonClasses } from '@/components/ui/Button';
 import { useSalesStore } from '../useSalesStore';
 
 export function CancelSaleModal() {
@@ -42,17 +43,17 @@ export function CancelSaleModal() {
             </div>
             <div>
               <h3 className="font-bold text-rose-900 text-xs sm:text-sm">
-                বিক্রয় মেমো বাতিলকরণ (Void Sale Invoice)
+                বিক্রয় মেমো বাতিলকরণ
               </h3>
-              <p className="text-[11px] text-rose-700 font-mono tabular-nums">
-                মেমো #{saleToCancel.invoiceNumber}
+              <p className="text-xs text-rose-700 font-mono tabular-nums">
+                মেমো #{toBanglaDigits(saleToCancel.invoiceNumber)}
               </p>
             </div>
           </div>
           <button
             type="button"
             onClick={closeCancelModal}
-            className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-colors"
+            className="p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-rose-100/80 transition-colors cursor-pointer"
           >
             <X size={16} weight="bold" />
           </button>
@@ -62,10 +63,10 @@ export function CancelSaleModal() {
         <form onSubmit={handleSubmit}>
           <div className="p-4 space-y-3">
             {/* ওয়ার্নিং ব্যানার */}
-            <div className="p-3 bg-amber-50 rounded-md border border-amber-200 text-amber-900 text-xs space-y-1">
+            <div className="p-3 bg-amber-50 rounded-md border border-amber-200 text-amber-950 text-xs space-y-1">
               <span className="font-bold block">সতর্কবার্তা:</span>
-              <ul className="list-disc list-inside space-y-0.5 text-[11px] text-amber-800">
-                <li>বিক্রিত পণ্যের স্টক স্বয়ংক্রিয়ভাবে ইনভেন্টরিতে যোগ (Restock) হবে।</li>
+              <ul className="list-disc list-inside space-y-0.5 text-xs text-amber-900">
+                <li>বিক্রিত পণ্যের স্টক স্বয়ংক্রিয়ভাবে ইনভেন্টরিতে ফেরত যোগ হবে।</li>
                 {Number(saleToCancel.dueAmount) > 0 && (
                   <li>
                     কাস্টমারের বকেয়া খাতা থেকে{' '}
@@ -78,7 +79,7 @@ export function CancelSaleModal() {
 
             {/* মেমো ইনফো সামারি */}
             <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200/80 text-xs flex justify-between items-center font-mono tabular-nums">
-              <span className="text-slate-600">মোট মেমো মূল্য:</span>
+              <span className="text-slate-700 font-sans">মোট মেমো মূল্য:</span>
               <strong className="text-slate-900 text-sm">{formatCurrency(saleToCancel.grandTotal)}</strong>
             </div>
 
@@ -91,8 +92,8 @@ export function CancelSaleModal() {
                 type="text"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="যেমন: ভুল পণ্য এন্ট্রি হয়েছিল / কাস্টমার তাৎক্ষণিক পরিবর্তন করেছে"
-                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
+                placeholder="বাতিলের কারণ"
+                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
               />
             </div>
           </div>
@@ -103,14 +104,14 @@ export function CancelSaleModal() {
               type="button"
               onClick={closeCancelModal}
               disabled={isSubmittingCancel}
-              className="px-3 py-1.5 rounded-md border border-slate-200/90 hover:bg-slate-100 active:scale-[0.98] text-xs font-medium text-slate-600 transition-colors"
+              className={buttonClasses({ variant: 'secondary', size: 'sm' })}
             >
               ফিরে যান
             </button>
             <button
               type="submit"
               disabled={isSubmittingCancel}
-              className="px-4 py-1.5 rounded-md bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-[0_1px_2px_rgba(225,29,72,0.2)] disabled:opacity-50"
+              className={buttonClasses({ variant: 'danger', size: 'sm', className: 'gap-1.5' })}
             >
               {isSubmittingCancel ? (
                 <>

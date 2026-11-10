@@ -12,6 +12,7 @@ import { ThermalReceipt } from '@/components/shared/ThermalReceipt';
 import { ThermalReceiptData } from '@/features/pos/pos.types';
 import { useBarcodeScanner } from '@/features/pos/hooks/useBarcodeScanner';
 import { BarcodeScanNotification } from '@/features/pos/components/BarcodeScanNotification';
+import { formatCurrency, formatNumber } from '@/lib/decimal';
 
 export default function PosPage() {
   const { saleType, setSaleType, cart, fetchThermalReceipt, getGrandTotal } = usePosStore();
@@ -57,24 +58,21 @@ export default function PosPage() {
   const cartItemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
   return (
-    <div className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-slate-50 text-slate-900 select-none">
+    <div className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-surface-canvas text-ink-primary select-none">
       {/* 1. Sticky Top Navigation Bar */}
-      <header className="px-3 sm:px-4 py-2 bg-white border-b border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)] shrink-0 flex items-center justify-between gap-3 z-30">
+      <header className="px-3 sm:px-4 py-2 bg-surface-card border-b border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.02)] shrink-0 flex items-center justify-between gap-3 z-30">
         <div className="flex items-center gap-2.5">
           <Link
             href="/"
-            className="p-1.5 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
+            className="p-1.5 rounded-lg text-ink-secondary hover:text-brand-deep hover:bg-brand-soft transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
             title="ড্যাশবোর্ডে ফিরুন"
           >
             <ArrowLeft size={18} weight="bold" />
           </Link>
           <div>
-            <h1 className="font-semibold text-xs sm:text-sm text-slate-900 tracking-tight leading-tight">
+            <h1 className="font-bold text-xs sm:text-sm text-ink-primary leading-tight">
               ইদ্রিস ব্রাদার্স পিওএস কাউন্টার
             </h1>
-            <p className="text-[10px] text-slate-500 hidden sm:block tracking-tight">
-              মরিচপট্টি, ফেনী বাজার • দ্রুত বিক্রয় ও ক্যাশ টার্মিনাল
-            </p>
           </div>
         </div>
 
@@ -91,39 +89,39 @@ export default function PosPage() {
         <div className="flex items-center gap-2">
           {/* Hardware Barcode Scanner Status Indicator */}
           <div
-            className="hidden lg:flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-50/80 border border-emerald-200/90 text-emerald-800 text-[11px] font-medium"
+            className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cash-bg border border-cash-border text-cash-text text-xs font-semibold"
             title="ইউএসবি বা ব্লুটুথ বারকোড স্ক্যানার গান সক্রিয়। যেকোনো পণ্য সরাসরি স্ক্যান করুন।"
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse" />
-            <Barcode size={13} weight="bold" />
+            <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+            <Barcode size={14} weight="bold" />
             <span>স্ক্যানার প্রস্তুত</span>
           </div>
 
           <Link
             href="/sales"
-            className="px-2.5 py-1.5 rounded-md border border-slate-200/90 hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5 active:scale-[0.98] transition-[background-color,border-color,transform] duration-150"
+            className="px-2.5 py-1.5 rounded-lg border border-border-strong hover:bg-surface-subtle text-ink-body text-xs font-semibold flex items-center gap-1.5 active:scale-[0.98] transition-[background-color,border-color,transform] duration-150"
             title="বিগত বিক্রয় মেমো খাতা ও হিস্ট্রি"
           >
-            <Receipt size={14} weight="bold" className="text-slate-500" />
+            <Receipt size={14} weight="bold" className="text-ink-secondary" />
             <span className="hidden sm:inline">মেমো খাতা</span>
           </Link>
 
           <div className="text-right hidden sm:block">
-            <span className="text-[10px] text-slate-500 block font-medium">মোট বিল:</span>
-            <span className="font-bold text-xs sm:text-sm text-slate-900 font-mono tabular-nums tracking-tight">
-              ৳{getGrandTotal().toLocaleString('en-BD')}
+            <span className="text-xs text-ink-secondary block font-medium">মোট বিল</span>
+            <span className="font-bold text-xs sm:text-sm text-brand-deep font-mono tabular-nums">
+              {formatCurrency(getGrandTotal(), false)}
             </span>
           </div>
 
           {/* Mobile Segmented Switcher Pill */}
-          <div className="md:hidden flex bg-slate-100 p-0.5 rounded-md border border-slate-200/80">
+          <div className="md:hidden flex bg-surface-subtle p-0.5 rounded-lg border border-border-default">
             <button
               type="button"
               onClick={() => setMobileTab('catalog')}
-              className={`px-2.5 py-1 rounded text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${
                 mobileTab === 'catalog'
-                  ? 'bg-white text-slate-900 shadow-2xs'
-                  : 'text-slate-600'
+                  ? 'bg-brand-deep text-white shadow-2xs'
+                  : 'text-ink-secondary'
               }`}
             >
               <GridFour size={14} weight="bold" />
@@ -132,21 +130,21 @@ export default function PosPage() {
             <button
               type="button"
               onClick={() => setMobileTab('settlement')}
-              className={`px-2.5 py-1 rounded text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${
                 mobileTab === 'settlement'
-                  ? 'bg-slate-900 text-white shadow-2xs'
-                  : 'text-slate-600'
+                  ? 'bg-brand-deep text-white shadow-2xs'
+                  : 'text-ink-secondary'
               }`}
             >
               <ShoppingCart size={14} weight="bold" />
-              <span>কার্ট ({cart.length})</span>
+              <span>কার্ট ({formatNumber(cart.length)})</span>
             </button>
           </div>
         </div>
       </header>
 
       {/* Mobile Mode Switcher Strip (Visible on mobile only) */}
-      <div className="md:hidden p-2 bg-slate-50 border-b border-slate-200">
+      <div className="md:hidden p-2 bg-surface-canvas border-b border-border-default">
         <PosHeaderModeBar
           saleType={saleType}
           onToggle={setSaleType}

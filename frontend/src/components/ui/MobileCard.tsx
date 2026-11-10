@@ -1,4 +1,5 @@
 import React from 'react';
+import { Button } from '@/components/ui/Button';
 
 export interface MobileCardField {
   label: string;
@@ -31,22 +32,23 @@ export function MobileCard({
   primaryAction,
   secondaryAction,
 }: MobileCardProps) {
-  const primaryBg = {
-    primary: 'bg-emerald-600 hover:bg-emerald-700 text-white',
-    danger: 'bg-rose-600 hover:bg-rose-700 text-white',
-    warning: 'bg-amber-600 hover:bg-amber-700 text-white',
-  }[primaryAction?.variant || 'primary'];
+  const buttonVariant =
+    primaryAction?.variant === 'danger'
+      ? 'danger'
+      : primaryAction?.variant === 'warning'
+      ? 'wholesale'
+      : 'primary';
 
   return (
-    <div className="bg-white border border-slate-200/90 rounded-xl p-4 shadow-2xs space-y-3">
-      {/* 1. Header: Entity Name & Status Badge */}
-      <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-slate-100">
+    <div className="bg-surface-card border border-border-default rounded-xl p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-3">
+      {/* ১. হেডার: নাম ও স্ট্যাটাস ব্যাজ */}
+      <div className="flex items-start justify-between gap-2 pb-2.5 border-b border-border-subtle">
         <div className="min-w-0">
-          <span className="font-bold text-slate-900 text-sm truncate block">
+          <span className="font-bold text-ink-primary text-sm truncate block">
             {title}
           </span>
           {subtitle && (
-            <span className="text-[11px] text-slate-400 mt-0.5 block truncate">
+            <span className="text-xs text-ink-secondary mt-0.5 block truncate">
               {subtitle}
             </span>
           )}
@@ -54,47 +56,49 @@ export function MobileCard({
         {statusBadge && <div className="shrink-0">{statusBadge}</div>}
       </div>
 
-      {/* 2. Key-Value Body */}
+      {/* ২. তথ্য সারি */}
       <div className="space-y-2 text-xs">
         {fields.map((field, idx) => (
           <div
             key={field.label}
             className={`flex items-center justify-between gap-3 ${
-              idx > 0 ? 'pt-2 border-t border-slate-100/70' : 'py-0.5'
+              idx > 0 ? 'pt-2 border-t border-border-subtle' : 'py-0.5'
             }`}
           >
-            <span className="shrink-0 text-slate-400 font-semibold uppercase tracking-wider text-[11px]">
+            <span className="shrink-0 text-ink-secondary font-semibold text-xs">
               {field.label}
             </span>
-            <div className="text-right font-bold text-slate-900 break-words tabular-numbers">
+            <div className="text-right font-bold text-ink-primary break-words tabular-numbers">
               {field.value}
             </div>
           </div>
         ))}
       </div>
 
-      {/* 3. Pinned Action Footer (>= 40px touch height) */}
+      {/* ৩. অ্যাকশন ফুটার (>= 40px টাচ উচ্চতা) */}
       {(primaryAction || secondaryAction) && (
-        <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+        <div className="flex items-center gap-2 pt-3 border-t border-border-subtle">
           {secondaryAction && (
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="md"
               onClick={secondaryAction.onClick}
-              className="flex-1 h-10 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+              className="flex-1"
             >
               {secondaryAction.icon}
-              {secondaryAction.label}
-            </button>
+              <span>{secondaryAction.label}</span>
+            </Button>
           )}
           {primaryAction && (
-            <button
-              type="button"
+            <Button
+              variant={buttonVariant}
+              size="md"
               onClick={primaryAction.onClick}
-              className={`flex-1 h-10 rounded-lg text-xs font-bold transition-all shadow-2xs flex items-center justify-center gap-1.5 cursor-pointer ${primaryBg}`}
+              className="flex-1"
             >
               {primaryAction.icon}
-              {primaryAction.label}
-            </button>
+              <span>{primaryAction.label}</span>
+            </Button>
           )}
         </div>
       )}

@@ -25,17 +25,17 @@ export function BarcodeScanNotification({
           className="fixed top-14 left-1/2 -translate-x-1/2 z-50 pointer-events-auto"
         >
           <div
-            className={`flex items-center gap-2.5 px-3 py-2 rounded-md border shadow-[0_4px_16px_rgba(15,23,42,0.08)] bg-white ${
+            className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border shadow-[0_4px_16px_rgba(15,23,42,0.08)] bg-surface-card ${
               scan.type === 'success'
-                ? 'border-emerald-200 text-slate-900'
-                : 'border-rose-200 text-slate-900'
+                ? 'border-cash-border text-ink-primary'
+                : 'border-due-border text-ink-primary'
             }`}
           >
             <div
               className={`w-6 h-6 rounded flex items-center justify-center shrink-0 ${
                 scan.type === 'success'
-                  ? 'bg-emerald-50 text-emerald-600'
-                  : 'bg-rose-50 text-rose-600'
+                  ? 'bg-cash-bg text-cash-text'
+                  : 'bg-due-bg text-due-text'
               }`}
             >
               {scan.type === 'success' ? (
@@ -47,7 +47,7 @@ export function BarcodeScanNotification({
 
             <div className="flex items-center gap-2 text-xs">
               <span className="font-semibold">{scan.message}</span>
-              <span className="font-mono tabular-nums tracking-tight text-[11px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200/80">
+              <span className="font-mono tabular-nums text-xs px-1.5 py-0.5 rounded bg-surface-subtle text-ink-body border border-border-default">
                 {scan.barcode}
               </span>
             </div>
@@ -55,7 +55,7 @@ export function BarcodeScanNotification({
             <button
               type="button"
               onClick={onDismiss}
-              className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ml-1"
+              className="p-1 rounded text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ml-1"
             >
               <X size={12} weight="bold" />
             </button>

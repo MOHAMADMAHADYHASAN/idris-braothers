@@ -1,19 +1,18 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import {
   ArrowCounterClockwise,
   X,
-  Warning,
-  Money,
-  Receipt,
   Check,
   Minus,
   Plus,
 } from '@phosphor-icons/react';
 import { useSalesStore } from '../useSalesStore';
-import { formatCurrency } from '@/lib/decimal';
+import { formatCurrency, formatNumber, toBanglaDigits } from '@/lib/decimal';
+import { buttonClasses } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 
 export function ReturnSaleModal() {
   const {
@@ -122,28 +121,25 @@ export function ReturnSaleModal() {
         {/* 1. Modal Header */}
         <div className="p-3.5 bg-slate-50 border-b border-slate-200/90 flex items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-md bg-amber-50 border border-amber-200/90 text-amber-700 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200/90 text-amber-700 flex items-center justify-center shrink-0">
               <ArrowCounterClockwise size={18} weight="bold" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-slate-900 tracking-tight flex items-center gap-2">
-                <span>পণ্য ফেরত ও রিফান্ড (Sales Return)</span>
+              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2 flex-wrap">
+                <span>পণ্য ফেরত ও রিফান্ড</span>
                 {saleToReturn && (
-                  <span className="font-mono tabular-nums text-xs font-semibold px-2 py-0.5 rounded bg-slate-200/80 text-slate-800">
-                    #{saleToReturn.invoiceNumber}
-                  </span>
+                  <Badge variant="neutral" className="font-mono tabular-nums">
+                    #{toBanglaDigits(saleToReturn.invoiceNumber)}
+                  </Badge>
                 )}
               </h2>
-              <p className="text-[11px] text-slate-500 tracking-tight">
-                ফেরতকৃত পণ্য স্বয়ংক্রিয়ভাবে ইনভেন্টরি স্টকে যুক্ত হবে এবং খাতা বা ক্যাশ সমন্বয় হবে
-              </p>
             </div>
           </div>
 
           <button
             type="button"
             onClick={closeReturnModal}
-            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
+            className="p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
           >
             <X size={16} weight="bold" />
           </button>
@@ -151,35 +147,35 @@ export function ReturnSaleModal() {
 
         {/* 2. Loading State */}
         {isLoadingReturnSale || !saleToReturn ? (
-          <div className="p-10 text-center text-slate-500 text-xs">
+          <div className="p-10 text-center text-slate-600 text-xs">
             মেমোর তথ্য লোড হচ্ছে...
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* Invoice Info Strip */}
-            <div className="p-2.5 rounded-md border border-slate-200/90 bg-slate-50/70 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="p-2.5 rounded-lg border border-slate-200/90 bg-slate-50/70 flex flex-wrap items-center justify-between gap-3 text-xs">
               <div>
-                <span className="text-slate-500 font-medium">কাস্টমার: </span>
+                <span className="text-slate-600 font-medium">কাস্টমার: </span>
                 <span className="font-semibold text-slate-900">
-                  {saleToReturn.customer?.name || 'খুচরা ক্রেতা (সাধারণ)'}
+                  {saleToReturn.customer?.name || 'সাধারণ খুচরা ক্রেতা'}
                 </span>
                 {saleToReturn.customer?.phone && (
-                  <span className="text-slate-500 font-mono ml-1.5">
-                    ({saleToReturn.customer.phone})
+                  <span className="text-slate-600 font-mono tabular-nums ml-1.5">
+                    ({toBanglaDigits(saleToReturn.customer.phone)})
                   </span>
                 )}
               </div>
 
               <div className="flex items-center gap-3">
-                <div>
-                  <span className="text-slate-500 font-medium">বিক্রয় ধরন: </span>
-                  <span className="font-semibold text-slate-900">
+                <div className="flex items-center gap-1">
+                  <span className="text-slate-600 font-medium">ধরন: </span>
+                  <Badge variant={saleToReturn.saleType === 'WHOLESALE' ? 'wholesale' : 'neutral'}>
                     {saleToReturn.saleType === 'WHOLESALE' ? 'পাইকারি' : 'খুচরা'}
-                  </span>
+                  </Badge>
                 </div>
                 <div>
-                  <span className="text-slate-500 font-medium">মেমোর বাকি: </span>
-                  <span className="font-mono tabular-nums font-bold text-slate-900">
+                  <span className="text-slate-600 font-medium">মেমোর বাকি: </span>
+                  <span className="font-mono tabular-nums font-bold text-amber-800">
                     {formatCurrency(saleToReturn.dueAmount)}
                   </span>
                 </div>
@@ -192,14 +188,14 @@ export function ReturnSaleModal() {
                 ফেরতের জন্য পণ্যের পরিমাণ নির্ধারণ করুন:
               </label>
 
-              <div className="border border-slate-200/90 rounded-md overflow-hidden bg-white">
+              <div className="border border-slate-200/90 rounded-lg overflow-hidden bg-white">
                 <table className="w-full text-left border-collapse text-xs">
-                  <thead className="bg-slate-50/80 border-b border-slate-200/90 text-slate-600 font-semibold">
+                  <thead className="bg-slate-50/80 border-b border-slate-200/90 text-slate-700 font-semibold">
                     <tr>
                       <th className="px-3 py-2 text-left">পণ্য বিবরণ</th>
                       <th className="px-3 py-2 text-center">বিক্রিত পরিমাণ</th>
                       <th className="px-3 py-2 text-right">দর (টাকা)</th>
-                      <th className="px-3 py-2 text-center w-36">ফেরতের সংখ্যা</th>
+                      <th className="px-3 py-2 text-center w-40">ফেরতের সংখ্যা</th>
                       <th className="px-3 py-2 text-right">ফেরত মূল্য</th>
                     </tr>
                   </thead>
@@ -222,17 +218,17 @@ export function ReturnSaleModal() {
                                 item.variant?.product.name ||
                                 'পণ্য'}
                             </div>
-                            <div className="text-[10px] text-slate-500">
+                            <div className="text-xs text-slate-600">
                               ইউনিট: {item.unitName}
                             </div>
                           </td>
 
                           <td className="px-3 py-2.5 text-center font-mono tabular-nums text-slate-700">
-                            {item.quantity} {item.unitName}
+                            {formatNumber(item.quantity)} {item.unitName}
                           </td>
 
                           <td className="px-3 py-2.5 text-right font-mono tabular-nums text-slate-700">
-                            ৳{item.unitPrice.toLocaleString('en-BD')}
+                            {formatCurrency(item.unitPrice)}
                           </td>
 
                           <td className="px-3 py-2.5">
@@ -243,9 +239,9 @@ export function ReturnSaleModal() {
                                   handleQuantityChange(item.id, item.quantity, returnQty - 1)
                                 }
                                 disabled={returnQty <= 0}
-                                className="w-6 h-6 rounded border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none active:scale-[0.98] cursor-pointer"
+                                className="w-7 h-7 rounded border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none active:scale-[0.98] cursor-pointer"
                               >
-                                <Minus size={11} weight="bold" />
+                                <Minus size={12} weight="bold" />
                               </button>
 
                               <input
@@ -261,7 +257,7 @@ export function ReturnSaleModal() {
                                     parseFloat(e.target.value) || 0
                                   )
                                 }
-                                className="w-16 h-7 text-center font-mono tabular-nums font-bold text-xs rounded border border-slate-300 focus:outline-hidden focus:border-slate-800"
+                                className="w-16 h-7 text-center font-mono tabular-nums font-bold text-xs rounded border border-slate-300 text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
                               />
 
                               <button
@@ -270,18 +266,18 @@ export function ReturnSaleModal() {
                                   handleQuantityChange(item.id, item.quantity, returnQty + 1)
                                 }
                                 disabled={returnQty >= item.quantity}
-                                className="w-6 h-6 rounded border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none active:scale-[0.98] cursor-pointer"
+                                className="w-7 h-7 rounded border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-slate-100 disabled:opacity-30 disabled:pointer-events-none active:scale-[0.98] cursor-pointer"
                               >
-                                <Plus size={11} weight="bold" />
+                                <Plus size={12} weight="bold" />
                               </button>
 
                               <button
                                 type="button"
                                 onClick={() => handleSetFullReturn(item.id, item.quantity)}
-                                className={`px-1.5 py-0.5 rounded text-[10px] font-semibold border cursor-pointer active:scale-[0.98] ${
+                                className={`px-2 py-1 rounded text-xs font-semibold border cursor-pointer active:scale-[0.98] ${
                                   isMax
                                     ? 'bg-amber-600 text-white border-amber-600'
-                                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                                    : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                                 }`}
                                 title="সম্পূর্ণ ফেরত"
                               >
@@ -291,7 +287,7 @@ export function ReturnSaleModal() {
                           </td>
 
                           <td className="px-3 py-2.5 text-right font-mono tabular-nums font-bold text-slate-900">
-                            ৳{lineRefund.toLocaleString('en-BD')}
+                            {formatCurrency(lineRefund)}
                           </td>
                         </tr>
                       );
@@ -302,18 +298,18 @@ export function ReturnSaleModal() {
             </div>
 
             {/* Total Refund Banner */}
-            <div className="p-3 rounded-md border border-slate-200/90 bg-slate-50 flex items-center justify-between">
+            <div className="p-3 rounded-lg border border-brand-light/70 bg-brand-soft/40 flex items-center justify-between">
               <div>
-                <span className="text-xs text-slate-600 font-medium block">
-                  মোট ফেরত টাকা (Refund Total):
+                <span className="text-xs text-slate-800 font-semibold block">
+                  মোট ফেরত টাকা:
                 </span>
-                <span className="text-[11px] text-slate-500">
+                <span className="text-xs text-slate-600">
                   নির্বাচিত আইটেমসমূহের মোট মূল্য
                 </span>
               </div>
               <div className="text-right">
-                <span className="font-mono tabular-nums tracking-tight font-black text-lg text-slate-900">
-                  ৳{totalRefund.toLocaleString('en-BD')}
+                <span className="font-mono tabular-nums tracking-tight font-black text-lg text-brand-deep">
+                  {formatCurrency(totalRefund)}
                 </span>
               </div>
             </div>
@@ -321,23 +317,23 @@ export function ReturnSaleModal() {
             {/* Refund Method Selector */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-slate-700 block">
-                টাকা পরিশোধ / রিফান্ড পদ্ধতি:
+                টাকা পরিশোধ ও রিফান্ড পদ্ধতি:
               </label>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button
                   type="button"
                   onClick={() => setRefundMethod('CASH')}
-                  className={`p-3 rounded-md border text-left transition-[background-color,border-color] duration-150 active:scale-[0.98] cursor-pointer flex items-start gap-2.5 ${
+                  className={`p-3 rounded-lg border text-left transition-[background-color,border-color] duration-150 active:scale-[0.98] cursor-pointer flex items-start gap-2.5 ${
                     refundMethod === 'CASH'
-                      ? 'border-emerald-600 bg-emerald-50/50 text-slate-900 ring-1 ring-emerald-600'
+                      ? 'border-brand-deep bg-brand-soft/60 text-slate-900 ring-1 ring-brand-deep'
                       : 'border-slate-200/90 bg-white hover:bg-slate-50 text-slate-700'
                   }`}
                 >
                   <div
                     className={`w-4 h-4 rounded-full border mt-0.5 flex items-center justify-center shrink-0 ${
                       refundMethod === 'CASH'
-                        ? 'border-emerald-600 bg-emerald-600 text-white'
+                        ? 'border-brand-deep bg-brand-deep text-white'
                         : 'border-slate-300 bg-white'
                     }`}
                   >
@@ -345,10 +341,7 @@ export function ReturnSaleModal() {
                   </div>
                   <div>
                     <span className="font-semibold text-xs block text-slate-900">
-                      নগদ রিফান্ড (Cash Payout)
-                    </span>
-                    <span className="text-[11px] text-slate-500">
-                      দোকানের ক্যাশ ড্রয়ার থেকে সরাসরি ক্রেতাকে নগদ ফেরত
+                      নগদ রিফান্ড
                     </span>
                   </div>
                 </button>
@@ -357,16 +350,16 @@ export function ReturnSaleModal() {
                   type="button"
                   disabled={!saleToReturn.customer}
                   onClick={() => setRefundMethod('CUSTOMER_DUE_ADJUSTMENT')}
-                  className={`p-3 rounded-md border text-left transition-[background-color,border-color] duration-150 active:scale-[0.98] cursor-pointer flex items-start gap-2.5 disabled:opacity-40 disabled:pointer-events-none ${
+                  className={`p-3 rounded-lg border text-left transition-[background-color,border-color] duration-150 active:scale-[0.98] cursor-pointer flex items-start gap-2.5 disabled:opacity-40 disabled:pointer-events-none ${
                     refundMethod === 'CUSTOMER_DUE_ADJUSTMENT'
-                      ? 'border-emerald-600 bg-emerald-50/50 text-slate-900 ring-1 ring-emerald-600'
+                      ? 'border-brand-deep bg-brand-soft/60 text-slate-900 ring-1 ring-brand-deep'
                       : 'border-slate-200/90 bg-white hover:bg-slate-50 text-slate-700'
                   }`}
                 >
                   <div
                     className={`w-4 h-4 rounded-full border mt-0.5 flex items-center justify-center shrink-0 ${
                       refundMethod === 'CUSTOMER_DUE_ADJUSTMENT'
-                        ? 'border-emerald-600 bg-emerald-600 text-white'
+                        ? 'border-brand-deep bg-brand-deep text-white'
                         : 'border-slate-300 bg-white'
                     }`}
                   >
@@ -376,10 +369,7 @@ export function ReturnSaleModal() {
                   </div>
                   <div>
                     <span className="font-semibold text-xs block text-slate-900">
-                      বকেয়া খাতা সমন্বয় (Ledger Due Credit)
-                    </span>
-                    <span className="text-[11px] text-slate-500">
-                      কাস্টমারের বর্তমান বকেয়া থেকে স্বয়ংক্রিয়ভাবে বাদ যাবে
+                      বকেয়া খাতা সমন্বয়
                     </span>
                   </div>
                 </button>
@@ -398,10 +388,10 @@ export function ReturnSaleModal() {
                     key={p}
                     type="button"
                     onClick={() => setReason(p)}
-                    className={`px-2 py-0.5 rounded text-[11px] font-medium border cursor-pointer active:scale-[0.98] ${
+                    className={`px-2.5 py-1 rounded-md text-xs font-medium border cursor-pointer active:scale-[0.98] transition-colors ${
                       reason === p
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                        ? 'bg-brand-deep text-white border-brand-deep'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
                     {p}
@@ -413,8 +403,8 @@ export function ReturnSaleModal() {
                 type="text"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="ফেরতের কারণ লিখুন (ঐচ্ছিক)"
-                className="w-full h-8.5 px-3 rounded-md border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-slate-800 focus:ring-1 focus:ring-slate-800"
+                placeholder="ফেরতের কারণ (ঐচ্ছিক)"
+                className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-500 focus:outline-hidden focus:border-brand-deep focus:ring-2 focus:ring-brand-deep/20"
               />
             </div>
 
@@ -424,7 +414,7 @@ export function ReturnSaleModal() {
                 type="button"
                 onClick={closeReturnModal}
                 disabled={isSubmittingReturn}
-                className="px-3 py-1.5 rounded-md border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-[background-color,border-color] duration-150 active:scale-[0.98] cursor-pointer"
+                className={buttonClasses({ variant: 'secondary', size: 'sm' })}
               >
                 বাতিল করুন
               </button>
@@ -432,13 +422,13 @@ export function ReturnSaleModal() {
               <button
                 type="submit"
                 disabled={!hasItemsToReturn || isSubmittingReturn}
-                className="px-4 py-1.5 rounded-md bg-amber-600 text-white text-xs font-semibold hover:bg-amber-700 transition-[background-color,transform] duration-150 flex items-center gap-1.5 disabled:opacity-40 disabled:pointer-events-none active:scale-[0.98] cursor-pointer"
+                className={buttonClasses({ variant: 'wholesale', size: 'sm', className: 'gap-1.5' })}
               >
                 <ArrowCounterClockwise size={14} weight="bold" />
                 <span>
                   {isSubmittingReturn
                     ? 'ফেরত প্রসেসিং হচ্ছে...'
-                    : `ফেরত নিশ্চিত করুন (৳${totalRefund.toLocaleString('en-BD')})`}
+                    : `ফেরত নিশ্চিত করুন (${formatCurrency(totalRefund)})`}
                 </span>
               </button>
             </div>

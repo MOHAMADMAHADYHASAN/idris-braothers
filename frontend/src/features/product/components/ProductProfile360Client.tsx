@@ -21,7 +21,13 @@ import {
   Plus,
   Info,
 } from '@phosphor-icons/react';
-import { formatCurrency } from '@/lib/decimal';
+import {
+  formatCurrency,
+  formatNumber,
+  formatWeight,
+  formatPercent,
+  formatDateBn,
+} from '@/lib/decimal';
 import { generateCode128Bars } from '@/lib/barcode';
 import { Product, ProductVariant, StockWastage } from '../product.types';
 import { productService } from '../product.service';
@@ -78,10 +84,10 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-surface-canvas flex items-center justify-center p-6">
         <div className="flex flex-col items-center gap-2">
-          <Spinner size={32} weight="bold" className="animate-spin text-slate-700" />
-          <p className="text-xs font-semibold text-slate-600">পণ্য প্রোফাইল লোড হচ্ছে...</p>
+          <Spinner size={32} weight="bold" className="animate-spin text-brand-deep" />
+          <p className="text-xs font-semibold text-ink-secondary">পণ্য প্রোফাইল লোড হচ্ছে...</p>
         </div>
       </div>
     );
@@ -89,12 +95,12 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
-        <WarningCircle size={40} weight="fill" className="text-rose-500 mb-2" />
-        <h2 className="text-base font-bold text-slate-900">{error || 'পণ্যটি খুঁজে পাওয়া যায়নি'}</h2>
+      <div className="min-h-screen bg-surface-canvas flex flex-col items-center justify-center p-6">
+        <WarningCircle size={40} weight="fill" className="text-danger mb-2" />
+        <h2 className="text-base font-bold text-ink-primary">{error || 'পণ্যটি খুঁজে পাওয়া যায়নি'}</h2>
         <Link
           href="/products"
-          className="mt-4 px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold"
+          className="mt-4 px-4 py-2 rounded-lg bg-brand-deep hover:bg-brand-hover text-white text-xs font-semibold"
         >
           পণ্য তালিকায় ফিরুন
         </Link>
@@ -139,14 +145,14 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/70 pb-20 font-sans print:bg-white print:p-0 print:pb-0">
-      {/* ১. টপ স্টিকি হেডার (প্রিন্টে লুকানো থাকবে) */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs print:hidden">
+    <div className="min-h-screen bg-surface-canvas pb-20 font-sans print:bg-white print:p-0 print:pb-0">
+      {/* ১. টপ স্টিকি হেডার */}
+      <header className="sticky top-0 z-40 bg-surface-card/95 backdrop-blur-md border-b border-border-default shadow-2xs print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/products"
-              className="p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors shrink-0"
+              className="p-2 rounded-lg text-ink-secondary hover:text-brand-deep hover:bg-brand-soft border border-border-default transition-colors shrink-0"
               title="পণ্য তালিকায় ফিরে যান"
             >
               <ArrowLeft size={16} weight="bold" />
@@ -154,58 +160,56 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate">
+                <h1 className="text-base sm:text-lg font-bold text-ink-primary truncate">
                   {product.banglaName || product.name}
                 </h1>
                 {product.banglaName && product.name && (
-                  <span className="text-xs text-slate-500 font-medium truncate hidden sm:inline">
-                    ({product.name})
+                  <span className="text-xs text-ink-secondary font-medium truncate hidden sm:inline">
+                    • {product.name}
                   </span>
                 )}
                 {product.category && (
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 shrink-0">
+                  <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-surface-subtle text-ink-body border border-border-default shrink-0">
                     {product.category.banglaName || product.category.name}
                   </span>
                 )}
                 {product.brand && (
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0">
+                  <span className="px-2 py-0.5 rounded-md text-xs font-semibold bg-brand-soft text-brand-deep border border-brand-light shrink-0">
                     {product.brand.banglaName || product.brand.name}
                   </span>
                 )}
                 <span
-                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold border shrink-0 ${
+                  className={`px-2 py-0.5 rounded-md text-xs font-bold border shrink-0 ${
                     isLowStock
-                      ? 'bg-rose-50 text-rose-700 border-rose-200'
-                      : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      ? 'bg-due-bg text-due-text border-due-border'
+                      : 'bg-cash-bg text-cash-text border-cash-border'
                   }`}
                 >
-                  স্টক: {totalStock} {product.baseUnitName} {isLowStock ? '(কম মজুত!)' : '(পর্যাপ্ত)'}
+                  স্টক: {formatWeight(totalStock, product.baseUnitName)} • {isLowStock ? 'কম মজুত' : 'পর্যাপ্ত'}
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 truncate mt-0.5">
+              <p className="text-xs text-ink-secondary truncate mt-0.5">
                 আইডি: {product.id.slice(-8).toUpperCase()} • একক: {product.baseUnitName} •{' '}
                 {product.hasVariants
-                  ? `${product.variants.length} টি ভ্যারিয়েন্টযুক্ত পণ্য`
-                  : 'সাধারণ সিঙ্গেল পণ্য'}
+                  ? `${formatNumber(product.variants.length)} টি ভ্যারিয়েন্টযুক্ত পণ্য`
+                  : 'সাধারণ একক পণ্য'}
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-2 shrink-0">
-            {/* বারকোড স্টিকার প্রিন্ট জাম্প */}
             <button
               type="button"
               onClick={scrollToBarcode}
-              className="px-3 py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-800 text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+              className="px-3 py-2 rounded-lg border border-border-strong hover:bg-surface-subtle text-ink-body text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
             >
-              <Barcode size={15} weight="bold" className="text-slate-600" />
+              <Barcode size={15} weight="bold" className="text-ink-secondary" />
               <span className="hidden sm:inline">বারকোড স্টিকার</span>
             </button>
 
-            {/* এডিট পণ্য বাটন */}
             <Link
               href={`/products/edit/${product.id}`}
-              className="px-3.5 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs"
+              className="px-3.5 py-2 rounded-lg bg-brand-deep hover:bg-brand-hover text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs"
             >
               <PencilSimple size={14} weight="bold" />
               <span>এডিট পণ্য</span>
@@ -276,18 +280,18 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* বাঁয়ে: ওভারভিউ, ভ্যারিয়েন্ট ও অডিট ম্যাট্রিক্স (৮ কলাম / ~৬৬%) */}
           <div className="lg:col-span-8 space-y-6">
-            {/* কার্ড ১: পণ্যের পরিচিতি ও ট্যাক্সোনমি */}
-            <div className="bg-white rounded-xl border border-slate-200/90 p-5 shadow-2xs space-y-4">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <Package size={16} weight="bold" className="text-slate-500" />
+            {/* কার্ড ১: পণ্যের পরিচিতি ও শ্রেণীবিন্যাস */}
+            <div className="bg-surface-card rounded-xl border border-border-default p-5 shadow-2xs space-y-4">
+              <div className="flex items-center justify-between border-b border-border-subtle pb-3">
+                <span className="text-sm font-bold text-ink-primary flex items-center gap-1.5">
+                  <Package size={16} weight="bold" className="text-brand-deep" />
                   পণ্যের মূল পরিচিতি ও শ্রেণীবিন্যাস
                 </span>
                 <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
+                  className={`px-2 py-0.5 rounded text-xs font-bold border ${
                     product.isActive
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : 'bg-rose-50 text-rose-700 border-rose-200'
+                      ? 'bg-cash-bg text-cash-text border-cash-border'
+                      : 'bg-due-bg text-due-text border-due-border'
                   }`}
                 >
                   {product.isActive ? 'সক্রিয় পণ্য' : 'নিষ্ক্রিয়'}
@@ -296,91 +300,86 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                 <div>
-                  <span className="text-slate-400 text-[10px] uppercase font-bold block">
+                  <span className="text-ink-secondary text-xs font-semibold block">
                     বাংলা নাম
                   </span>
-                  <span className="font-bold text-slate-900 text-sm">
+                  <span className="font-bold text-ink-primary text-sm">
                     {product.banglaName || 'নাম দেওয়া নেই'}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-slate-400 text-[10px] uppercase font-bold block">
-                    ইংরেজি নাম (POS / Receipt)
+                  <span className="text-ink-secondary text-xs font-semibold block">
+                    ইংরেজি ও মেমো নাম
                   </span>
-                  <span className="font-semibold text-slate-900 text-sm">
+                  <span className="font-semibold text-ink-primary text-sm">
                     {product.name}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-slate-400 text-[10px] uppercase font-bold block">
+                  <span className="text-ink-secondary text-xs font-semibold block">
                     ক্যাটাগরি
                   </span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-ink-body">
                     {product.category?.banglaName || product.category?.name || 'ক্যাটাগরি নেই'}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-slate-400 text-[10px] uppercase font-bold block">
-                    ব্র্যান্ড / প্রস্তুতকারক
+                  <span className="text-ink-secondary text-xs font-semibold block">
+                    ব্র্যান্ড ও প্রস্তুতকারক
                   </span>
-                  <span className="font-semibold text-slate-800">
+                  <span className="font-semibold text-ink-body">
                     {product.brand?.banglaName || product.brand?.name || 'নিজস্ব / খোলা মাল'}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-slate-400 text-[10px] uppercase font-bold block">
+                  <span className="text-ink-secondary text-xs font-semibold block">
                     ওজন ও বিক্রয় মোড
                   </span>
-                  <span className="font-semibold text-slate-800 flex items-center gap-1">
-                    <Scales size={14} weight="bold" className="text-slate-500" />
+                  <span className="font-semibold text-ink-body flex items-center gap-1">
+                    <Scales size={14} weight="bold" className="text-brand-deep" />
                     {selectedVariant?.allowDecimalQty
-                      ? 'লুজ ওজনযোগ্য পণ্য (দশমিক ওজন যেমন ০.২৫ কেজি এলাউড)'
-                      : 'সিলড প্যাকেট / বোতল (শুধুমাত্র পূর্ণসংখ্যা যেমন ১, ২, ৫)'}
+                      ? 'ওজনযোগ্য পণ্য (ভগ্নাংশ ০.২৫ কেজি বিক্রয়যোগ্য)'
+                      : 'প্যাকেট / বোতল (পূর্ণসংখ্যা বিক্রয়যোগ্য)'}
                   </span>
                 </div>
 
                 <div>
-                  <span className="text-slate-400 text-[10px] uppercase font-bold block">
-                    বেস হিসাব একক
+                  <span className="text-ink-secondary text-xs font-semibold block">
+                    মূল হিসাব একক
                   </span>
-                  <span className="font-mono font-bold text-slate-900">
+                  <span className="font-mono font-bold text-ink-primary">
                     {product.baseUnitName}
                   </span>
                 </div>
               </div>
 
               {product.description && (
-                <div className="pt-3 border-t border-slate-100 text-xs">
-                  <span className="text-slate-400 text-[10px] uppercase font-bold block mb-1">
+                <div className="pt-3 border-t border-border-subtle text-xs">
+                  <span className="text-ink-secondary text-xs font-semibold block mb-1">
                     পণ্য বিবরণী ও সংরক্ষণ নির্দেশিকা
                   </span>
-                  <p className="text-slate-700 leading-relaxed">{product.description}</p>
+                  <p className="text-ink-body leading-relaxed">{product.description}</p>
                 </div>
               )}
             </div>
 
             {/* কার্ড ২: ভ্যারিয়েন্ট ও প্যাকেজিং রূপান্তর ম্যাট্রিক্স */}
-            <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
-                <div>
-                  <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                    <Storefront size={16} weight="bold" className="text-slate-500" />
-                    ভ্যারিয়েন্ট, মূল্য ও প্যাকেজিং রূপান্তর ম্যাট্রিক্স
-                  </h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    প্রতিটি ভ্যারিয়েন্টের মজুত স্টক, লাভ মার্জিন এবং বস্তা/কার্টন কনভার্সন
-                  </p>
-                </div>
+            <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden">
+              <div className="p-4 border-b border-border-subtle flex items-center justify-between flex-wrap gap-2">
+                <h3 className="text-sm font-bold text-ink-primary flex items-center gap-1.5">
+                  <Storefront size={16} weight="bold" className="text-brand-deep" />
+                  ভ্যারিয়েন্ট, মূল্য ও প্যাকেজিং রূপান্তর ম্যাট্রিক্স
+                </h3>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-slate-50/80 border-b border-slate-200/90 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
+                    <tr className="bg-surface-subtle/80 border-b border-border-default text-ink-secondary font-bold text-xs">
                       <th className="py-2.5 px-3">ভ্যারিয়েন্ট / সাইজ</th>
                       <th className="py-2.5 px-3">SKU ও বারকোড</th>
                       <th className="py-2.5 px-3 text-right">মজুত স্টক</th>
@@ -391,7 +390,7 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                       <th className="py-2.5 px-3 text-center">অ্যাকশন</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-border-subtle">
                     {product.variants.map((v) => {
                       const retailProfit = (v.retailPrice || 0) - (v.currentPurchasePrice || 0);
                       const retailMargin =
@@ -403,60 +402,60 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
 
                       return (
                         <React.Fragment key={v.id}>
-                          <tr className="hover:bg-slate-50/60 transition-colors">
+                          <tr className="hover:bg-surface-subtle/60 transition-colors">
                             <td className="py-2.5 px-3">
-                              <div className="font-bold text-slate-900 text-xs sm:text-sm">
-                                {v.variantName === 'Default' ? 'সাধারণ (স্ট্যান্ডার্ড)' : v.variantName}
+                              <div className="font-bold text-ink-primary text-xs sm:text-sm">
+                                {v.variantName === 'Default' ? 'সাধারণ (মূল পণ্য)' : v.variantName}
                               </div>
-                              <span className="text-[10px] text-slate-400 font-mono">
+                              <span className="text-xs text-ink-secondary font-mono">
                                 একক: {v.baseUnitName}
                               </span>
                             </td>
 
-                            <td className="py-2.5 px-3 font-mono text-[11px]">
-                              <div className="text-slate-800 font-semibold">{v.sku || '-'}</div>
-                              <div className="text-slate-400 text-[10px]">{v.barcode || '-'}</div>
+                            <td className="py-2.5 px-3 font-mono text-xs">
+                              <div className="text-ink-primary font-semibold">{v.sku || '-'}</div>
+                              <div className="text-ink-secondary">{v.barcode || '-'}</div>
                             </td>
 
                             <td className="py-2.5 px-3 text-right font-mono tabular-nums font-bold">
                               <span
                                 className={
                                   v.stockQuantity <= v.lowStockAlert
-                                    ? 'text-rose-700 font-black'
-                                    : 'text-slate-900'
+                                    ? 'text-due-text font-black'
+                                    : 'text-ink-primary'
                                 }
                               >
-                                {v.stockQuantity} {v.baseUnitName}
+                                {formatWeight(v.stockQuantity, v.baseUnitName)}
                               </span>
                               {v.stockQuantity <= v.lowStockAlert && (
-                                <span className="block text-[10px] text-rose-500 font-semibold">
-                                  অ্যালার্ট (&le;{v.lowStockAlert})
+                                <span className="block text-xs text-due-text font-semibold">
+                                  অ্যালার্ট (&le;{formatNumber(v.lowStockAlert)})
                                 </span>
                               )}
                             </td>
 
-                            <td className="py-2.5 px-3 text-right font-mono tabular-nums text-slate-700 font-medium">
+                            <td className="py-2.5 px-3 text-right font-mono tabular-nums text-ink-body font-medium">
                               {formatCurrency(v.currentPurchasePrice)}
                             </td>
 
-                            <td className="py-2.5 px-3 text-right font-mono tabular-nums font-semibold text-purple-800">
+                            <td className="py-2.5 px-3 text-right font-mono tabular-nums font-semibold text-wholesale-text">
                               {formatCurrency(v.wholesalePrice)}
                             </td>
 
-                            <td className="py-2.5 px-3 text-right font-mono tabular-nums font-black text-slate-900">
+                            <td className="py-2.5 px-3 text-right font-mono tabular-nums font-black text-ink-primary">
                               {formatCurrency(v.retailPrice)}
                             </td>
 
                             <td className="py-2.5 px-3 text-center">
                               <span
-                                className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
+                                className={`inline-block px-2 py-0.5 rounded text-xs font-mono font-bold border ${
                                   retailProfit >= 0
-                                    ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                                    : 'bg-rose-50 text-rose-700 border border-rose-200'
+                                    ? 'bg-cash-bg text-cash-text border-cash-border'
+                                    : 'bg-due-bg text-due-text border-due-border'
                                 }`}
-                                title={`খুচরা মার্জিন: ${retailMargin.toFixed(1)}%, পাইকারি মার্জিন: ${wholesaleMargin.toFixed(1)}%`}
+                                title={`খুচরা মার্জিন: ${formatPercent(retailMargin, 1)}, পাইকারি মার্জিন: ${formatPercent(wholesaleMargin, 1)}`}
                               >
-                                +{retailMargin.toFixed(0)}%
+                                {formatPercent(retailMargin, 0, true)}
                               </span>
                             </td>
 
@@ -465,56 +464,56 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                                 <button
                                   type="button"
                                   onClick={() => setActiveVariantForPrice(v)}
-                                  className="p-1 rounded border border-slate-200 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+                                  className="p-1.5 rounded border border-border-default hover:bg-surface-subtle text-ink-secondary hover:text-brand-deep transition-colors cursor-pointer"
                                   title="দর পরিবর্তন"
                                 >
-                                  <Coins size={13} weight="bold" />
+                                  <Coins size={14} weight="bold" />
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setActiveVariantForUnit(v)}
-                                  className="p-1 rounded border border-slate-200 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+                                  className="p-1.5 rounded border border-border-default hover:bg-surface-subtle text-ink-secondary hover:text-brand-deep transition-colors cursor-pointer"
                                   title="কার্টন/বস্তা ইউনিট যোগ"
                                 >
-                                  <Package size={13} weight="bold" />
+                                  <Package size={14} weight="bold" />
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setActiveVariantForWastage(v)}
-                                  className="p-1 rounded border border-slate-200 hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors cursor-pointer"
+                                  className="p-1.5 rounded border border-border-default hover:bg-due-bg text-ink-secondary hover:text-due-text transition-colors cursor-pointer"
                                   title="ওয়েস্টেজ এন্ট্রি"
                                 >
-                                  <WarningCircle size={13} weight="bold" />
+                                  <WarningCircle size={14} weight="bold" />
                                 </button>
                               </div>
                             </td>
                           </tr>
 
-                          {/* প্যাকেজিং ইউনিট সাব-রো (বস্তা, কার্টন, পাল্লা) */}
+                          {/* প্যাকেজিং ইউনিট সাব-রো */}
                           {v.units && v.units.length > 0 && (
-                            <tr className="bg-slate-50/40">
-                              <td colSpan={8} className="py-2 px-4 border-b border-slate-100">
-                                <div className="flex items-center gap-2 flex-wrap text-[11px]">
-                                  <span className="text-slate-500 font-semibold flex items-center gap-1">
-                                    <Package size={12} weight="bold" className="text-slate-400" />
+                            <tr className="bg-surface-subtle/40">
+                              <td colSpan={8} className="py-2 px-4 border-b border-border-subtle">
+                                <div className="flex items-center gap-2 flex-wrap text-xs">
+                                  <span className="text-ink-secondary font-semibold flex items-center gap-1">
+                                    <Package size={13} weight="bold" className="text-ink-secondary" />
                                     প্যাকেজিং ইউনিটসমূহ:
                                   </span>
                                   {v.units.map((u) => (
                                     <div
                                       key={u.id}
-                                      className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-white border border-slate-200 font-mono shadow-2xs"
+                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-card border border-border-default font-mono shadow-2xs"
                                     >
-                                      <span className="font-bold text-slate-900">{u.unitName}</span>
-                                      <span className="text-slate-400 text-[10px]">
-                                        (= {u.conversionFactor} {v.baseUnitName})
+                                      <span className="font-bold text-ink-primary">{u.unitName}</span>
+                                      <span className="text-ink-secondary text-xs">
+                                        (= {formatNumber(u.conversionFactor)} {v.baseUnitName})
                                       </span>
                                       {u.wholesalePrice && (
-                                        <span className="text-purple-700 font-bold">
+                                        <span className="text-wholesale-text font-bold">
                                           পাইকারি {formatCurrency(u.wholesalePrice)}
                                         </span>
                                       )}
                                       {u.retailPrice && (
-                                        <span className="text-slate-800 font-bold">
+                                        <span className="text-ink-primary font-bold">
                                           খুচরা {formatCurrency(u.retailPrice)}
                                         </span>
                                       )}
@@ -533,21 +532,16 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
             </div>
 
             {/* কার্ড ৩: স্টক ওয়েস্টেজ ও ঘাটতি হিস্ট্রি */}
-            <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-                <div>
-                  <h3 className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                    <WarningCircle size={16} weight="bold" className="text-rose-500" />
-                    স্টক ওয়েস্টেজ ও ঘাটতি অডিট হিস্ট্রি
-                  </h3>
-                  <p className="text-[11px] text-slate-500 mt-0.5">
-                    শুকিয়ে যাওয়া, ইঁদুরে কাটা বা ক্ষতিগ্রস্ত মালের পূর্ববর্তী রেকর্ড
-                  </p>
-                </div>
+            <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden">
+              <div className="p-4 border-b border-border-subtle flex items-center justify-between">
+                <h3 className="text-sm font-bold text-ink-primary flex items-center gap-1.5">
+                  <WarningCircle size={16} weight="bold" className="text-danger" />
+                  স্টক ওয়েস্টেজ ও ঘাটতি অডিট হিস্ট্রি
+                </h3>
                 <button
                   type="button"
                   onClick={() => setActiveVariantForWastage(product.variants[0])}
-                  className="px-2.5 py-1 rounded-md bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold hover:bg-rose-100 flex items-center gap-1 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg bg-due-bg text-due-text border border-due-border text-xs font-semibold hover:bg-red-100 flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   <Plus size={13} weight="bold" />
                   <span>ঘাটতি এন্ট্রি করুন</span>
@@ -555,44 +549,40 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
               </div>
 
               {wastages.length === 0 ? (
-                <div className="py-8 text-center text-slate-400 text-xs">
-                  এই পণ্যের কোনো ওয়েস্টেজ বা ঘাটতির রেকর্ড নেই (১০০% ক্লিন অডিট)।
+                <div className="py-8 text-center text-ink-secondary text-xs">
+                  এই পণ্যের কোনো ওয়েস্টেজ বা ঘাটতির রেকর্ড নেই।
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="bg-slate-50/80 border-b border-slate-200/90 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
-                        <th className="py-2 px-3">তারিখ</th>
-                        <th className="py-2 px-3">ভ্যারিয়েন্ট</th>
-                        <th className="py-2 px-3 text-right">ঘাটতির পরিমাণ</th>
-                        <th className="py-2 px-3 text-right">কেনাদর লোকসান (৳)</th>
-                        <th className="py-2 px-3">ঘাটতির সুনির্দিষ্ট কারণ</th>
+                      <tr className="bg-surface-subtle/80 border-b border-border-default text-ink-secondary font-bold text-xs">
+                        <th className="py-2.5 px-3">তারিখ</th>
+                        <th className="py-2.5 px-3">ভ্যারিয়েন্ট</th>
+                        <th className="py-2.5 px-3 text-right">ঘাটতির পরিমাণ</th>
+                        <th className="py-2.5 px-3 text-right">কেনাদর লোকসান (৳)</th>
+                        <th className="py-2.5 px-3">ঘাটতির কারণ</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-border-subtle">
                       {wastages.map((w) => (
-                        <tr key={w.id} className="hover:bg-slate-50/50">
-                          <td className="py-2 px-3 font-mono text-[11px] text-slate-600">
-                            {new Date(w.recordedAt).toLocaleDateString('bn-BD', {
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric',
-                            })}
+                        <tr key={w.id} className="hover:bg-surface-subtle/50">
+                          <td className="py-2.5 px-3 font-mono text-xs text-ink-secondary">
+                            {formatDateBn(w.recordedAt)}
                           </td>
-                          <td className="py-2 px-3 font-semibold text-slate-900">
+                          <td className="py-2.5 px-3 font-semibold text-ink-primary">
                             {w.variant?.variantName || 'সাধারণ'}
                           </td>
-                          <td className="py-2 px-3 text-right font-mono tabular-nums font-bold text-rose-700">
-                            -{w.quantity} {product.baseUnitName}
+                          <td className="py-2.5 px-3 text-right font-mono tabular-nums font-bold text-due-text">
+                            -{formatWeight(w.quantity, product.baseUnitName)}
                           </td>
-                          <td className="py-2 px-3 text-right font-mono tabular-nums font-bold text-rose-700">
+                          <td className="py-2.5 px-3 text-right font-mono tabular-nums font-bold text-due-text">
                             {formatCurrency(w.lossAmount)}
                           </td>
-                          <td className="py-2 px-3 text-slate-700">
+                          <td className="py-2.5 px-3 text-ink-body">
                             <span>{w.reason}</span>
                             {w.note && (
-                              <span className="text-slate-400 text-[10px] block">{w.note}</span>
+                              <span className="text-ink-secondary text-xs block">{w.note}</span>
                             )}
                           </td>
                         </tr>
@@ -604,92 +594,90 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
             </div>
           </div>
 
-          {/* ডানে: লাইভ ভ্যালুয়েশন ও বারকোড স্টিকার জেনারেটর (৪ কলাম / ~৩৪% - Sticky) */}
+          {/* ডানে: লাইভ ভ্যালুয়েশন ও বারকোড স্টিকার জেনারেটর */}
           <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-20">
-            {/* কার্ড ৪: ইনভেন্টরি ভ্যালুয়েশন ও মুনাফা অ্যানালিটিক্স */}
-            <div className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs space-y-3">
-              <span className="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2 flex items-center gap-1.5">
-                <TrendUp size={16} weight="bold" className="text-emerald-600" />
-                লাইভ ইনভেন্টরি ভ্যালুয়েশন ও প্রফিট প্রিভিউ
+            {/* কার্ড ৪: ইনভেন্টরি ভ্যালুয়েশন */}
+            <div className="bg-surface-card rounded-xl border border-border-default p-4 shadow-2xs space-y-3">
+              <span className="text-sm font-bold text-ink-primary border-b border-border-subtle pb-2 flex items-center gap-1.5">
+                <TrendUp size={16} weight="bold" className="text-success" />
+                লাইভ ইনভেন্টরি ভ্যালুয়েশন
               </span>
 
               <div className="space-y-2 text-xs">
-                <div className="flex justify-between text-slate-600">
+                <div className="flex justify-between text-ink-secondary">
                   <span>মোট মজুত স্টক:</span>
-                  <span className="font-mono font-bold text-slate-900">
-                    {totalStock} {product.baseUnitName}
+                  <span className="font-mono font-bold text-ink-primary">
+                    {formatWeight(totalStock, product.baseUnitName)}
                   </span>
                 </div>
 
-                <div className="flex justify-between text-slate-600">
-                  <span>ইনভেন্টরি কেনা মূলধন (Asset):</span>
-                  <span className="font-mono font-bold text-slate-900">
+                <div className="flex justify-between text-ink-secondary">
+                  <span>ইনভেন্টরি কেনা মূলধন:</span>
+                  <span className="font-mono font-bold text-ink-primary">
                     {formatCurrency(totalAssetValue)}
                   </span>
                 </div>
 
-                <div className="flex justify-between text-slate-600">
-                  <span>সম্ভাব্য বিক্রয় রেভিনিউ:</span>
-                  <span className="font-mono font-bold text-slate-900">
+                <div className="flex justify-between text-ink-secondary">
+                  <span>সম্ভাব্য বিক্রয় মূল্য:</span>
+                  <span className="font-mono font-bold text-ink-primary">
                     {formatCurrency(totalPotentialRevenue)}
                   </span>
                 </div>
 
-                <div className="border-t border-slate-200 pt-2 flex justify-between font-bold">
-                  <span className="text-emerald-700">সম্ভাব্য মোট গ্রস মুনাফা:</span>
-                  <span className="font-mono text-emerald-700 font-black text-sm">
-                    {formatCurrency(potentialGrossProfit)} ({overallMarginPercent.toFixed(1)}%)
+                <div className="border-t border-border-default pt-2 flex justify-between font-bold">
+                  <span className="text-cash-text">সম্ভাব্য গ্রস মুনাফা:</span>
+                  <span className="font-mono text-cash-text font-black text-sm">
+                    {formatCurrency(potentialGrossProfit)} ({formatPercent(overallMarginPercent, 1)})
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* কার্ড ৫: থার্মাল বারকোড স্টিকার প্রিন্ট জেনারেটর */}
+            {/* কার্ড ৫: থার্মাল বারকোড স্টিকার প্রিন্টার */}
             <div
               ref={barcodeSectionRef}
-              className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs space-y-3.5"
+              className="bg-surface-card rounded-xl border border-border-default p-4 shadow-2xs space-y-3.5"
             >
-              <div className="border-b border-slate-100 pb-2 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                  <Barcode size={16} weight="bold" className="text-slate-600" />
-                  থার্মাল বারকোড স্টিকার প্রিন্টার
+              <div className="border-b border-border-subtle pb-2 flex items-center justify-between">
+                <span className="text-sm font-bold text-ink-primary flex items-center gap-1.5">
+                  <Barcode size={16} weight="bold" className="text-brand-deep" />
+                  বারকোড স্টিকার প্রিন্টার
                 </span>
-                <span className="text-[10px] font-bold text-slate-400 font-mono">50mm × 30mm</span>
+                <span className="text-xs font-bold text-ink-secondary font-mono">50mm × 30mm</span>
               </div>
 
-              {/* ভ্যারিয়েন্ট সিলেক্টর */}
               {product.variants.length > 1 && (
                 <div>
-                  <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-ink-body mb-1">
                     ভ্যারিয়েন্ট নির্ধারণ করুন
                   </label>
                   <select
                     value={selectedVariantId}
                     onChange={(e) => setSelectedVariantId(e.target.value)}
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs font-semibold bg-white"
+                    className="w-full px-2.5 py-2 rounded-lg border border-border-strong text-xs font-semibold bg-surface-card text-ink-primary"
                   >
                     {product.variants.map((v) => (
                       <option key={v.id} value={v.id}>
-                        {v.variantName} (স্টক: {v.stockQuantity} {v.baseUnitName})
+                        {v.variantName} (স্টক: {formatWeight(v.stockQuantity, v.baseUnitName)})
                       </option>
                     ))}
                   </select>
                 </div>
               )}
 
-              {/* দর অপশন */}
               <div>
-                <label className="block text-[11px] font-bold text-slate-700 mb-1">
+                <label className="block text-xs font-bold text-ink-body mb-1">
                   স্টিকারে প্রদর্শিত মূল্য
                 </label>
-                <div className="grid grid-cols-3 gap-1">
+                <div className="grid grid-cols-3 gap-1.5">
                   <button
                     type="button"
                     onClick={() => setPriceTypeToPrint('RETAIL')}
-                    className={`py-1 rounded text-[11px] font-bold border cursor-pointer ${
+                    className={`py-1.5 rounded-md text-xs font-bold border cursor-pointer transition-colors ${
                       priceTypeToPrint === 'RETAIL'
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-slate-50 text-slate-700 border-slate-200'
+                        ? 'bg-brand-deep text-white border-brand-deep'
+                        : 'bg-surface-subtle text-ink-body border-border-default'
                     }`}
                   >
                     খুচরা দর
@@ -697,10 +685,10 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                   <button
                     type="button"
                     onClick={() => setPriceTypeToPrint('WHOLESALE')}
-                    className={`py-1 rounded text-[11px] font-bold border cursor-pointer ${
+                    className={`py-1.5 rounded-md text-xs font-bold border cursor-pointer transition-colors ${
                       priceTypeToPrint === 'WHOLESALE'
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-slate-50 text-slate-700 border-slate-200'
+                        ? 'bg-wholesale-solid text-white border-wholesale-hover'
+                        : 'bg-surface-subtle text-ink-body border-border-default'
                     }`}
                   >
                     পাইকারি দর
@@ -708,10 +696,10 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                   <button
                     type="button"
                     onClick={() => setPriceTypeToPrint('NONE')}
-                    className={`py-1 rounded text-[11px] font-bold border cursor-pointer ${
+                    className={`py-1.5 rounded-md text-xs font-bold border cursor-pointer transition-colors ${
                       priceTypeToPrint === 'NONE'
-                        ? 'bg-slate-900 text-white border-slate-900'
-                        : 'bg-slate-50 text-slate-700 border-slate-200'
+                        ? 'bg-brand-deep text-white border-brand-deep'
+                        : 'bg-surface-subtle text-ink-body border-border-default'
                     }`}
                   >
                     দাম ছাড়া
@@ -719,27 +707,26 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                 </div>
               </div>
 
-              {/* স্টিকার কপি কাউন্ট */}
               <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="text-[11px] font-bold text-slate-700">স্টিকার কপি সংখ্যা</label>
-                  <span className="font-mono text-xs font-black text-slate-900">
-                    {stickerCount} কপি
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="text-xs font-bold text-ink-body">স্টিকার কপি সংখ্যা</label>
+                  <span className="font-mono text-xs font-black text-brand-deep">
+                    {formatNumber(stickerCount)} কপি
                   </span>
                 </div>
-                <div className="flex items-center gap-1 flex-wrap">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   {[1, 10, 24, 50, 100].map((count) => (
                     <button
                       key={count}
                       type="button"
                       onClick={() => setStickerCount(count)}
-                      className={`px-2 py-0.5 rounded text-[11px] font-mono font-bold border cursor-pointer ${
+                      className={`px-2.5 py-1 rounded-md text-xs font-mono font-bold border cursor-pointer transition-colors ${
                         stickerCount === count
-                          ? 'bg-emerald-600 text-white border-emerald-600'
-                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                          ? 'bg-brand-deep text-white border-brand-deep'
+                          : 'bg-surface-subtle text-ink-body border-border-default hover:bg-brand-soft'
                       }`}
                     >
-                      {count}
+                      {formatNumber(count)}
                     </button>
                   ))}
                   <input
@@ -748,26 +735,26 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                     max="500"
                     value={stickerCount}
                     onChange={(e) => setStickerCount(parseInt(e.target.value, 10) || 1)}
-                    className="w-14 px-1.5 py-0.5 text-center font-mono font-bold text-xs rounded border border-slate-300"
+                    className="w-16 px-2 py-1 text-center font-mono font-bold text-xs rounded-md border border-border-strong bg-surface-card text-ink-primary"
                   />
                 </div>
               </div>
 
-              {/* লাইভ ভিজ্যুয়াল স্টিকার প্রিভিউ বক্স */}
-              <div className="p-3 bg-slate-50 rounded-lg border border-dashed border-slate-300 space-y-1 text-center">
-                <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">
+              {/* লাইভ স্টিকার প্রিভিউ বক্স */}
+              <div className="p-3 bg-surface-subtle rounded-lg border border-dashed border-border-strong space-y-1.5 text-center">
+                <span className="text-xs text-ink-secondary font-bold block">
                   থার্মাল স্টিকার প্রিভিউ
                 </span>
 
-                <div className="bg-white p-2.5 rounded border border-slate-300 shadow-2xs inline-block max-w-[200px] w-full text-center">
-                  <div className="font-bold text-[10px] text-slate-700 leading-tight">
+                <div className="bg-surface-card p-2.5 rounded border border-border-strong shadow-2xs inline-block max-w-[200px] w-full text-center">
+                  <div className="font-bold text-xs text-ink-body leading-tight">
                     ইদ্রিস ব্রাদার্স • ফেনী
                   </div>
-                  <div className="font-bold text-xs text-slate-900 leading-tight truncate mt-0.5">
+                  <div className="font-bold text-xs text-ink-primary leading-tight truncate mt-0.5">
                     {product.banglaName || product.name}
                   </div>
                   {selectedVariant?.variantName && selectedVariant.variantName !== 'Default' && (
-                    <div className="text-[10px] text-slate-500 font-medium">
+                    <div className="text-xs text-ink-secondary font-medium">
                       সাইজ: {selectedVariant.variantName}
                     </div>
                   )}
@@ -793,12 +780,12 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                     </svg>
                   </div>
 
-                  <div className="font-mono text-[9px] text-slate-600 tracking-wider">
+                  <div className="font-mono text-xs text-ink-body tracking-wider">
                     {barcodeValue}
                   </div>
 
                   {priceTypeToPrint !== 'NONE' && (
-                    <div className="font-bold font-mono text-xs text-slate-900 mt-0.5">
+                    <div className="font-bold font-mono text-xs text-ink-primary mt-0.5">
                       দর: {formatCurrency(
                         priceTypeToPrint === 'WHOLESALE'
                           ? selectedVariant?.wholesalePrice || 0
@@ -810,14 +797,13 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                 </div>
               </div>
 
-              {/* প্রিন্ট ট্রিগার বাটন */}
               <button
                 type="button"
                 onClick={handlePrintStickers}
-                className="w-full py-2.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+                className="w-full py-2.5 rounded-lg bg-brand-deep hover:bg-brand-hover text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
               >
                 <Printer size={15} weight="bold" />
-                <span>{stickerCount} কপি স্টিকার প্রিন্ট করুন</span>
+                <span>{formatNumber(stickerCount)} কপি স্টিকার প্রিন্ট করুন</span>
               </button>
             </div>
           </div>

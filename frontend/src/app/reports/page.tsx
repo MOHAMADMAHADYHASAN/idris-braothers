@@ -18,9 +18,17 @@ import {
   Scales,
 } from '@phosphor-icons/react';
 import { useReportsStore } from '@/features/reports/useReportsStore';
-import { formatCurrency } from '@/lib/decimal';
+import {
+  formatCurrency,
+  formatNumber,
+  formatWeight,
+  formatPercent,
+  toBanglaDigits,
+} from '@/lib/decimal';
 import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { UnifiedDateRangeFilter } from '@/components/shared/UnifiedDateRangeFilter';
+import { Badge } from '@/components/ui/Badge';
+import { buttonClasses } from '@/components/ui/Button';
 import { ResolvedDateRange } from '@/lib/dateFilter';
 
 export default function ReportsPage() {
@@ -52,27 +60,22 @@ export default function ReportsPage() {
   const isAnyLoading = isLoadingPnl || isLoadingValuation || isLoadingDues || isLoadingTopSelling;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 text-slate-900 pb-16 font-sans flex flex-col">
-      {/* ১. স্টিকি পেজ হেডার (AdminPageHeader) */}
-      <div className="bg-white border-b border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+    <div className="min-h-screen bg-surface-canvas text-ink-primary pb-16 font-sans flex flex-col">
+      {/* ১. স্টিকি পেজ হেডার */}
+      <div className="bg-surface-card border-b border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
           <AdminPageHeader
             title="ব্যবসায়িক রিপোর্ট ও আর্থিক বিশ্লেষণ"
-            subtitle="ইদ্রিস ব্রাদার্স • মরিচপট্টি, ফেনী বাজার — লাভ-ক্ষতি, ইনভেন্টরি ক্যাপিটাল ও খাতা অ্যানালিটিক্স"
             backHref="/"
             backTitle="ড্যাশবোর্ডে ফিরুন"
             icon={<ChartBar size={16} weight="bold" />}
-            badge={
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                ERP Reports
-              </span>
-            }
+            badge={<Badge variant="brand">আর্থিক রিপোর্ট</Badge>}
             actions={
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => fetchAllReports()}
                   disabled={isAnyLoading}
-                  className="px-2.5 py-1.5 rounded-md border border-slate-200/90 bg-white hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 disabled:opacity-50 cursor-pointer shadow-2xs"
+                  className={buttonClasses({ variant: 'secondary', size: 'xs' })}
                   title="তথ্য রিফ্রেশ করুন"
                 >
                   <ArrowClockwise size={14} weight="bold" className={isAnyLoading ? 'animate-spin' : ''} />
@@ -81,7 +84,7 @@ export default function ReportsPage() {
 
                 <Link
                   href="/pos"
-                  className="px-2.5 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 shadow-2xs"
+                  className={buttonClasses({ variant: 'primary', size: 'xs' })}
                 >
                   <ShoppingCart size={14} weight="bold" />
                   <span className="hidden sm:inline">পিওএস কাউন্টার</span>
@@ -92,21 +95,19 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      {/* ২. মেইন কন্টেন্ট ক্যানভাস - Tier 4 Canvas Spacing */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-4 sm:space-y-5">
+      {/* ২. মেইন কন্টেন্ট ক্যানভাস */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 space-y-5">
         {error && (
-          <div className="p-3 rounded-md bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium flex items-center gap-2">
+          <div className="p-3 rounded-lg bg-due-bg border border-due-border text-due-text text-xs font-medium flex items-center gap-2">
             <Warning size={15} weight="fill" className="shrink-0" />
             <span>{error}</span>
           </div>
         )}
 
-        {/* ================================================================= */}
-        {/* SECTION 1: DATE FILTER BAR (UnifiedDateRangeFilter) */}
-        {/* ================================================================= */}
-        <div className="bg-white rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
-          <div className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-            <Calendar size={16} weight="bold" className="text-slate-600" />
+        {/* SECTION 1: DATE FILTER BAR */}
+        <div className="bg-surface-card rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+          <div className="text-xs font-bold text-ink-primary flex items-center gap-1.5">
+            <Calendar size={16} weight="bold" className="text-brand-deep" />
             <span>রিপোর্ট ও লাভ-ক্ষতির সময়কাল:</span>
           </div>
 
@@ -119,218 +120,203 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        {/* ================================================================= */}
-        {/* SECTION 2: PROFIT & LOSS STATEMENT (P&L CARD) */}
-        {/* ================================================================= */}
-        <div className="bg-white rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden">
-          <div className="px-4 py-3 border-b border-slate-200/90 bg-slate-50/80 flex items-center justify-between">
+        {/* SECTION 2: PROFIT & LOSS STATEMENT */}
+        <div className="bg-surface-card rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden">
+          <div className="px-4 py-3.5 border-b border-border-default bg-surface-subtle/60 flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center">
                 <Receipt size={18} weight="bold" />
               </div>
               <div>
-                <h2 className="text-xs sm:text-sm font-bold text-slate-900">
-                  আয় ও লাভ-ক্ষতি বিবরণী (Profit & Loss Statement)
+                <h2 className="text-sm font-bold text-ink-primary">
+                  আয় ও লাভ-ক্ষতি বিবরণী
                 </h2>
-                <p className="text-[11px] text-slate-500">
-                  বিক্রয় আয়, পণ্যের ক্রয়মূল্য (COGS), অপচয় ও পরিচালন খরচ সমন্বিত নিট লাভ
-                </p>
               </div>
             </div>
 
             {profitLoss && (
-              <div
-                className={`px-2 py-0.5 rounded-md border text-[11px] font-bold flex items-center gap-1 font-mono tabular-nums ${
-                  profitLoss.netProfit.isProfitable
-                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200/80'
-                    : 'bg-rose-50 text-rose-800 border-rose-200/80'
-                }`}
-              >
+              <Badge variant={profitLoss.netProfit.isProfitable ? 'cash' : 'due'} className="font-mono">
                 {profitLoss.netProfit.isProfitable ? (
                   <TrendUp size={14} weight="bold" />
                 ) : (
                   <TrendDown size={14} weight="bold" />
                 )}
                 <span>
-                  {profitLoss.netProfit.isProfitable ? 'নিট মুনাফা' : 'নিট লোকসান'} (
-                  {profitLoss.netProfit.netMarginPercent})
+                  {profitLoss.netProfit.isProfitable ? 'নিট মুনাফা' : 'নিট লোকসান'} ({toBanglaDigits(profitLoss.netProfit.netMarginPercent)})
                 </span>
-              </div>
+              </Badge>
             )}
           </div>
 
           <div className="p-4">
             {isLoadingPnl ? (
-              <div className="p-8 text-center text-slate-500 text-xs">
-                <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <div className="p-8 text-center text-ink-secondary text-xs">
+                <div className="w-5 h-5 border-2 border-brand-deep border-t-transparent rounded-full animate-spin mx-auto mb-2" />
                 লাভ-ক্ষতি তথ্য হিসাব করা হচ্ছে...
               </div>
             ) : profitLoss ? (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                {/* 1. Revenue & Sales */}
-                <div className="p-3.5 rounded-md bg-slate-50/80 border border-slate-200/90 space-y-2.5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
-                    বিক্রয় ও রাজস্ব (Revenue)
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* ১. বিক্রয় ও রাজস্ব */}
+                <div className="p-4 rounded-xl bg-surface-subtle/70 border border-border-default space-y-2.5">
+                  <span className="text-xs font-bold text-ink-secondary block">
+                    বিক্রয় ও রাজস্ব
                   </span>
                   <div>
-                    <div className="text-[11px] text-slate-500">মোট বিক্রয় রাজস্ব ({profitLoss.salesSummary.totalInvoices} টি ইনভয়েস)</div>
-                    <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900">
-                      ৳{profitLoss.salesSummary.totalSalesRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    <div className="text-xs text-ink-secondary">
+                      মোট বিক্রয় রাজস্ব ({formatNumber(profitLoss.salesSummary.totalInvoices)} টি মেমো)
+                    </div>
+                    <div className="text-xl sm:text-2xl font-black font-mono tabular-nums text-ink-primary mt-0.5">
+                      {formatCurrency(profitLoss.salesSummary.totalSalesRevenue)}
                     </div>
                   </div>
-                  <div className="text-xs text-slate-600 pt-2 border-t border-slate-200/80 flex justify-between">
-                    <span>প্রদত্ত ছাড় (Discounts):</span>
-                    <span className="font-mono tabular-nums font-semibold">৳{profitLoss.salesSummary.totalDiscountGiven.toFixed(2)}</span>
+                  <div className="text-xs text-ink-body pt-2 border-t border-border-default flex justify-between">
+                    <span>প্রদত্ত ছাড়:</span>
+                    <span className="font-mono tabular-nums font-semibold">
+                      {formatCurrency(profitLoss.salesSummary.totalDiscountGiven)}
+                    </span>
                   </div>
                 </div>
 
-                {/* 2. Direct Costs & Gross Profit */}
-                <div className="p-3.5 rounded-md bg-slate-50/80 border border-slate-200/90 space-y-2.5">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                {/* ২. মালের ক্রয়মূল্য ও মোট লাভ */}
+                <div className="p-4 rounded-xl bg-surface-subtle/70 border border-border-default space-y-2.5">
+                  <span className="text-xs font-bold text-ink-secondary block">
                     মালের ক্রয়মূল্য ও মোট লাভ
                   </span>
                   <div>
-                    <div className="text-[11px] text-slate-500">বিক্রিত পণ্যের ক্রয়মূল্য (COGS)</div>
-                    <div className="text-base sm:text-lg font-bold font-mono tabular-nums tracking-tight text-slate-700">
-                      ৳{profitLoss.salesSummary.costOfGoodsSold.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    <div className="text-xs text-ink-secondary">বিক্রিত পণ্যের ক্রয়মূল্য</div>
+                    <div className="text-base sm:text-lg font-bold font-mono tabular-nums text-ink-body mt-0.5">
+                      {formatCurrency(profitLoss.salesSummary.costOfGoodsSold)}
                     </div>
                   </div>
-                  <div className="pt-2 border-t border-slate-200/80">
+                  <div className="pt-2 border-t border-border-default">
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-slate-800">মোট লাভ (Gross Profit):</span>
-                      <span className="font-mono tabular-nums tracking-tight font-bold text-slate-900 text-sm">
-                        ৳{profitLoss.salesSummary.grossProfit.toFixed(2)}
+                      <span className="text-xs font-bold text-ink-primary">মোট লাভ:</span>
+                      <span className="font-mono tabular-nums font-bold text-ink-primary text-sm">
+                        {formatCurrency(profitLoss.salesSummary.grossProfit)}
                       </span>
                     </div>
-                    <div className="text-[11px] text-slate-500 mt-0.5">
-                      গ্রস মার্জিন: <span className="font-semibold text-slate-700 font-mono tabular-nums">{profitLoss.salesSummary.grossMarginPercent}</span>
+                    <div className="text-xs text-ink-secondary mt-0.5">
+                      গ্রস মার্জিন:{' '}
+                      <span className="font-semibold text-ink-body font-mono tabular-nums">
+                        {toBanglaDigits(profitLoss.salesSummary.grossMarginPercent)}
+                      </span>
                     </div>
                   </div>
                 </div>
 
-                {/* 3. Deductions & Net Profit (Solid Dark Spotlight) */}
-                <div className="p-3.5 rounded-md bg-slate-900 text-white space-y-2.5 border border-slate-800 shadow-[0_1px_2px_rgba(15,23,42,0.08)]">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                    কর্তন ও চূড়ান্ত নিট লাভ (Net)
+                {/* ৩. কর্তন ও চূড়ান্ত নিট লাভ (Soft Navy Highlight Card — Replaces Glaring Dark Box) */}
+                <div className="p-4 rounded-xl bg-brand-soft/75 text-ink-primary space-y-2.5 border border-brand-light shadow-[0_1px_2px_rgba(30,74,122,0.06)]">
+                  <span className="text-xs font-bold text-brand-deep block">
+                    কর্তন ও চূড়ান্ত নিট লাভ
                   </span>
-                  <div className="space-y-1 text-xs text-slate-300">
+                  <div className="space-y-1.5 text-xs text-ink-body">
                     <div className="flex justify-between">
-                      <span>মালের অপচয়/ঘাটতি ক্ষতি:</span>
-                      <span className="font-mono tabular-nums text-rose-300 font-medium">
-                        - ৳{profitLoss.deductions.wastageLoss.toFixed(2)}
+                      <span>মালের অপচয় ও ঘাটতি ক্ষতি:</span>
+                      <span className="font-mono tabular-nums text-due-text font-semibold">
+                        - {formatCurrency(profitLoss.deductions.wastageLoss)}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span>দোকান খরচ (Daily Expense):</span>
-                      <span className="font-mono tabular-nums text-rose-300 font-medium">
-                        - ৳{profitLoss.deductions.operatingExpenses.toFixed(2)}
+                      <span>দোকান পরিচালনা খরচ:</span>
+                      <span className="font-mono tabular-nums text-due-text font-semibold">
+                        - {formatCurrency(profitLoss.deductions.operatingExpenses)}
                       </span>
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-slate-800">
-                    <div className="text-[11px] text-slate-400 font-medium">প্রকৃত নিট মুনাফা (Net Profit)</div>
+                  <div className="pt-2.5 border-t border-brand-light">
+                    <div className="text-xs text-ink-secondary font-semibold">প্রকৃত নিট মুনাফা</div>
                     <div
-                      className={`text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight mt-0.5 ${
-                        profitLoss.netProfit.isProfitable ? 'text-emerald-400' : 'text-rose-400'
+                      className={`text-xl sm:text-2xl font-black font-mono tabular-nums mt-0.5 ${
+                        profitLoss.netProfit.isProfitable ? 'text-cash-text' : 'text-due-text'
                       }`}
                     >
-                      {profitLoss.netProfit.isProfitable ? '+' : ''}৳
-                      {profitLoss.netProfit.amount.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      {profitLoss.netProfit.isProfitable ? '+' : ''}
+                      {formatCurrency(profitLoss.netProfit.amount)}
                     </div>
-                    <div className="text-[11px] text-slate-400 mt-0.5">
-                      নিট লাভের অনুপাত: <span className="font-bold text-white font-mono tabular-nums">{profitLoss.netProfit.netMarginPercent}</span>
+                    <div className="text-xs text-ink-secondary mt-0.5">
+                      নিট লাভের অনুপাত:{' '}
+                      <span className="font-bold text-brand-deep font-mono tabular-nums">
+                        {toBanglaDigits(profitLoss.netProfit.netMarginPercent)}
+                      </span>
                     </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <p className="text-xs text-slate-400">কোনো তথ্য পাওয়া যায়নি</p>
+              <p className="text-xs text-ink-secondary">কোনো তথ্য পাওয়া যায়নি</p>
             )}
           </div>
         </div>
 
-        {/* ================================================================= */}
         {/* SECTION 3: INVENTORY CAPITAL VALUATION & LOW STOCK */}
-        {/* ================================================================= */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3.5">
-          {/* Inventory Valuation Card (2 cols) */}
-          <div className="lg:col-span-2 bg-white rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] p-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200/90 mb-3.5">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="lg:col-span-2 bg-surface-card rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] p-4">
+            <div className="flex items-center justify-between pb-3 border-b border-border-default mb-3.5">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center">
                   <Package size={18} weight="bold" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-xs sm:text-sm text-slate-900">
+                  <h3 className="font-bold text-sm text-ink-primary">
                     ইনভেন্টরি ক্যাপিটাল ও স্টক ভ্যালুয়েশন
                   </h3>
-                  <p className="text-[11px] text-slate-500">
-                    দোকানের বর্তমান সক্রিয় {inventoryValuation?.totalVariantsCount || 0} টি SKU-এর মোট মূলধন
+                  <p className="text-xs text-ink-secondary">
+                    সক্রিয় পণ্য: {formatNumber(inventoryValuation?.totalVariantsCount || 0)} টি
                   </p>
                 </div>
               </div>
             </div>
 
             {isLoadingValuation ? (
-              <div className="p-8 text-center text-slate-500 text-xs">
+              <div className="p-8 text-center text-ink-secondary text-xs">
                 ইনভেন্টরি মূলধন হিসাব করা হচ্ছে...
               </div>
             ) : inventoryValuation ? (
               <div className="space-y-3.5">
-                {/* Total Capital Highlight */}
-                <div className="p-3.5 rounded-md bg-slate-50/80 border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="p-4 rounded-xl bg-surface-subtle/70 border border-border-default flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <span className="text-[11px] font-semibold text-slate-500 block mb-0.5">
-                      বর্তমান ক্রয়মূল্যে মোট ইনভেন্টরি মূলধন (Capital at Replacement Cost)
+                    <span className="text-xs font-semibold text-ink-secondary block mb-0.5">
+                      বর্তমান ক্রয়মূল্যে মোট ইনভেন্টরি মূলধন
                     </span>
-                    <div className="text-2xl sm:text-3xl font-black font-mono tabular-nums tracking-tight text-slate-900">
-                      ৳
-                      {inventoryValuation.valuation.totalCostValuation.toLocaleString('en-IN', {
-                        minimumFractionDigits: 2,
-                      })}
+                    <div className="text-2xl sm:text-3xl font-black font-mono tabular-nums text-ink-primary">
+                      {formatCurrency(inventoryValuation.valuation.totalCostValuation)}
                     </div>
                   </div>
-                  <div className="text-right sm:border-l sm:border-slate-200 sm:pl-4">
-                    <span className="text-[11px] font-semibold text-emerald-800 block mb-0.5">
+                  <div className="sm:text-right sm:border-l sm:border-border-default sm:pl-4">
+                    <span className="text-xs font-semibold text-cash-text block mb-0.5">
                       সম্ভাব্য খুচরা বিক্রয় মূল্য
                     </span>
-                    <div className="text-lg sm:text-xl font-bold font-mono tabular-nums tracking-tight text-emerald-700">
-                      ৳
-                      {inventoryValuation.valuation.totalRetailValuation.toLocaleString('en-IN', {
-                        minimumFractionDigits: 2,
-                      })}
+                    <div className="text-lg sm:text-xl font-bold font-mono tabular-nums text-cash-text">
+                      {formatCurrency(inventoryValuation.valuation.totalRetailValuation)}
                     </div>
-                    <span className="text-[10px] text-slate-500 font-mono tabular-nums">
-                      সম্ভাব্য মোট লাভ: ৳{inventoryValuation.valuation.potentialRetailProfit.toFixed(2)}
+                    <span className="text-xs text-ink-secondary font-mono tabular-nums">
+                      সম্ভাব্য মোট লাভ: {formatCurrency(inventoryValuation.valuation.potentialRetailProfit)}
                     </span>
                   </div>
                 </div>
 
-                {/* Wholesale Valuation Strip */}
-                <div className="p-2.5 bg-slate-100/70 border border-slate-200/90 rounded-md flex items-center justify-between text-xs text-slate-800">
-                  <span className="font-medium text-[11px]">
-                    পাইকারি দর অনুযায়ী বিক্রয় সম্ভাবনা (Wholesale Potential):
+                {/* Wholesale Valuation Strip (Amber Semantic Strip) */}
+                <div className="p-3 bg-wholesale-bg/60 border border-wholesale-border/50 rounded-lg flex items-center justify-between text-xs text-wholesale-text">
+                  <span className="font-semibold">
+                    পাইকারি দর অনুযায়ী বিক্রয় সম্ভাবনা:
                   </span>
-                  <span className="font-mono tabular-nums tracking-tight font-bold text-slate-900 text-xs sm:text-sm">
-                    ৳{inventoryValuation.valuation.totalWholesaleValuation.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  <span className="font-mono tabular-nums font-bold text-sm">
+                    {formatCurrency(inventoryValuation.valuation.totalWholesaleValuation)}
                   </span>
                 </div>
               </div>
             ) : null}
           </div>
 
-          {/* Low Stock Warning Card (1 col) */}
-          <div className="bg-white rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] p-4 flex flex-col justify-between">
+          {/* Low Stock Warning Card */}
+          <div className="bg-surface-card rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] p-4 flex flex-col justify-between">
             <div>
-              <div className="flex items-center gap-2 mb-2.5">
-                <div className="w-7 h-7 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 flex items-center justify-center">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-wholesale-bg text-wholesale-text border border-wholesale-border/60 flex items-center justify-center">
                   <Warning size={16} weight="bold" />
                 </div>
-                <div>
-                  <h4 className="font-bold text-xs sm:text-sm text-slate-900">স্টক সতর্কতা (Low Stock)</h4>
-                  <p className="text-[11px] text-slate-500">সতর্কতা সীমার নিচে থাকা পণ্য</p>
-                </div>
+                <h4 className="font-bold text-sm text-ink-primary">স্টক সতর্কতা</h4>
               </div>
 
               {inventoryValuation?.lowStock && inventoryValuation.lowStock.count > 0 ? (
@@ -338,23 +324,23 @@ export default function ReportsPage() {
                   {inventoryValuation.lowStock.items.slice(0, 5).map((item) => (
                     <div
                       key={item.variantId}
-                      className="p-2 bg-slate-50 rounded-md border border-slate-200/80 flex items-center justify-between text-xs"
+                      className="p-2 bg-surface-subtle rounded-lg border border-border-default flex items-center justify-between text-xs"
                     >
-                      <span className="font-medium text-slate-800 truncate max-w-[140px]">{item.name}</span>
-                      <span className="font-mono tabular-nums tracking-tight text-rose-700 font-bold">
-                        {item.stockQuantity} {item.baseUnitName}
+                      <span className="font-medium text-ink-primary truncate max-w-[140px]">{item.name}</span>
+                      <span className="font-mono tabular-nums text-due-text font-bold">
+                        {formatWeight(item.stockQuantity, item.baseUnitName)}
                       </span>
                     </div>
                   ))}
                   {inventoryValuation.lowStock.count > 5 && (
-                    <p className="text-[10px] text-slate-400 text-center font-mono tabular-nums">
-                      + আরও {inventoryValuation.lowStock.count - 5} টি সংকটপূর্ণ আইটেম আছে
+                    <p className="text-xs text-ink-secondary text-center font-mono tabular-nums">
+                      + আরও {formatNumber(inventoryValuation.lowStock.count - 5)} টি সংকটপূর্ণ আইটেম আছে
                     </p>
                   )}
                 </div>
               ) : (
-                <div className="p-6 text-center text-slate-500 text-xs">
-                  <CheckCircle size={24} className="text-emerald-500 mx-auto mb-1" />
+                <div className="p-6 text-center text-ink-secondary text-xs">
+                  <CheckCircle size={24} className="text-success mx-auto mb-1" />
                   <p>সকল পণ্যের স্টক পর্যাপ্ত রয়েছে</p>
                 </div>
               )}
@@ -362,104 +348,116 @@ export default function ReportsPage() {
 
             <Link
               href="/products"
-              className="mt-3 w-full py-1.5 bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-800 text-xs font-semibold rounded-md text-center transition-[background-color,border-color,transform] duration-150 block border border-slate-200/80"
+              className="mt-3 w-full py-2 bg-brand-soft hover:bg-brand-light/60 active:scale-[0.98] text-brand-deep text-xs font-semibold rounded-lg text-center transition-colors block border border-brand-light"
             >
               ক্যাটালগে স্টক ও মূল্য পরিচালনা করুন →
             </Link>
           </div>
         </div>
 
-        {/* ================================================================= */}
-        {/* SECTION 4: MARKET DUES & PAYABLES (KHATA SUMMARY) */}
-        {/* ================================================================= */}
-        <div className="bg-white rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] p-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200/90 mb-3.5">
+        {/* SECTION 4: MARKET DUES & PAYABLES */}
+        <div className="bg-surface-card rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] p-4">
+          <div className="flex items-center justify-between pb-3 border-b border-border-default mb-3.5 gap-2 flex-wrap">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center">
                 <Scales size={18} weight="bold" />
               </div>
               <div>
-                <h3 className="font-bold text-xs sm:text-sm text-slate-900">
-                  বাজারের দেনা ও পাওনা খাতা (Market Receivables & Payables)
+                <h3 className="font-bold text-sm text-ink-primary">
+                  বাজারের দেনা ও পাওনা খাতা
                 </h3>
-                <p className="text-[11px] text-slate-500">
-                  খুচরা/পাইকারি ক্রেতাদের মোট বাকি এবং আমদানিকারক মহাজনদের দেনার বর্তমান স্থিতি
-                </p>
               </div>
             </div>
 
-            {duesSummary && (
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 border border-slate-200/80 font-mono tabular-nums">
-                {duesSummary.netKhataStanding.status}
-              </span>
-            )}
+            {duesSummary && (() => {
+              const rawStatus = duesSummary.netKhataStanding.status || '';
+              const isDeficit = /^DEFICIT\b/i.test(rawStatus);
+              const isSurplus = /^SURPLUS\b/i.test(rawStatus);
+              const cleanStatus = toBanglaDigits(
+                rawStatus
+                  .replace(/^DEFICIT\s*/i, 'ঘাটতি: ')
+                  .replace(/^SURPLUS\s*/i, 'উদ্বৃত্ত: ')
+                  .replace(/^BALANCED\s*/i, 'সমান: ')
+                  .replace(/\(([^)]+)\)/, '$1')
+                  .trim()
+              );
+              return (
+                <Badge variant={isDeficit ? 'due' : isSurplus ? 'cash' : 'neutral'}>
+                  {cleanStatus}
+                </Badge>
+              );
+            })()}
           </div>
 
           {isLoadingDues ? (
-            <div className="p-8 text-center text-slate-500 text-xs">খাতা তথ্য লোড হচ্ছে...</div>
+            <div className="p-8 text-center text-ink-secondary text-xs">খাতা তথ্য লোড হচ্ছে...</div>
           ) : duesSummary ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Customer Receivables */}
-              <div className="p-3.5 rounded-md bg-slate-50/80 border border-slate-200/90 space-y-2.5">
+              <div className="p-4 rounded-xl bg-surface-subtle/70 border border-border-default space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                    <Users size={14} weight="bold" />
-                    কাস্টমারদের কাছে বাকি পাওনা ({duesSummary.customerDues.debtorsCount} জন)
+                  <span className="text-xs font-bold text-ink-body flex items-center gap-1.5">
+                    <Users size={15} weight="bold" className="text-brand-deep" />
+                    কাস্টমারদের কাছে বাকি পাওনা ({formatNumber(duesSummary.customerDues.debtorsCount)} জন)
                   </span>
                   <Link
                     href="/khata/customers"
-                    className="text-xs text-slate-700 font-semibold hover:underline"
+                    className="text-xs text-brand-deep font-semibold hover:underline"
                   >
                     বাকি খাতা →
                   </Link>
                 </div>
 
-                <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900">
-                  ৳{duesSummary.customerDues.totalOutstanding.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                <div className="text-xl sm:text-2xl font-black font-mono tabular-nums text-due-text">
+                  {formatCurrency(duesSummary.customerDues.totalOutstanding)}
                 </div>
 
-                <div className="pt-2 border-t border-slate-200/80 space-y-1.5">
-                  <span className="text-[10px] font-semibold text-slate-500 block uppercase">শীর্ষ ৫ দেনাদার:</span>
+                <div className="pt-2 border-t border-border-default space-y-1.5">
+                  <span className="text-xs font-semibold text-ink-secondary block">শীর্ষ ৫ দেনাদার:</span>
                   {duesSummary.customerDues.topDebtors.map((d) => (
-                    <div key={d.id} className="flex justify-between text-xs py-1 border-b border-slate-200/50">
+                    <div key={d.id} className="flex justify-between text-xs py-1 border-b border-border-subtle">
                       <div>
-                        <span className="font-medium text-slate-800">{d.name}</span>
-                        <span className="text-[10px] text-slate-400 ml-1 font-mono tabular-nums">({d.phone})</span>
+                        <span className="font-semibold text-ink-primary">{d.name}</span>
+                        <span className="text-xs text-ink-secondary ml-1.5 font-mono tabular-nums">({d.phone})</span>
                       </div>
-                      <span className="font-mono tabular-nums tracking-tight font-bold text-slate-900">৳{d.currentDue?.toFixed(2)}</span>
+                      <span className="font-mono tabular-nums font-bold text-ink-primary">
+                        {formatCurrency(d.currentDue)}
+                      </span>
                     </div>
                   ))}
                 </div>
               </div>
 
               {/* Supplier Payables */}
-              <div className="p-3.5 rounded-md bg-slate-50/80 border border-slate-200/90 space-y-2.5">
+              <div className="p-4 rounded-xl bg-surface-subtle/70 border border-border-default space-y-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold uppercase tracking-wider text-slate-600 flex items-center gap-1.5">
-                    <Truck size={14} weight="bold" />
-                    মহাজনদের পাওনা দেনা ({duesSummary.supplierPayables.creditorsCount} জন)
+                  <span className="text-xs font-bold text-ink-body flex items-center gap-1.5">
+                    <Truck size={15} weight="bold" className="text-brand-deep" />
+                    মহাজনদের পাওনা দেনা ({formatNumber(duesSummary.supplierPayables.creditorsCount)} জন)
                   </span>
                   <Link
                     href="/khata/suppliers"
-                    className="text-xs text-slate-700 font-semibold hover:underline"
+                    className="text-xs text-brand-deep font-semibold hover:underline"
                   >
                     মহাজন খাতা →
                   </Link>
                 </div>
 
-                <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900">
-                  ৳{duesSummary.supplierPayables.totalOutstanding.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                <div className="text-xl sm:text-2xl font-black font-mono tabular-nums text-wholesale-text">
+                  {formatCurrency(duesSummary.supplierPayables.totalOutstanding)}
                 </div>
 
-                <div className="pt-2 border-t border-slate-200/80 space-y-1.5">
-                  <span className="text-[10px] font-semibold text-slate-500 block uppercase">শীর্ষ ৫ পাওনাদার মহাজন:</span>
+                <div className="pt-2 border-t border-border-default space-y-1.5">
+                  <span className="text-xs font-semibold text-ink-secondary block">শীর্ষ ৫ পাওনাদার মহাজন:</span>
                   {duesSummary.supplierPayables.topCreditors.map((s) => (
-                    <div key={s.id} className="flex justify-between text-xs py-1 border-b border-slate-200/50">
+                    <div key={s.id} className="flex justify-between text-xs py-1 border-b border-border-subtle">
                       <div>
-                        <span className="font-medium text-slate-800">{s.companyName || s.name}</span>
-                        <span className="text-[10px] text-slate-400 ml-1 font-mono tabular-nums">({s.phone})</span>
+                        <span className="font-semibold text-ink-primary">{s.companyName || s.name}</span>
+                        <span className="text-xs text-ink-secondary ml-1.5 font-mono tabular-nums">({s.phone})</span>
                       </div>
-                      <span className="font-mono tabular-nums tracking-tight font-bold text-slate-900">৳{s.currentPayable?.toFixed(2)}</span>
+                      <span className="font-mono tabular-nums font-bold text-ink-primary">
+                        {formatCurrency(s.currentPayable)}
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -468,61 +466,55 @@ export default function ReportsPage() {
           ) : null}
         </div>
 
-        {/* ================================================================= */}
         {/* SECTION 5: TOP SELLING PRODUCTS LEADERBOARD */}
-        {/* ================================================================= */}
-        <div className="bg-white rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] p-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-200/90 mb-3.5">
+        <div className="bg-surface-card rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] p-4">
+          <div className="flex items-center justify-between pb-3 border-b border-border-default mb-3.5">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center">
                 <ChartBar size={18} weight="bold" />
               </div>
               <div>
-                <h3 className="font-bold text-xs sm:text-sm text-slate-900">
-                  সর্বোচ্চ বিক্রিত পণ্য (Top Selling Products & SKUs)
+                <h3 className="font-bold text-sm text-ink-primary">
+                  সর্বোচ্চ বিক্রিত পণ্য তালিকা
                 </h3>
-                <p className="text-[11px] text-slate-500">
-                  বিক্রয় আয় ও পরিমাণের ভিত্তিতে আড়তের শীর্ষ জনপ্রিয় পণ্যসমূহ
-                </p>
               </div>
             </div>
           </div>
 
           {isLoadingTopSelling ? (
-            <div className="p-8 text-center text-slate-500 text-xs">শীর্ষ পণ্য তালিকা লোড হচ্ছে...</div>
+            <div className="p-8 text-center text-ink-secondary text-xs">শীর্ষ পণ্য তালিকা লোড হচ্ছে...</div>
           ) : topSelling.length === 0 ? (
-            <p className="text-xs text-slate-400 text-center py-6">কোনো বিক্রয় রেকর্ড নেই</p>
+            <p className="text-xs text-ink-secondary text-center py-6">কোনো বিক্রয় রেকর্ড নেই</p>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               {topSelling.map((item, index) => {
                 const maxRevenue = topSelling[0]?.totalRevenue || 1;
                 const percentage = Math.round((item.totalRevenue / maxRevenue) * 100);
 
                 return (
-                  <div key={item.variantId} className="p-2.5 bg-slate-50/80 rounded-md border border-slate-200/80">
-                    <div className="flex items-center justify-between text-xs mb-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="w-4 h-4 rounded-md bg-slate-200 text-slate-700 font-bold text-[10px] font-mono tabular-nums flex items-center justify-center">
-                          {index + 1}
+                  <div key={item.variantId} className="p-3 bg-surface-subtle/70 rounded-lg border border-border-default">
+                    <div className="flex items-center justify-between text-xs mb-1.5 gap-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className="w-5 h-5 rounded-md bg-brand-soft text-brand-deep border border-brand-light font-bold text-xs font-mono tabular-nums flex items-center justify-center shrink-0">
+                          {formatNumber(index + 1)}
                         </span>
-                        <span className="font-bold text-slate-900">{item.name}</span>
-                        <span className="text-[10px] text-slate-500 bg-white px-1.5 py-0.5 rounded border border-slate-200/80">
+                        <span className="font-bold text-ink-primary truncate">{item.name}</span>
+                        <span className="text-xs text-ink-secondary bg-surface-card px-2 py-0.5 rounded border border-border-default shrink-0">
                           {item.category}
                         </span>
                       </div>
-                      <div className="text-right">
-                        <span className="font-mono tabular-nums tracking-tight font-bold text-slate-900 text-xs sm:text-sm">
-                          ৳{item.totalRevenue.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                      <div className="text-right shrink-0">
+                        <span className="font-mono tabular-nums font-bold text-ink-primary text-xs sm:text-sm">
+                          {formatCurrency(item.totalRevenue)}
                         </span>
-                        <span className="text-slate-500 text-[10px] ml-1.5 font-mono tabular-nums">
-                          ({item.totalSoldQuantity} {item.baseUnitName})
+                        <span className="text-ink-secondary text-xs ml-1.5 font-mono tabular-nums">
+                          ({formatWeight(item.totalSoldQuantity, item.baseUnitName)})
                         </span>
                       </div>
                     </div>
-                    {/* Visual Progress Bar */}
-                    <div className="w-full bg-slate-200/80 rounded-full h-1 overflow-hidden">
+                    <div className="w-full bg-border-default rounded-full h-1.5 overflow-hidden">
                       <div
-                        className="bg-slate-800 h-1 rounded-full transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                        className="bg-brand-deep h-1.5 rounded-full transition-[width] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
                         style={{ width: `${percentage}%` }}
                       />
                     </div>

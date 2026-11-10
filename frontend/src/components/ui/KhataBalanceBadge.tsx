@@ -16,7 +16,7 @@ export function KhataBalanceBadge({
   const isZero = amount === 0;
 
   const sizeClasses = {
-    sm: 'text-[11px] px-2 py-0.5',
+    sm: 'text-xs px-2 py-0.5',
     md: 'text-xs px-2.5 py-1',
     lg: 'text-sm px-3.5 py-1.5',
   }[size];
@@ -24,7 +24,7 @@ export function KhataBalanceBadge({
   if (isZero) {
     return (
       <span
-        className={`inline-flex items-center rounded-full font-bold bg-slate-100 text-slate-600 border border-slate-200/90 shadow-2xs ${sizeClasses}`}
+        className={`inline-flex items-center rounded-full font-bold bg-surface-subtle text-ink-body border border-border-default ${sizeClasses}`}
       >
         পরিশোধিত (৳০)
       </span>
@@ -33,15 +33,15 @@ export function KhataBalanceBadge({
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full font-bold border shadow-2xs ${sizeClasses} ${
+      className={`inline-flex items-center gap-1.5 rounded-full font-bold border ${sizeClasses} ${
         isDue
-          ? 'bg-rose-50 text-rose-700 border-rose-200/90'
-          : 'bg-emerald-50 text-emerald-700 border-emerald-200/90'
+          ? 'bg-due-bg text-due-text border-due-border'
+          : 'bg-cash-bg text-cash-text border-cash-border'
       }`}
     >
       <span
         className={`w-1.5 h-1.5 rounded-full ${
-          isDue ? 'bg-rose-500' : 'bg-emerald-500'
+          isDue ? 'bg-danger' : 'bg-success'
         }`}
       />
       <span className="tabular-numbers">

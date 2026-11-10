@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { X, UserPlus, PencilSimple, WarningCircle, CheckCircle } from '@phosphor-icons/react';
+import { buttonClasses } from '@/components/ui/Button';
 import { useCustomerKhataStore } from '../useCustomerKhataStore';
 import { CustomerType } from '../customerKhata.types';
 
@@ -87,22 +88,22 @@ export function CustomerFormModal() {
         {/* হেডার */}
         <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center shrink-0">
               {isEdit ? <PencilSimple size={17} weight="bold" /> : <UserPlus size={17} weight="bold" />}
             </div>
             <div>
               <h3 className="font-semibold text-slate-900 text-xs sm:text-sm leading-tight">
                 {isEdit ? 'কাস্টমার তথ্য সম্পাদনা' : 'নতুন কাস্টমার খাতা তৈরি'}
               </h3>
-              <p className="text-[11px] text-slate-500">
-                {isEdit ? selectedCustomer?.name : 'গ্রাহকের নাম ও লেনদেনের ধরন নির্ধারণ করুন'}
-              </p>
+              {isEdit && selectedCustomer?.name && (
+                <p className="text-xs text-slate-600">{selectedCustomer.name}</p>
+              )}
             </div>
           </div>
           <button
             type="button"
             onClick={closeModal}
-            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-[background-color,color] duration-150"
+            className="p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-[background-color,color] duration-150 cursor-pointer"
           >
             <X size={16} weight="bold" />
           </button>
@@ -129,8 +130,8 @@ export function CustomerFormModal() {
                 autoFocus
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="যেমন: হাজী আব্দুল কাদের / ভাই ভাই স্টোর"
-                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
+                placeholder="গ্রাহকের নাম"
+                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
               />
             </div>
 
@@ -143,8 +144,8 @@ export function CustomerFormModal() {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="যেমন: 018XXXXXXXX"
-                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm font-mono tabular-nums tracking-tight text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
+                placeholder="০১XXXXXXXXX"
+                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm font-mono tabular-nums tracking-tight text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
               />
             </div>
 
@@ -157,8 +158,8 @@ export function CustomerFormModal() {
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="যেমন: ফেনী বড় বাজার / দাগনভূঞা"
-                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
+                placeholder="ঠিকানা / এলাকা"
+                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
               />
             </div>
 
@@ -171,10 +172,10 @@ export function CustomerFormModal() {
                 <button
                   type="button"
                   onClick={() => setCustomerType('RETAIL')}
-                  className={`py-1.5 px-3 rounded-md border text-xs font-medium flex items-center justify-center gap-1.5 transition-[background-color,color] duration-150 active:scale-[0.98] ${
+                  className={`py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ${
                     customerType === 'RETAIL'
-                      ? 'border-slate-900 bg-slate-900 text-white shadow-2xs'
-                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      ? 'border-brand-deep bg-brand-deep text-white shadow-2xs'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                   }`}
                 >
                   <span>খুচরা ক্রেতা</span>
@@ -183,13 +184,13 @@ export function CustomerFormModal() {
                 <button
                   type="button"
                   onClick={() => setCustomerType('WHOLESALE')}
-                  className={`py-1.5 px-3 rounded-md border text-xs font-medium flex items-center justify-center gap-1.5 transition-[background-color,color] duration-150 active:scale-[0.98] ${
+                  className={`py-2 px-3 rounded-lg border text-xs font-semibold flex items-center justify-center gap-1.5 transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ${
                     customerType === 'WHOLESALE'
-                      ? 'border-slate-900 bg-slate-900 text-white shadow-2xs'
-                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      ? 'border-amber-600 bg-amber-600 text-white shadow-2xs'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                   }`}
                 >
-                  <span>পাইকারি বেপারী/দোকান</span>
+                  <span>পাইকারি বেপারী বা দোকান</span>
                 </button>
               </div>
             </div>
@@ -201,7 +202,7 @@ export function CustomerFormModal() {
                   সফটওয়্যার চালুর পূর্বের বকেয়া (টাকা)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">
+                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-600 font-bold text-xs">
                     ৳
                   </span>
                   <input
@@ -210,12 +211,9 @@ export function CustomerFormModal() {
                     value={openingDueStr}
                     onChange={(e) => setOpeningDueStr(e.target.value)}
                     placeholder="০"
-                    className="w-full pl-6 pr-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs font-mono tabular-nums tracking-tight text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
+                    className="w-full pl-6 pr-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs font-mono tabular-nums tracking-tight text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
                   />
                 </div>
-                <p className="text-[11px] text-slate-400 mt-1">
-                  যদি এই গ্রাহকের কাছে আগে থেকেই কোনো বাকি পাওনা থাকে, তা এখানে লিখুন। না থাকলে ০ রাখুন।
-                </p>
               </div>
             )}
           </div>
@@ -226,14 +224,14 @@ export function CustomerFormModal() {
               type="button"
               onClick={closeModal}
               disabled={isSubmitting}
-              className="px-3.5 py-1.5 rounded-md border border-slate-200 hover:bg-slate-100 text-xs font-medium text-slate-600 transition-[background-color,color] duration-150 active:scale-[0.98]"
+              className={buttonClasses({ variant: 'secondary', size: 'sm' })}
             >
               বাতিল
             </button>
             <button
               type="submit"
               disabled={isSubmitting || !name.trim()}
-              className="px-4 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium flex items-center gap-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.08)] transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50"
+              className={buttonClasses({ variant: 'primary', size: 'sm', className: 'gap-1.5' })}
             >
               <CheckCircle size={15} weight="bold" />
               <span>{isSubmitting ? 'সংরক্ষণ হচ্ছে...' : isEdit ? 'আপডেট সম্পন্ন' : 'খাতা তৈরি করুন'}</span>

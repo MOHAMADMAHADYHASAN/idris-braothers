@@ -12,6 +12,7 @@ import { PricingMarginCard } from './PricingMarginCard';
 import { PackagingUnitsCard, FormUnitItem } from './PackagingUnitsCard';
 import { VariantsStockMatrixCard, FormVariantItem } from './VariantsStockMatrixCard';
 import { WarningCircle, Spinner } from '@phosphor-icons/react';
+import { generateRandom6Digits } from '@/lib/skuGenerator';
 
 interface ProductFormClientProps {
   productId?: string;
@@ -68,6 +69,13 @@ export function ProductFormClient({ productId, initialProduct }: ProductFormClie
   useEffect(() => {
     fetchMetadata();
   }, [fetchMetadata]);
+
+  // Auto-assign initial 6-digit SKU on create mode (non-blocking & editable)
+  useEffect(() => {
+    if (!productId && !initialProduct) {
+      setSku((prev) => prev || generateRandom6Digits());
+    }
+  }, [productId, initialProduct]);
 
   // Load product if editing via URL param
   useEffect(() => {
@@ -574,6 +582,7 @@ export function ProductFormClient({ productId, initialProduct }: ProductFormClie
               }}
               defaultBaseUnit={baseUnitName}
               productName={name}
+              simpleSku={sku}
             />
           </div>
         )}

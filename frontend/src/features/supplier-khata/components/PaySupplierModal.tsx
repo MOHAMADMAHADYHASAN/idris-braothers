@@ -7,10 +7,10 @@ import {
   Printer,
   CheckCircle,
   WarningCircle,
-  Buildings,
 } from '@phosphor-icons/react';
-import { motion, AnimatePresence } from 'motion/react';
-import { formatCurrency } from '@/lib/decimal';
+import { motion } from 'motion/react';
+import { formatCurrency, formatDateTimeBn, formatNumber } from '@/lib/decimal';
+import { buttonClasses } from '@/components/ui/Button';
 import { useSupplierKhataStore } from '../useSupplierKhataStore';
 
 export function PaySupplierModal() {
@@ -66,7 +66,7 @@ export function PaySupplierModal() {
           paidAmount: payAmount,
           previousPayable: currentPayable,
           newPayable: res.supplier.currentPayable,
-          date: new Date().toLocaleString('bn-BD'),
+          date: formatDateTimeBn(new Date()),
           note: note.trim() || 'মহাজনকে নগদ দেনা পরিশোধ',
         });
       } else {
@@ -100,40 +100,43 @@ export function PaySupplierModal() {
             </div>
             <div>
               <h3 className="text-base font-bold text-slate-900">টাকা পরিশোধ সম্পন্ন হয়েছে!</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {successReceipt.companyName || successReceipt.supplierName}-কে ৳
-                <span className="font-mono tabular-nums font-semibold">{formatCurrency(successReceipt.paidAmount)}</span> ক্যাশ প্রদান করা হয়েছে।
+              <p className="text-xs text-slate-600 mt-0.5">
+                {successReceipt.companyName || successReceipt.supplierName}-কে{' '}
+                <span className="font-mono tabular-nums font-bold text-slate-900">
+                  {formatCurrency(successReceipt.paidAmount)}
+                </span>{' '}
+                ক্যাশ প্রদান করা হয়েছে।
               </p>
             </div>
 
             {/* প্রিন্ট স্লিপ বক্স (ক্যাশ আউট ভাউচার) */}
-            <div className="bg-slate-50 border border-slate-200/90 p-3.5 rounded-md text-left font-mono text-xs space-y-2">
+            <div className="bg-slate-50 border border-slate-200/90 p-3.5 rounded-lg text-left font-mono text-xs space-y-2">
               <div className="text-center font-bold pb-2 border-b border-slate-200 text-xs text-slate-900">
                 ইদ্রিস ব্রাদার্স — মহাজন দেনা পরিশোধ ভাউচার
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">গদি / প্রতিষ্ঠান:</span>
+                <span className="text-slate-600">গদি / প্রতিষ্ঠান:</span>
                 <span className="font-semibold text-slate-900">
                   {successReceipt.companyName || successReceipt.supplierName}
                 </span>
               </div>
               {successReceipt.supplierName && successReceipt.companyName && (
                 <div className="flex justify-between">
-                  <span className="text-slate-500">মহাজন:</span>
-                  <span className="text-slate-700">{successReceipt.supplierName}</span>
+                  <span className="text-slate-600">মহাজন:</span>
+                  <span className="text-slate-800">{successReceipt.supplierName}</span>
                 </div>
               )}
               {successReceipt.supplierAddress && (
                 <div className="flex justify-between">
-                  <span className="text-slate-500">মোকাম:</span>
-                  <span className="text-slate-700">{successReceipt.supplierAddress}</span>
+                  <span className="text-slate-600">মোকাম:</span>
+                  <span className="text-slate-800">{successReceipt.supplierAddress}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-slate-500">তারিখ:</span>
-                <span className="text-slate-700">{successReceipt.date}</span>
+                <span className="text-slate-600">তারিখ:</span>
+                <span className="text-slate-800">{successReceipt.date}</span>
               </div>
-              <div className="border-t border-slate-200 pt-1.5 flex justify-between text-slate-500">
+              <div className="border-t border-slate-200 pt-1.5 flex justify-between text-slate-600">
                 <span>পূর্বের দেনা:</span>
                 <span className="font-mono tabular-nums">{formatCurrency(successReceipt.previousPayable)}</span>
               </div>
@@ -152,7 +155,7 @@ export function PaySupplierModal() {
               <button
                 type="button"
                 onClick={handlePrint}
-                className="flex-1 py-2 px-3 rounded-md bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white font-medium text-xs flex items-center justify-center gap-1.5 transition-[background-color,border-color,transform] duration-150"
+                className={buttonClasses({ variant: 'primary', size: 'sm', className: 'flex-1 gap-1.5' })}
               >
                 <Printer size={15} weight="bold" />
                 <span>ভাউচার প্রিন্ট করুন</span>
@@ -160,7 +163,7 @@ export function PaySupplierModal() {
               <button
                 type="button"
                 onClick={closeModal}
-                className="py-2 px-4 rounded-md border border-slate-200 hover:bg-slate-100 active:scale-[0.98] text-slate-700 font-medium text-xs transition-[background-color,border-color,transform] duration-150"
+                className={buttonClasses({ variant: 'secondary', size: 'sm' })}
               >
                 সম্পন্ন
               </button>
@@ -171,15 +174,15 @@ export function PaySupplierModal() {
           <form onSubmit={handleSubmit}>
             {/* হেডার */}
             <div className="px-4 py-3 border-b border-slate-200/90 flex items-center justify-between bg-slate-50/80">
-              <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center">
                   <HandCoins size={16} weight="bold" />
                 </div>
                 <div>
                   <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
                     মহাজন দেনা পরিশোধ
                   </h3>
-                  <p className="text-[11px] text-slate-500">
+                  <p className="text-xs text-slate-600">
                     {selectedSupplier.companyName || selectedSupplier.name}
                   </p>
                 </div>
@@ -187,7 +190,7 @@ export function PaySupplierModal() {
               <button
                 type="button"
                 onClick={closeModal}
-                className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-[background-color,color] duration-150"
+                className="p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-200 transition-[background-color,color] duration-150 cursor-pointer"
               >
                 <X size={16} weight="bold" />
               </button>
@@ -203,18 +206,18 @@ export function PaySupplierModal() {
               )}
 
               {/* পূর্বের দেনা ও অবশিষ্ট দেনা কার্ড */}
-              <div className="bg-slate-50/80 p-3 rounded-md border border-slate-200/90 grid grid-cols-2 gap-2 text-center">
+              <div className="bg-slate-50/80 p-3 rounded-lg border border-slate-200/90 grid grid-cols-2 gap-2 text-center">
                 <div className="border-r border-slate-200 pr-2">
-                  <span className="text-[10px] text-slate-500 font-medium block">পূর্বের দেনা</span>
+                  <span className="text-xs text-slate-600 font-medium block">পূর্বের দেনা</span>
                   <span className="text-sm sm:text-base font-bold font-mono text-amber-800 tabular-nums tracking-tight">
                     {formatCurrency(currentPayable)}
                   </span>
                 </div>
                 <div className="pl-2">
-                  <span className="text-[10px] text-slate-500 font-medium block">অবশিষ্ট দেনা থাকবে</span>
+                  <span className="text-xs text-slate-600 font-medium block">অবশিষ্ট দেনা থাকবে</span>
                   <span
                     className={`text-sm sm:text-base font-bold font-mono tabular-nums tracking-tight ${
-                      remainingPayable <= 0 ? 'text-emerald-700' : 'text-slate-900'
+                      remainingPayable <= 0 ? 'text-emerald-700' : 'text-brand-deep'
                     }`}
                   >
                     {formatCurrency(remainingPayable)}
@@ -228,7 +231,7 @@ export function PaySupplierModal() {
                   নগদ পরিশোধের পরিমাণ (টাকা) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base font-bold">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 text-base font-bold">
                     ৳
                   </span>
                   <input
@@ -242,7 +245,7 @@ export function PaySupplierModal() {
                       setError(null);
                     }}
                     placeholder="০.০০"
-                    className="w-full pl-7 pr-3 py-2 bg-white border border-slate-300 rounded-md text-lg sm:text-xl font-bold font-mono tabular-nums text-emerald-700 placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-600 focus:border-emerald-600 transition-[border-color,box-shadow] duration-150"
+                    className="w-full pl-7 pr-3 py-2 bg-white border border-slate-300 rounded-md text-lg sm:text-xl font-bold font-mono tabular-nums text-emerald-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
                   />
                 </div>
               </div>
@@ -254,16 +257,16 @@ export function PaySupplierModal() {
                     key={val}
                     type="button"
                     onClick={() => handleQuickAdd(val)}
-                    className="py-1 px-2.5 rounded-md border border-slate-200/90 bg-slate-50 hover:bg-slate-100 text-xs font-mono tabular-nums font-semibold text-slate-700 transition-[background-color,border-color,transform] duration-150 active:scale-[0.98]"
+                    className="py-1 px-2.5 rounded-md border border-slate-200/90 bg-slate-50 hover:bg-brand-soft/60 hover:border-brand-light text-xs font-mono tabular-nums font-semibold text-slate-700 hover:text-brand-deep transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] cursor-pointer"
                   >
-                    +{val >= 1000 ? `${val / 1000}K` : val}
+                    +{formatNumber(val)}
                   </button>
                 ))}
                 {currentPayable > 0 && (
                   <button
                     type="button"
                     onClick={handlePayFull}
-                    className="py-1 px-2.5 rounded-md border border-amber-300 bg-amber-50 hover:bg-amber-100 text-xs font-medium text-amber-800 transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] ml-auto"
+                    className="py-1 px-2.5 rounded-md border border-amber-300 bg-amber-50 hover:bg-amber-100 text-xs font-semibold text-amber-800 transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] ml-auto cursor-pointer"
                   >
                     পুরো দেনা শোধ
                   </button>
@@ -279,8 +282,8 @@ export function PaySupplierModal() {
                   type="text"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="যেমন: খাতুনগঞ্জের প্রতিনিধিকে ক্যাশ প্রদান / ব্যাংক চেক"
-                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-800 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
+                  placeholder="নোট বা রেফারেন্স"
+                  className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
                 />
               </div>
 
@@ -290,9 +293,9 @@ export function PaySupplierModal() {
                   type="checkbox"
                   checked={printReceipt}
                   onChange={(e) => setPrintReceipt(e.target.checked)}
-                  className="w-3.5 h-3.5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-600"
+                  className="w-4 h-4 rounded border-slate-300 text-brand-deep focus:ring-brand-deep"
                 />
-                <span className="text-xs text-slate-600 font-medium">
+                <span className="text-xs text-slate-700 font-medium">
                   পরিশোধ শেষে ক্যাশ ভাউচার স্লিপ প্রিন্ট করুন
                 </span>
               </label>
@@ -304,14 +307,14 @@ export function PaySupplierModal() {
                 type="button"
                 onClick={closeModal}
                 disabled={isSubmitting}
-                className="px-3.5 py-1.5 rounded-md border border-slate-200/90 hover:bg-slate-100 active:scale-[0.98] text-xs font-medium text-slate-600 transition-[background-color,border-color,transform] duration-150"
+                className={buttonClasses({ variant: 'secondary', size: 'sm' })}
               >
                 বাতিল
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || payAmount <= 0}
-                className="px-4 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 shadow-[0_1px_2px_rgba(5,150,105,0.2)] disabled:opacity-50"
+                className={buttonClasses({ variant: 'cash', size: 'sm', className: 'gap-1.5' })}
               >
                 {isSubmitting ? (
                   <span>পরিশোধ হচ্ছে...</span>

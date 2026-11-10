@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { X, SlidersHorizontal, WarningCircle, CheckCircle } from '@phosphor-icons/react';
 import { formatCurrency } from '@/lib/decimal';
+import { buttonClasses } from '@/components/ui/Button';
 import { useCustomerKhataStore } from '../useCustomerKhataStore';
 
 export function CustomerAdjustmentModal() {
@@ -68,18 +69,18 @@ export function CustomerAdjustmentModal() {
         {/* হেডার */}
         <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center shrink-0">
               <SlidersHorizontal size={17} weight="bold" />
             </div>
             <div>
               <h3 className="font-semibold text-slate-900 text-xs sm:text-sm leading-tight">হিসাব সমন্বয় ও ছাড়</h3>
-              <p className="text-[11px] text-slate-500">গ্রাহক: {selectedCustomer.name}</p>
+              <p className="text-xs text-slate-600">গ্রাহক: {selectedCustomer.name}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={closeModal}
-            className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-[background-color,color] duration-150"
+            className="p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-[background-color,color] duration-150 cursor-pointer"
           >
             <X size={16} weight="bold" />
           </button>
@@ -96,16 +97,16 @@ export function CustomerAdjustmentModal() {
             )}
 
             {/* বর্তমান বকেয়া ও নতুন সম্ভাব্য বকেয়া */}
-            <div className="bg-slate-50/70 p-3 rounded-md border border-slate-200/80 grid grid-cols-2 gap-2 text-center">
+            <div className="bg-slate-50/70 p-3 rounded-lg border border-slate-200/80 grid grid-cols-2 gap-2 text-center">
               <div className="border-r border-slate-200 pr-2">
-                <span className="text-[11px] text-slate-500 font-medium block">বর্তমান বকেয়া</span>
+                <span className="text-xs text-slate-600 font-medium block">বর্তমান বকেয়া</span>
                 <span className="text-base font-black font-mono tabular-nums tracking-tight text-rose-700">
                   {formatCurrency(currentDue)}
                 </span>
               </div>
               <div className="pl-2">
-                <span className="text-[11px] text-slate-500 font-medium block">সমন্বয়ের পর বকেয়া</span>
-                <span className="text-base font-black font-mono tabular-nums tracking-tight text-slate-900">
+                <span className="text-xs text-slate-600 font-medium block">সমন্বয়ের পর বকেয়া</span>
+                <span className="text-base font-black font-mono tabular-nums tracking-tight text-brand-deep">
                   {formatCurrency(newDue)}
                 </span>
               </div>
@@ -120,10 +121,10 @@ export function CustomerAdjustmentModal() {
                 <button
                   type="button"
                   onClick={() => setAdjustmentType('DISCOUNT')}
-                  className={`py-1.5 px-3 rounded-md border text-xs font-medium transition-[background-color,color] duration-150 active:scale-[0.98] ${
+                  className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ${
                     adjustmentType === 'DISCOUNT'
-                      ? 'border-slate-900 bg-slate-900 text-white shadow-2xs'
-                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      ? 'border-brand-deep bg-brand-deep text-white shadow-2xs'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                   }`}
                 >
                   <span>বাকি ছাড় / মাফ (-)</span>
@@ -131,10 +132,10 @@ export function CustomerAdjustmentModal() {
                 <button
                   type="button"
                   onClick={() => setAdjustmentType('ADD_DUE')}
-                  className={`py-1.5 px-3 rounded-md border text-xs font-medium transition-[background-color,color] duration-150 active:scale-[0.98] ${
+                  className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ${
                     adjustmentType === 'ADD_DUE'
-                      ? 'border-slate-900 bg-slate-900 text-white shadow-2xs'
-                      : 'border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                      ? 'border-brand-deep bg-brand-deep text-white shadow-2xs'
+                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
                   }`}
                 >
                   <span>বাকি বৃদ্ধি (+)</span>
@@ -149,7 +150,7 @@ export function CustomerAdjustmentModal() {
                 <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 font-bold text-sm">
                   ৳
                 </span>
                 <input
@@ -160,7 +161,7 @@ export function CustomerAdjustmentModal() {
                   value={amountStr}
                   onChange={(e) => setAmountStr(e.target.value)}
                   placeholder="০.০০"
-                  className="w-full pl-7 pr-3 py-1.5 bg-white border border-slate-200 rounded-md text-sm font-bold font-mono tabular-nums tracking-tight text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
+                  className="w-full pl-7 pr-3 py-1.5 bg-white border border-slate-200 rounded-md text-sm font-bold font-mono tabular-nums tracking-tight text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
                 />
               </div>
             </div>
@@ -175,8 +176,8 @@ export function CustomerAdjustmentModal() {
                 required
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="যেমন: হিসাব মেলাতে ৫০ টাকা ছাড় দেওয়া হয়েছে"
-                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
+                placeholder="সমন্বয়ের কারণ"
+                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
               />
             </div>
           </div>
@@ -187,14 +188,14 @@ export function CustomerAdjustmentModal() {
               type="button"
               onClick={closeModal}
               disabled={isSubmitting}
-              className="px-3.5 py-1.5 rounded-md border border-slate-200 hover:bg-slate-100 text-xs font-medium text-slate-600 transition-[background-color,color] duration-150 active:scale-[0.98]"
+              className={buttonClasses({ variant: 'secondary', size: 'sm' })}
             >
               বাতিল
             </button>
             <button
               type="submit"
               disabled={isSubmitting || inputAmount <= 0 || !reason.trim()}
-              className="px-4 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium flex items-center gap-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.08)] transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50"
+              className={buttonClasses({ variant: 'primary', size: 'sm', className: 'gap-1.5' })}
             >
               <CheckCircle size={15} weight="bold" />
               <span>{isSubmitting ? 'সমন্বয় হচ্ছে...' : 'সমন্বয় নিশ্চিত করুন'}</span>

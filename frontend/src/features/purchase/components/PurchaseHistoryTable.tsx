@@ -3,7 +3,7 @@
 import React, { useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye } from '@phosphor-icons/react';
-import { formatCurrency } from '@/lib/decimal';
+import { formatCurrency, formatDateBn } from '@/lib/decimal';
 import { usePurchaseStore } from '../usePurchaseStore';
 import { Purchase } from '../purchase.types';
 import { AdminPagination } from '@/components/shared/AdminPagination';
@@ -19,7 +19,6 @@ export function PurchaseHistoryTable({ onOpenDetail }: PurchaseHistoryTableProps
     purchases,
     meta,
     isLoadingHistory,
-    openDetailModal,
     setPage,
   } = usePurchaseStore();
 
@@ -37,40 +36,32 @@ export function PurchaseHistoryTable({ onOpenDetail }: PurchaseHistoryTableProps
         key: 'purchaseNumber',
         header: 'চালান নং ও তারিখ',
         disableToggle: true,
-        renderCell: (p) => {
-          const dateStr = new Date(p.createdAt).toLocaleDateString('bn-BD', {
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-          });
-
-          return (
-            <div>
-              <span className="font-mono tabular-nums font-bold text-slate-900 text-xs block">
-                #{p.purchaseNumber}
-              </span>
-              <span className="text-[11px] text-slate-400 font-mono tabular-nums">
-                {dateStr}
-              </span>
-            </div>
-          );
-        },
+        renderCell: (p) => (
+          <div>
+            <span className="font-mono tabular-nums font-bold text-ink-primary text-xs sm:text-sm block">
+              #{p.purchaseNumber}
+            </span>
+            <span className="text-xs text-ink-secondary font-mono tabular-nums">
+              {formatDateBn(p.createdAt)}
+            </span>
+          </div>
+        ),
         renderFooterCell: () => (
-          <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+          <span className="text-xs font-bold text-ink-secondary">
             পৃষ্ঠার মোট:
           </span>
         ),
       },
       {
         key: 'supplier',
-        header: 'মহাজন / আড়ত ও মোকাম',
+        header: 'মহাজন ও মোকাম',
         renderCell: (p) => (
           <div>
-            <span className="font-semibold text-slate-900 text-xs block">
+            <span className="font-semibold text-ink-primary text-xs sm:text-sm block">
               {p.supplier?.companyName || p.supplier?.name || 'অজ্ঞাত মহাজন'}
             </span>
             {p.supplier?.address && (
-              <span className="text-[11px] text-slate-400 block truncate max-w-[200px]">
+              <span className="text-xs text-ink-secondary block truncate max-w-[200px]">
                 {p.supplier.address}
               </span>
             )}
@@ -81,55 +72,51 @@ export function PurchaseHistoryTable({ onOpenDetail }: PurchaseHistoryTableProps
         key: 'transportCost',
         header: 'গাড়িভাড়া',
         headerClassName: 'text-right',
-        cellClassName: 'text-right font-mono tabular-nums text-slate-600 text-xs',
-        footerClassName: 'text-right font-mono tabular-nums text-slate-700 font-bold',
+        cellClassName: 'text-right font-mono tabular-nums text-ink-secondary text-xs',
+        footerClassName: 'text-right font-mono tabular-nums text-ink-primary font-bold text-xs',
         renderCell: (p) =>
-          p.transportCost > 0 ? `${formatCurrency(p.transportCost)}` : '-',
+          p.transportCost > 0 ? formatCurrency(p.transportCost) : '—',
         renderFooterCell: (data) =>
-          `${formatCurrency(
+          formatCurrency(
             data.reduce((sum, p) => sum + (Number(p.transportCost) || 0), 0)
-          )}`,
+          ),
       },
       {
         key: 'grandTotal',
         header: 'সর্বমোট বিল',
         headerClassName: 'text-right',
-        cellClassName: 'text-right font-mono tabular-nums tracking-tight font-black text-slate-900 text-xs sm:text-sm',
-        footerClassName: 'text-right font-mono tabular-nums tracking-tight font-black text-slate-900 text-xs sm:text-sm',
-        renderCell: (p) => `${formatCurrency(p.grandTotal)}`,
+        cellClassName: 'text-right font-mono tabular-nums font-black text-ink-primary text-xs sm:text-sm',
+        footerClassName: 'text-right font-mono tabular-nums font-black text-ink-primary text-xs sm:text-sm',
+        renderCell: (p) => formatCurrency(p.grandTotal),
         renderFooterCell: (data) =>
-          `${formatCurrency(
+          formatCurrency(
             data.reduce((sum, p) => sum + (Number(p.grandTotal) || 0), 0)
-          )}`,
+          ),
       },
       {
         key: 'paidAmount',
         header: 'নগদ পরিশোধ',
         headerClassName: 'text-right',
-        cellClassName: 'text-right font-mono tabular-nums tracking-tight font-bold text-emerald-700',
-        footerClassName: 'text-right font-mono tabular-nums tracking-tight font-bold text-emerald-700',
-        renderCell: (p) => `${formatCurrency(p.paidAmount)}`,
+        cellClassName: 'text-right font-mono tabular-nums font-bold text-cash-text',
+        footerClassName: 'text-right font-mono tabular-nums font-bold text-cash-text',
+        renderCell: (p) => formatCurrency(p.paidAmount),
         renderFooterCell: (data) =>
-          `${formatCurrency(
+          formatCurrency(
             data.reduce((sum, p) => sum + (Number(p.paidAmount) || 0), 0)
-          )}`,
+          ),
       },
       {
         key: 'dueAmount',
         header: 'বকেয়া দেনা',
         headerClassName: 'text-right',
-        cellClassName: 'text-right font-mono tabular-nums tracking-tight font-bold',
-        footerClassName: 'text-right font-mono tabular-nums tracking-tight font-bold text-amber-800',
+        cellClassName: 'text-right font-mono tabular-nums font-bold',
+        footerClassName: 'text-right font-mono tabular-nums font-bold text-due-text',
         renderCell: (p) => {
           if (p.dueAmount > 0) {
-            return (
-              <span className="text-amber-800">
-                {formatCurrency(p.dueAmount)}
-              </span>
-            );
+            return <span className="text-due-text">{formatCurrency(p.dueAmount)}</span>;
           }
           return (
-            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-cash-bg text-cash-text border border-cash-border">
               পরিশোধিত
             </span>
           );
@@ -140,11 +127,9 @@ export function PurchaseHistoryTable({ onOpenDetail }: PurchaseHistoryTableProps
             0
           );
           return totalDue > 0 ? (
-            <span className="text-amber-800">
-              {formatCurrency(totalDue)}
-            </span>
+            <span className="text-due-text">{formatCurrency(totalDue)}</span>
           ) : (
-            <span className="text-emerald-700 font-semibold">০ দেনা</span>
+            <span className="text-cash-text font-semibold">৳০ দেনা</span>
           );
         },
       },
@@ -162,10 +147,10 @@ export function PurchaseHistoryTable({ onOpenDetail }: PurchaseHistoryTableProps
                 e.stopPropagation();
                 handleDetail(p);
               }}
-              className="h-7.5 px-2.5 rounded-md border border-slate-200/90 hover:bg-slate-100 active:scale-[0.98] text-slate-600 hover:text-slate-900 text-xs font-semibold inline-flex items-center gap-1 transition-[background-color,border-color,transform] duration-150 cursor-pointer shadow-2xs"
-              title="চালানের সম্পূর্ণ চালানপত্র দেখুন"
+              className="h-8 px-2.5 rounded-lg border border-border-strong hover:bg-brand-soft hover:text-brand-deep hover:border-brand-light active:scale-[0.98] text-ink-body text-xs font-semibold inline-flex items-center gap-1 transition-all cursor-pointer shadow-2xs"
+              title="চালানের সম্পূর্ণ বিবরণ দেখুন"
             >
-              <Eye size={13} weight="bold" />
+              <Eye size={14} weight="bold" />
               <span>বিস্তারিত</span>
             </button>
           </div>

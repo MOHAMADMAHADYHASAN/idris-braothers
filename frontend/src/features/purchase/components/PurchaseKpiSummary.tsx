@@ -3,7 +3,7 @@
 import React from 'react';
 import { Receipt, Coins, CreditCard, Bank } from '@phosphor-icons/react';
 import { usePurchaseStore } from '../usePurchaseStore';
-import { formatCurrency } from '@/lib/decimal';
+import { formatCurrency, formatNumber } from '@/lib/decimal';
 
 export function PurchaseKpiSummary() {
   const { purchases, meta } = usePurchaseStore();
@@ -14,80 +14,80 @@ export function PurchaseKpiSummary() {
   const totalDue = purchases.reduce((acc, p) => acc + (p.dueAmount || 0), 0);
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {/* ১. মোট চালান সংখ্যা */}
-      <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
+      <div className="bg-surface-card p-3.5 rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          <span className="text-xs font-semibold text-ink-secondary">
             মোট চালান
           </span>
-          <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light/70 text-brand-deep flex items-center justify-center shrink-0">
             <Receipt size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900">
-            {totalPurchases} <span className="text-xs font-normal text-slate-400">টি</span>
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums text-ink-primary">
+            {formatNumber(totalPurchases)}{' '}
+            <span className="text-xs font-medium text-ink-secondary">টি</span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-0.5">মোকাম ও মহাজন চালানপত্র</p>
         </div>
       </div>
 
       {/* ২. মোট ক্রয়মূল্য */}
-      <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
+      <div className="bg-surface-card p-3.5 rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          <span className="text-xs font-semibold text-ink-secondary">
             মোট ক্রয় চালান বিল
           </span>
-          <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light/70 text-brand-deep flex items-center justify-center shrink-0">
             <Coins size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900 truncate">
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums text-ink-primary truncate">
             {formatCurrency(totalAmount)}
           </div>
-          <p className="text-[11px] text-slate-400 mt-0.5">গাড়িভাড়া সহ সর্বমোট স্টক ইন</p>
         </div>
       </div>
 
       {/* ৩. নগদ পরিশোধিত */}
-      <div className="bg-white p-3.5 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
+      <div className="bg-surface-card p-3.5 rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+          <span className="text-xs font-semibold text-ink-secondary">
             পরিশোধিত নগদ
           </span>
-          <div className="w-8 h-8 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg bg-cash-bg border border-cash-border text-cash-text flex items-center justify-center shrink-0">
             <CreditCard size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-emerald-700 truncate">
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums text-cash-text truncate">
             {formatCurrency(totalPaid)}
           </div>
-          <p className="text-[11px] text-slate-400 mt-0.5">মোকাম বা ব্যাংকে প্রদত্ত ক্যাশ</p>
         </div>
       </div>
 
       {/* ৪. মহাজন বকেয়া দেনা */}
       <div
-        className={`p-3.5 rounded-lg border shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between transition-colors ${
-          totalDue > 0 ? 'bg-amber-50/40 border-amber-200/90' : 'bg-white border-slate-200/90'
+        className={`p-3.5 rounded-xl border shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between transition-colors ${
+          totalDue > 0
+            ? 'bg-due-bg/45 border-due-border'
+            : 'bg-surface-card border-border-default'
         }`}
       >
         <div className="flex items-center justify-between">
           <span
-            className={`text-[11px] font-semibold uppercase tracking-wider ${
-              totalDue > 0 ? 'text-amber-800' : 'text-slate-500'
+            className={`text-xs font-semibold ${
+              totalDue > 0 ? 'text-due-text' : 'text-ink-secondary'
             }`}
           >
             মহাজন বকেয়া দেনা
           </span>
           <div
-            className={`w-8 h-8 rounded-md border flex items-center justify-center shrink-0 ${
+            className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${
               totalDue > 0
-                ? 'bg-amber-100 border-amber-200 text-amber-800'
-                : 'bg-slate-100 border-slate-200/80 text-slate-700'
+                ? 'bg-due-bg border-due-border text-due-text'
+                : 'bg-brand-soft border-brand-light/70 text-brand-deep'
             }`}
           >
             <Bank size={17} weight="bold" />
@@ -95,13 +95,12 @@ export function PurchaseKpiSummary() {
         </div>
         <div className="mt-2">
           <div
-            className={`text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight truncate ${
-              totalDue > 0 ? 'text-amber-800' : 'text-slate-900'
+            className={`text-xl sm:text-2xl font-black font-mono tabular-nums truncate ${
+              totalDue > 0 ? 'text-due-text' : 'text-ink-primary'
             }`}
           >
             {formatCurrency(totalDue)}
           </div>
-          <p className="text-[11px] text-slate-400 mt-0.5">মোকাম আড়তের অবশিষ্ট দেনা</p>
         </div>
       </div>
     </div>

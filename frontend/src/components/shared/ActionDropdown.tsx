@@ -111,8 +111,8 @@ export function ActionDropdown({
         ref={buttonRef}
         type="button"
         onClick={toggle}
-        className={`p-1.5 rounded-md text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors active:scale-95 cursor-pointer inline-flex items-center justify-center ${
-          isOpen ? 'bg-slate-100 text-slate-900' : ''
+        className={`p-1.5 rounded-md text-ink-secondary hover:text-brand-deep hover:bg-brand-soft transition-colors active:scale-95 cursor-pointer inline-flex items-center justify-center ${
+          isOpen ? 'bg-brand-soft text-brand-deep' : ''
         } ${buttonClassName}`}
         title={title}
       >
@@ -132,7 +132,7 @@ export function ActionDropdown({
               zIndex: 99999,
             }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-white rounded-xl border border-slate-200/90 shadow-[0_8px_24px_-4px_rgba(15,23,42,0.14)] p-1 text-xs font-sans animate-in fade-in zoom-in-95 duration-100"
+            className="bg-surface-card rounded-xl border border-border-default shadow-[0_8px_24px_-4px_rgba(15,23,42,0.14)] p-1.5 text-xs font-sans animate-in fade-in zoom-in-95 duration-100"
           >
             {items.map((item, idx) => (
               <button
@@ -144,15 +144,15 @@ export function ActionDropdown({
                   setIsOpen(false);
                   item.onClick();
                 }}
-                className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-left transition-colors cursor-pointer select-none text-[11px] sm:text-xs ${
+                className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg text-left transition-colors cursor-pointer select-none text-xs ${
                   item.disabled
                     ? 'opacity-40 cursor-not-allowed'
                     : item.danger
-                    ? 'text-rose-600 hover:bg-rose-50 hover:text-rose-700 font-medium'
-                    : 'text-slate-700 hover:bg-slate-100 hover:text-slate-900 font-medium'
+                    ? 'text-due-text hover:bg-due-bg font-medium'
+                    : 'text-ink-body hover:bg-brand-soft hover:text-brand-deep font-medium'
                 }`}
               >
-                <span className={item.danger ? 'text-rose-500 flex-shrink-0' : 'text-slate-500 flex-shrink-0'}>
+                <span className={item.danger ? 'text-danger flex-shrink-0' : 'text-ink-secondary flex-shrink-0'}>
                   {item.icon}
                 </span>
                 <span className="truncate flex-1 whitespace-nowrap">{item.label}</span>

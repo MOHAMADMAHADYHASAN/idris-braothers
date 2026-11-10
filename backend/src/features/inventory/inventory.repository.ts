@@ -103,6 +103,38 @@ export class InventoryRepository extends BaseRepository {
   }
 
   /**
+   * Hardware scanner & POS lookup: matches variant.barcode -> unit.barcode -> variant.sku
+   * Keeps strict barcode uniqueness checks separate from hardware scan resolution.
+   */
+  async findByScanCode(code: string, tx?: Prisma.TransactionClient): Promise<{
+    variant: VariantWithDetails;
+    matchedUnit?: VariantUnit;
+  } | null> {
+    const barcodeMatch = await this.findVariantByBarcode(code, tx);
+    if (barcodeMatch) {
+      return barcodeMatch;
+    }
+
+    const skuMatch = await this.getDb(tx).productVariant.findFirst({
+      where: {
+        sku: { equals: code.trim(), mode: 'insensitive' },
+        isActive: true,
+        product: { isActive: true },
+      },
+      include: {
+        product: true,
+        units: true,
+      },
+    });
+
+    if (skuMatch) {
+      return { variant: skuMatch };
+    }
+
+    return null;
+  }
+
+  /**
    * Find variant by SKU
    */
   async findVariantBySku(sku: string, tx?: Prisma.TransactionClient): Promise<VariantWithDetails | null> {

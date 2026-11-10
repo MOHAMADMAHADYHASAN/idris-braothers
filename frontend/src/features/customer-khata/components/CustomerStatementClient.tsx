@@ -6,10 +6,8 @@ import {
   ArrowLeft,
   Printer,
   User,
-  Storefront,
   Phone,
   MapPin,
-  Coins,
   CheckCircle,
   WarningCircle,
   HandCoins,
@@ -17,10 +15,16 @@ import {
   Spinner,
   CaretDown,
   CaretUp,
-  Percent,
 } from '@phosphor-icons/react';
-import { formatCurrency } from '@/lib/decimal';
-import { Customer, CustomerLedgerEntry } from '../customerKhata.types';
+import {
+  formatCurrency,
+  formatDateBn,
+  formatNumber,
+  toBanglaDigits,
+} from '@/lib/decimal';
+import { buttonClasses } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Customer } from '../customerKhata.types';
 import { useCustomerKhataStore } from '../useCustomerKhataStore';
 import { AdminPagination } from '@/components/shared/AdminPagination';
 
@@ -157,7 +161,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
         <div className="flex flex-col items-center gap-2">
-          <Spinner size={32} weight="bold" className="animate-spin text-slate-700" />
+          <Spinner size={32} weight="bold" className="animate-spin text-brand-deep" />
           <p className="text-xs font-semibold text-slate-600">কাস্টমার স্টেটমেন্ট লোড হচ্ছে...</p>
         </div>
       </div>
@@ -171,7 +175,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
         <h2 className="text-base font-bold text-slate-900">কাস্টমারটি খুঁজে পাওয়া যায়নি</h2>
         <Link
           href="/khata/customers"
-          className="mt-4 px-4 py-2 rounded-lg bg-slate-900 text-white text-xs font-semibold"
+          className={buttonClasses({ variant: 'primary', size: 'sm', className: 'mt-4' })}
         >
           কাস্টমার তালিকায় ফিরুন
         </Link>
@@ -195,39 +199,30 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/khata/customers"
-              className="p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors shrink-0"
+              className="p-2 rounded-lg text-slate-600 hover:text-brand-deep hover:bg-brand-soft/60 border border-slate-200 transition-colors shrink-0"
               title="কাস্টমার তালিকায় ফিরে যান"
             >
               <ArrowLeft size={16} weight="bold" />
             </Link>
             <div className="min-w-0">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate">
                   {customer.name}
                 </h1>
-                <span
-                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold border shrink-0 ${
-                    customer.customerType === 'WHOLESALE'
-                      ? 'bg-purple-50 text-purple-700 border-purple-200'
-                      : 'bg-slate-100 text-slate-700 border-slate-200'
-                  }`}
-                >
+                <Badge variant={customer.customerType === 'WHOLESALE' ? 'wholesale' : 'neutral'}>
                   {customer.customerType === 'WHOLESALE' ? 'পাইকারি পার্টি' : 'খুচরা গ্রাহক'}
-                </span>
-                <span
-                  className={`px-2 py-0.5 rounded-md text-[10px] font-bold border shrink-0 ${
-                    customer.currentDue > 0
-                      ? 'bg-rose-50 text-rose-700 border-rose-200'
-                      : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                  }`}
+                </Badge>
+                <Badge
+                  variant={customer.currentDue > 0 ? 'due' : 'cash'}
+                  className={customer.currentDue > 0 ? 'bg-rose-50 text-rose-700 border-rose-200' : undefined}
                 >
                   {customer.currentDue > 0
                     ? `বকেয়া: ${formatCurrency(customer.currentDue)}`
-                    : 'পরিশোধিত / ০ বাকি'}
-                </span>
+                    : 'পরিশোধিত ও ০ বাকি'}
+                </Badge>
               </div>
-              <p className="text-[11px] text-slate-500 truncate mt-0.5">
-                {customer.phone ? `ফোন: ${customer.phone}` : ''}{' '}
+              <p className="text-xs text-slate-600 truncate mt-0.5 font-mono tabular-nums">
+                {customer.phone ? `ফোন: ${toBanglaDigits(customer.phone)}` : ''}{' '}
                 {customer.address ? `• ঠিকানা: ${customer.address}` : ''}
               </p>
             </div>
@@ -237,10 +232,10 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
             <button
               type="button"
               onClick={handlePrint}
-              className="px-4 py-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+              className={buttonClasses({ variant: 'primary', size: 'sm', className: 'gap-1.5' })}
             >
               <Printer size={15} weight="bold" />
-              <span>স্টেটমেন্ট প্রিন্ট (A4)</span>
+              <span>স্টেটমেন্ট প্রিন্ট</span>
             </button>
           </div>
         </div>
@@ -248,18 +243,20 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
 
       {/* ২. মূল লেজার ক্যানভাস (Desktop 70% - 30%) */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 print:p-0 print:max-w-none">
-        {/* প্রিন্ট হেডার (শুধু প্রিন্ট ডকুমেন্টে আসবে) */}
+        {/* প্রিন্ট হেডার */}
         <div className="hidden print:block border-b border-slate-300 pb-4 mb-4">
           <div className="flex justify-between items-start">
             <div>
               <h2 className="text-xl font-bold text-slate-900">মেসার্স ইদ্রিস ব্রাদার্স</h2>
               <p className="text-xs text-slate-600">মরিচপট্টি, ফেনী বাজার, ফেনী</p>
-              <p className="text-xs text-slate-500">গ্রাহক খতিয়ান ও হিসাব বিবরণী (Customer Ledger Statement)</p>
+              <p className="text-xs text-slate-600">গ্রাহক খতিয়ান ও হিসাব বিবরণী</p>
             </div>
             <div className="text-right">
               <h3 className="text-base font-bold text-slate-900">{customer.name}</h3>
-              <p className="text-xs text-slate-600">{customer.phone || ''}</p>
-              <p className="text-xs text-slate-500">{customer.address || ''}</p>
+              <p className="text-xs text-slate-600 font-mono">
+                {customer.phone ? toBanglaDigits(customer.phone) : ''}
+              </p>
+              <p className="text-xs text-slate-600">{customer.address || ''}</p>
             </div>
           </div>
         </div>
@@ -267,7 +264,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* বাঁয়ে: খতিয়ান স্টেটমেন্ট টেবিল ও ফিল্টার (৮ কলাম / ~৭০%) */}
           <div className="lg:col-span-8 space-y-4 print:w-full">
-            {/* ফিল্টার টুলবার (প্রিন্টে লুকানো থাকবে) */}
+            {/* ফিল্টার টুলবার */}
             <div className="bg-white rounded-xl border border-slate-200/90 p-3 shadow-2xs flex items-center justify-between flex-wrap gap-2 print:hidden">
               <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-lg border border-slate-200/80">
                 <button
@@ -275,8 +272,8 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                   onClick={() => setFilterType('ALL')}
                   className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer ${
                     filterType === 'ALL'
-                      ? 'bg-white text-slate-900 shadow-2xs border border-slate-200'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-brand-deep text-white shadow-xs'
+                      : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
                   সব লেনদেন
@@ -286,27 +283,27 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                   onClick={() => setFilterType('DEBIT')}
                   className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer ${
                     filterType === 'DEBIT'
-                      ? 'bg-white text-slate-900 shadow-2xs border border-slate-200'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-brand-deep text-white shadow-xs'
+                      : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
-                  বাকিতে মাল ক্রয় (ডেবিট)
+                  বাকিতে মাল ক্রয়
                 </button>
                 <button
                   type="button"
                   onClick={() => setFilterType('CREDIT')}
                   className={`px-3 py-1 rounded-md text-xs font-semibold transition-colors cursor-pointer ${
                     filterType === 'CREDIT'
-                      ? 'bg-white text-slate-900 shadow-2xs border border-slate-200'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-brand-deep text-white shadow-xs'
+                      : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
-                  নগদ জমা / উশুল (ক্রেডিট)
+                  নগদ জমা ও উশুল
                 </button>
               </div>
 
-              <span className="text-xs text-slate-500 font-mono">
-                মোট এন্ট্রি: <strong>{ledgerMeta.total}</strong>টি
+              <span className="text-xs text-slate-600 font-mono tabular-nums">
+                মোট এন্ট্রি: <strong className="text-slate-900">{formatNumber(ledgerMeta.total)}</strong>টি
               </span>
             </div>
 
@@ -314,11 +311,11 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
             <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden print:border-none print:shadow-none">
               <div className="px-5 py-3.5 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="p-1 rounded-md bg-indigo-50 text-indigo-600">
+                  <span className="p-1.5 rounded-lg bg-brand-soft text-brand-deep">
                     <Receipt size={16} weight="bold" />
                   </span>
                   <h3 className="text-sm font-bold text-slate-800 tracking-tight">
-                    লেনদেন খতিয়ান বিবরণী (Ledger Entries)
+                    লেনদেন খতিয়ান বিবরণী
                   </h3>
                 </div>
               </div>
@@ -326,7 +323,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs min-w-[650px]">
                   <thead>
-                    <tr className="bg-slate-100/70 border-b border-slate-200 text-[10px] font-bold text-slate-600 uppercase tracking-wider">
+                    <tr className="bg-slate-100/70 border-b border-slate-200 text-xs font-bold text-slate-700">
                       <th className="py-2.5 px-3">তারিখ ও সময়</th>
                       <th className="py-2.5 px-3">মেমো / ভাউচার</th>
                       <th className="py-2.5 px-3">বিবরণ / নোট</th>
@@ -338,20 +335,20 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                   <tbody className="divide-y divide-slate-200/70">
                     {isLedgerLoading ? (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-slate-400">
-                          <Spinner size={24} className="animate-spin mx-auto mb-1 text-slate-600" />
+                        <td colSpan={6} className="py-12 text-center text-slate-600">
+                          <Spinner size={24} className="animate-spin mx-auto mb-1 text-brand-deep" />
                           <span>খতিয়ান লোড হচ্ছে...</span>
                         </td>
                       </tr>
                     ) : filteredEntries.length === 0 ? (
                       <tr>
-                        <td colSpan={6} className="py-12 text-center text-slate-400">
+                        <td colSpan={6} className="py-12 text-center text-slate-600">
                           কোনো লেনদেন রেকর্ড পাওয়া যায়নি
                         </td>
                       </tr>
                     ) : (
                       filteredEntries.map((entry) => {
-                        const dateStr = new Date(entry.createdAt).toLocaleDateString('bn-BD', {
+                        const dateStr = formatDateBn(entry.createdAt, {
                           year: 'numeric',
                           month: 'short',
                           day: 'numeric',
@@ -360,7 +357,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                         return (
                           <tr key={entry.id} className="hover:bg-slate-50/60 transition-colors">
                             {/* তারিখ */}
-                            <td className="py-2.5 px-3 font-mono text-[11px] text-slate-600 whitespace-nowrap">
+                            <td className="py-2.5 px-3 font-mono tabular-nums text-xs text-slate-600 whitespace-nowrap">
                               {dateStr}
                             </td>
 
@@ -369,13 +366,13 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                               {entry.saleId ? (
                                 <Link
                                   href={`/sales/${entry.saleId}`}
-                                  className="text-indigo-600 hover:underline hover:text-indigo-800"
+                                  className="text-brand-deep hover:underline font-bold"
                                   title="বিক্রয় মেমো দেখুন"
                                 >
-                                  মেমো #{entry.saleId.slice(-6)}
+                                  মেমো #{toBanglaDigits(entry.saleId.slice(-6))}
                                 </Link>
                               ) : (
-                                <span className="text-slate-400">—</span>
+                                <span className="text-slate-500">—</span>
                               )}
                             </td>
 
@@ -385,17 +382,17 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                                 {entry.entryType === 'SALE' || entry.entryType === 'SALE_DUE'
                                   ? 'বাকিতে পণ্য ক্রয়'
                                   : entry.entryType === 'PAYMENT_RECEIVED'
-                                  ? 'নগদ জমা / উশুল'
+                                  ? 'নগদ জমা ও উশুল'
                                   : entry.entryType === 'OPENING_BALANCE'
                                   ? 'প্রারম্ভিক বকেয়া'
                                   : entry.entryType === 'RETURN'
-                                  ? 'পণ্য ফেরত (রিটার্ন)'
+                                  ? 'পণ্য ফেরত'
                                   : entry.entryType === 'ADJUSTMENT'
-                                  ? 'হিসাব সমন্বয় / ছাড়'
+                                  ? 'হিসাব সমন্বয় ও ছাড়'
                                   : 'অন্যান্য'}
                               </span>
                               {entry.note && (
-                                <span className="text-[11px] text-slate-400 font-normal block truncate max-w-[180px]">
+                                <span className="text-xs text-slate-600 font-normal block truncate max-w-[180px]">
                                   {entry.note}
                                 </span>
                               )}
@@ -408,7 +405,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                                   {formatCurrency(entry.debit)}
                                 </span>
                               ) : (
-                                <span className="text-slate-300">—</span>
+                                <span className="text-slate-500">—</span>
                               )}
                             </td>
 
@@ -419,7 +416,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                                   {formatCurrency(entry.credit)}
                                 </span>
                               ) : (
-                                <span className="text-slate-300">—</span>
+                                <span className="text-slate-500">—</span>
                               )}
                             </td>
 
@@ -451,67 +448,51 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
             </div>
           </div>
 
-          {/* ডানে: কাস্টমার কার্ড ও দ্রুত টাকা জমা নেওয়ার প্যানেল (৪ কলাম / ~৩০% - প্রিন্টে লুকানো থাকবে) */}
+          {/* ডানে: কাস্টমার কার্ড ও দ্রুত টাকা জমা নেওয়ার প্যানেল (৪ কলাম / ~৩০%) */}
           <div className="lg:col-span-4 space-y-4 print:hidden">
             {/* কাস্টমার ব্যালেন্স ও ক্রেডিট সামারি কার্ড */}
             <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs p-5 space-y-4">
               <div>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400 block mb-1">
+                <span className="text-xs font-bold text-slate-600 block mb-1">
                   বর্তমান অবশিষ্ট বকেয়া
                 </span>
                 <div
-                  className={`text-2xl font-bold font-mono tracking-tight ${
-                    customer.currentDue > 0 ? 'text-rose-600' : 'text-emerald-600'
+                  className={`text-2xl font-black font-mono tabular-nums tracking-tight ${
+                    customer.currentDue > 0 ? 'text-rose-700' : 'text-emerald-700'
                   }`}
                 >
                   {formatCurrency(customer.currentDue)}
                 </div>
               </div>
 
-              {/* বকেয়া স্ট্যাটাস নোট */}
-              <div className="pt-2 border-t border-slate-100">
-                {customer.currentDue > 0 ? (
-                  <p className="text-[11px] text-rose-600 font-medium">
-                    * কাস্টমারের কাছে দোকানের বাকি বকেয়া পাওনা রয়েছে।
-                  </p>
-                ) : customer.currentDue < 0 ? (
-                  <p className="text-[11px] text-emerald-600 font-medium">
-                    * কাস্টমারের অগ্রিম টাকা জমা রয়েছে।
-                  </p>
-                ) : (
-                  <p className="text-[11px] text-slate-500 font-medium flex items-center gap-1">
-                    <CheckCircle size={13} weight="bold" className="text-emerald-500" />
-                    কোনো বকেয়া নেই (সম্পূর্ণ পরিশোধিত)।
-                  </p>
-                )}
-              </div>
-
               {/* কাস্টমার ইনফো */}
-              <div className="pt-3 border-t border-slate-100 space-y-2 text-xs text-slate-600">
+              <div className="pt-3 border-t border-slate-100 space-y-2 text-xs text-slate-700">
                 {customer.phone && (
                   <div className="flex items-center gap-2">
-                    <Phone size={14} className="text-slate-400" />
-                    <span className="font-mono text-slate-900">{customer.phone}</span>
+                    <Phone size={14} className="text-slate-500" />
+                    <span className="font-mono tabular-nums text-slate-900">
+                      {toBanglaDigits(customer.phone)}
+                    </span>
                   </div>
                 )}
                 {customer.address && (
                   <div className="flex items-start gap-2">
-                    <MapPin size={14} className="text-slate-400 mt-0.5" />
+                    <MapPin size={14} className="text-slate-500 mt-0.5" />
                     <span>{customer.address}</span>
                   </div>
                 )}
               </div>
             </div>
 
-            {/* দ্রুত টাকা জমা / উশুল ফর্ম (Fast Due Collection) */}
+            {/* দ্রুত টাকা জমা / উশুল ফর্ম */}
             <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
               <div className="px-5 py-3.5 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="p-1 rounded-md bg-emerald-50 text-emerald-600">
+                  <span className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">
                     <HandCoins size={16} weight="bold" />
                   </span>
                   <h3 className="text-xs sm:text-sm font-bold text-slate-800">
-                    দ্রুত টাকা জমা গ্রহণ (Collect Due)
+                    দ্রুত টাকা জমা গ্রহণ
                   </h3>
                 </div>
               </div>
@@ -532,14 +513,14 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                       <button
                         type="button"
                         onClick={() => setPayAmount(customer.currentDue.toString())}
-                        className="text-[10px] text-indigo-600 hover:text-indigo-800 font-bold cursor-pointer"
+                        className="text-xs text-brand-deep hover:underline font-bold cursor-pointer"
                       >
                         পুরো বকেয়া ({formatCurrency(customer.currentDue)})
                       </button>
                     )}
                   </div>
                   <div className="relative">
-                    <span className="absolute left-3 top-2.5 text-slate-400 font-bold text-xs select-none">৳</span>
+                    <span className="absolute left-3 top-2.5 text-slate-600 font-bold text-xs select-none">৳</span>
                     <input
                       type="number"
                       step="any"
@@ -547,8 +528,8 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                       required
                       value={payAmount}
                       onChange={(e) => setPayAmount(e.target.value)}
-                      placeholder="0.00"
-                      className="w-full pl-7 pr-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 font-mono text-sm text-slate-900 font-bold"
+                      placeholder="০.০০"
+                      className="w-full pl-7 pr-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep font-mono text-sm text-slate-900 placeholder:text-slate-400 font-bold"
                     />
                   </div>
                 </div>
@@ -563,9 +544,9 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                         key={m}
                         type="button"
                         onClick={() => setPayMethod(m)}
-                        className={`py-1.5 rounded-md text-[11px] font-bold border transition-colors cursor-pointer ${
+                        className={`py-1.5 rounded-md text-xs font-bold border transition-colors cursor-pointer ${
                           payMethod === m
-                            ? 'bg-slate-900 text-white border-slate-900 shadow-2xs'
+                            ? 'bg-brand-deep text-white border-brand-deep shadow-2xs'
                             : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                         }`}
                       >
@@ -583,15 +564,15 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                     type="text"
                     value={payNote}
                     onChange={(e) => setPayNote(e.target.value)}
-                    placeholder="রশিদ নং বা পেমেন্ট রেফারেন্স..."
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 text-xs text-slate-900"
+                    placeholder="রশিদ নং / রেফারেন্স"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep text-xs text-slate-900 placeholder:text-slate-500"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={isPaying}
-                  className="w-full py-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm disabled:opacity-50 cursor-pointer"
+                  className={buttonClasses({ variant: 'cash', size: 'md', className: 'w-full gap-1.5' })}
                 >
                   {isPaying ? <Spinner size={14} className="animate-spin text-white" /> : <CheckCircle size={15} weight="bold" />}
                   <span>টাকা জমা গ্রহণ করুন</span>
@@ -599,14 +580,14 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
               </form>
             </div>
 
-            {/* হিসাব সমন্বয় ও ছাড় (Collapsible Adjustment Box) */}
+            {/* হিসাব সমন্বয় ও ছাড় */}
             <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
               <button
                 type="button"
                 onClick={() => setShowAdjustment(!showAdjustment)}
-                className="w-full px-5 py-3 bg-slate-50/80 flex items-center justify-between text-xs font-bold text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="w-full px-5 py-3 bg-slate-50/80 flex items-center justify-between text-xs font-bold text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
               >
-                <span>হিসাব সমন্বয় / ছাড় (Adjustment)</span>
+                <span>হিসাব সমন্বয় ও ছাড়</span>
                 {showAdjustment ? <CaretUp size={14} /> : <CaretDown size={14} />}
               </button>
 
@@ -616,8 +597,10 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                     <button
                       type="button"
                       onClick={() => setAdjType('DISCOUNT')}
-                      className={`py-1 rounded text-[11px] font-bold border ${
-                        adjType === 'DISCOUNT' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-700'
+                      className={`py-1.5 rounded-md text-xs font-bold border cursor-pointer transition-colors ${
+                        adjType === 'DISCOUNT'
+                          ? 'bg-brand-deep text-white border-brand-deep'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                       }`}
                     >
                       ছাড় / মওকুফ (-)
@@ -625,8 +608,10 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                     <button
                       type="button"
                       onClick={() => setAdjType('ADD_CHARGE')}
-                      className={`py-1 rounded text-[11px] font-bold border ${
-                        adjType === 'ADD_CHARGE' ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-700'
+                      className={`py-1.5 rounded-md text-xs font-bold border cursor-pointer transition-colors ${
+                        adjType === 'ADD_CHARGE'
+                          ? 'bg-brand-deep text-white border-brand-deep'
+                          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
                       }`}
                     >
                       অতিরিক্ত চার্জ (+)
@@ -642,7 +627,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                       value={adjAmount}
                       onChange={(e) => setAdjAmount(e.target.value)}
                       placeholder="টাকার পরিমাণ (৳)"
-                      className="w-full px-3 py-1.5 rounded-lg border border-slate-300 font-mono text-xs font-bold"
+                      className="w-full px-3 py-1.5 rounded-lg border border-slate-300 font-mono text-xs font-bold text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
                     />
                   </div>
 
@@ -652,15 +637,15 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                       required
                       value={adjNote}
                       onChange={(e) => setAdjNote(e.target.value)}
-                      placeholder="সমন্বয়ের সুনির্দিষ্ট কারণ লিখুন..."
-                      className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs"
+                      placeholder="সমন্বয়ের কারণ"
+                      className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
                     />
                   </div>
 
                   <button
                     type="submit"
                     disabled={isAdjusting}
-                    className="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold disabled:opacity-50 cursor-pointer"
+                    className={buttonClasses({ variant: 'primary', size: 'sm', className: 'w-full' })}
                   >
                     {isAdjusting ? 'সমন্বয় হচ্ছে...' : 'সমন্বয় নিশ্চিত করুন'}
                   </button>

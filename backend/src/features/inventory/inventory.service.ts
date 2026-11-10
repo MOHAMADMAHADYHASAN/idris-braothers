@@ -11,15 +11,11 @@ import {
   AddProductUnitInput,
   RecordWastageInput,
 } from './inventory.validation';
-
-function generateSku(text: string, suffix?: string): string {
-  const clean = text
-    .toUpperCase()
-    .replace(/[^A-Z0-9]/g, '')
-    .slice(0, 8);
-  const rand = Math.floor(1000 + Math.random() * 9000);
-  return suffix ? `${clean || 'ITEM'}-${suffix.toUpperCase()}-${rand}` : `${clean || 'ITEM'}-${rand}`;
-}
+import {
+  extractBaseProductCode,
+  generateUniqueBaseCode,
+  generateUniqueVariantSku,
+} from './skuGenerator';
 
 export class InventoryService {
   /**
@@ -38,7 +34,7 @@ export class InventoryService {
         }
       }
 
-      const sku = data.sku?.trim() || generateSku(data.name, 'DEF');
+      const sku = data.sku?.trim() || (await generateUniqueBaseCode(prisma));
       const existingSku = await inventoryRepository.findVariantBySku(sku);
       if (existingSku) {
         throw new AppError(`Product with SKU "${sku}" already exists`, 409);
@@ -96,7 +92,10 @@ export class InventoryService {
       throw new AppError('At least one variant is required when "hasVariants" is enabled', 400);
     }
 
-    // Validate unique barcodes and skus
+    // Validate unique barcodes and explicit SKUs across DB & batch
+    const usedSkusInBatch = new Set<string>();
+    const explicitSkus: string[] = [];
+
     for (const v of data.variants) {
       if (v.barcode) {
         const existingBarcode = await inventoryRepository.findVariantByBarcode(v.barcode);
@@ -104,12 +103,65 @@ export class InventoryService {
           throw new AppError(`Variant with barcode "${v.barcode}" already exists`, 409);
         }
       }
-      if (v.sku) {
-        const existingSku = await inventoryRepository.findVariantBySku(v.sku);
-        if (existingSku) {
-          throw new AppError(`Variant with SKU "${v.sku}" already exists`, 409);
+      const trimmedSku = v.sku?.trim();
+      if (trimmedSku) {
+        if (usedSkusInBatch.has(trimmedSku)) {
+          throw new AppError(`Duplicate SKU "${trimmedSku}" found within product variants`, 409);
         }
+        usedSkusInBatch.add(trimmedSku);
+        explicitSkus.push(trimmedSku);
       }
+    }
+
+    if (explicitSkus.length > 0) {
+      const duplicateSkuVariant = await prisma.productVariant.findFirst({
+        where: { sku: { in: explicitSkus } },
+        include: { product: { select: { name: true } } },
+      });
+      if (duplicateSkuVariant) {
+        throw new AppError(
+          `SKU "${duplicateSkuVariant.sku}" is already in use by product "${duplicateSkuVariant.product.name}"`,
+          409
+        );
+      }
+    }
+
+    // Resolve shared 6-digit base code for any blank variant SKUs
+    const sharedBaseCode =
+      extractBaseProductCode(data.variants) || (await generateUniqueBaseCode(prisma));
+
+    const resolvedVariantsData = [];
+    for (let idx = 0; idx < data.variants.length; idx++) {
+      const v = data.variants[idx];
+      const finalSku =
+        v.sku?.trim() ||
+        (await generateUniqueVariantSku(sharedBaseCode, v.variantName, idx, usedSkusInBatch, prisma));
+
+      resolvedVariantsData.push({
+        variantName: v.variantName,
+        sku: finalSku,
+        barcode: v.barcode || null,
+        baseUnitName: v.baseUnitName || 'কেজি',
+        allowDecimalQty: v.allowDecimalQty !== undefined ? v.allowDecimalQty : true,
+        attributes: v.attributes || {},
+        stockQuantity: new Prisma.Decimal(v.stockQuantity || 0),
+        lowStockAlert: new Prisma.Decimal(v.lowStockAlert || 10),
+        currentPurchasePrice: new Prisma.Decimal(v.currentPurchasePrice),
+        retailPrice: new Prisma.Decimal(v.retailPrice),
+        wholesalePrice: new Prisma.Decimal(v.wholesalePrice),
+        ...(v.units && v.units.length > 0 && {
+          units: {
+            create: v.units.map((u) => ({
+              unitName: u.unitName,
+              conversionFactor: new Prisma.Decimal(u.conversionFactor),
+              retailPrice: u.retailPrice ? new Prisma.Decimal(u.retailPrice) : null,
+              wholesalePrice: u.wholesalePrice ? new Prisma.Decimal(u.wholesalePrice) : null,
+              barcode: u.barcode || null,
+              isDefault: u.isDefault ?? false,
+            })),
+          },
+        }),
+      });
     }
 
     return await inventoryRepository.create({
@@ -120,31 +172,7 @@ export class InventoryService {
       ...(data.categoryId && { category: { connect: { id: data.categoryId } } }),
       ...(data.brandId && { brand: { connect: { id: data.brandId } } }),
       variants: {
-        create: data.variants.map((v, idx) => ({
-          variantName: v.variantName,
-          sku: v.sku?.trim() || generateSku(data.name, `V${idx + 1}`),
-          barcode: v.barcode || null,
-          baseUnitName: v.baseUnitName || 'কেজি',
-          allowDecimalQty: v.allowDecimalQty !== undefined ? v.allowDecimalQty : true,
-          attributes: v.attributes || {},
-          stockQuantity: new Prisma.Decimal(v.stockQuantity || 0),
-          lowStockAlert: new Prisma.Decimal(v.lowStockAlert || 10),
-          currentPurchasePrice: new Prisma.Decimal(v.currentPurchasePrice),
-          retailPrice: new Prisma.Decimal(v.retailPrice),
-          wholesalePrice: new Prisma.Decimal(v.wholesalePrice),
-          ...(v.units && v.units.length > 0 && {
-            units: {
-              create: v.units.map((u) => ({
-                unitName: u.unitName,
-                conversionFactor: new Prisma.Decimal(u.conversionFactor),
-                retailPrice: u.retailPrice ? new Prisma.Decimal(u.retailPrice) : null,
-                wholesalePrice: u.wholesalePrice ? new Prisma.Decimal(u.wholesalePrice) : null,
-                barcode: u.barcode || null,
-                isDefault: u.isDefault ?? false,
-              })),
-            },
-          }),
-        })),
+        create: resolvedVariantsData,
       },
     });
   }
@@ -214,11 +242,11 @@ export class InventoryService {
   }
 
   /**
-   * Fast Barcode lookup (Cashier Barcode Scanner)
-   * Resolves both variant barcodes and bulk carton/sack unit barcodes
+   * Fast Barcode & SKU lookup (Cashier Barcode Scanner)
+   * Resolves variant barcodes, bulk carton/sack unit barcodes, and variant SKUs
    */
   async getProductByBarcode(barcode: string) {
-    const result = await inventoryRepository.findVariantByBarcode(barcode);
+    const result = await inventoryRepository.findByScanCode(barcode);
 
     if (!result || !result.variant.isActive || !result.variant.product.isActive) {
       throw new AppError(`No active product found with barcode: ${barcode}`, 404);
@@ -323,7 +351,7 @@ export class InventoryService {
             data: {
               productId: id,
               variantName: 'Default',
-              sku: data.sku || generateSku(data.name || existing.name),
+              sku: data.sku?.trim() || (await generateUniqueBaseCode(tx)),
               barcode: data.barcode || null,
               baseUnitName: data.baseUnitName || 'কেজি',
               allowDecimalQty: data.allowDecimalQty !== undefined ? data.allowDecimalQty : true,
@@ -386,6 +414,15 @@ export class InventoryService {
           }
         }
 
+        // Collect shared base code & SKUs already used in this product
+        const usedSkusInBatch = new Set<string>(
+          existing.variants.map((ev) => ev.sku).filter(Boolean)
+        );
+        const sharedBaseCode =
+          extractBaseProductCode(existing.variants) ||
+          extractBaseProductCode(data.variants) ||
+          (await generateUniqueBaseCode(tx));
+
         // Upsert / update submitted variants
         for (let idx = 0; idx < data.variants.length; idx++) {
           const v = data.variants[idx];
@@ -442,8 +479,11 @@ export class InventoryService {
               }
             }
           } else {
-            // New variant added in modal
-            const sku = v.sku?.trim() || generateSku(data.name || existing.name, `V${idx + 1}`);
+            // New variant added during product edit
+            const sku =
+              v.sku?.trim() ||
+              (await generateUniqueVariantSku(sharedBaseCode, v.variantName, idx, usedSkusInBatch, tx));
+            usedSkusInBatch.add(sku);
             if (v.barcode) {
               const barcodeConflict = await inventoryRepository.findVariantByBarcode(v.barcode, tx);
               if (barcodeConflict) {

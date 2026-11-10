@@ -1,37 +1,57 @@
 @import "tailwindcss";
 
 @theme inline {
-  /* Surfaces & Canvas (Anti-Fatigue Slate) */
-  --color-surface-canvas: #F8FAFC;
-  --color-surface-card: #FFFFFF;
-  --color-surface-subtle: #F1F5F9;
-  --color-border-subtle: #E2E8F0;
-  --color-border-strong: #CBD5E1;
+  /* Brand Primary (Authoritative Navy Blue — Unified Reference Standard) */
+  --color-brand-deep: #1e4a7a;
+  --color-brand-hover: #173a61;
+  --color-brand-mid: #2a4c70;
+  --color-brand-light: #c8ddf0;
+  --color-brand-soft: #eef4fb;
+  --color-brand-link-underline: #a0c4e8;
 
-  /* Ink & Typography */
-  --color-ink-primary: #0F172A;
+  /* Backward-compatible semantic brand aliases */
+  --color-brand-default: #1e4a7a;
+
+  /* Surfaces & Canvas (Anti-Fatigue Light Slate) */
+  --color-surface-canvas: #f8fafc;
+  --color-surface-card: #ffffff;
+  --color-surface-subtle: #f1f5f9;
+  --color-surface-page: #f9fafb;
+  --color-border-default: #e2e8f0;
+  --color-border-subtle: #f1f5f9;
+  --color-border-strong: #cbd5e1;
+
+  /* Ink & Typography Hierarchy (High-Contrast WCAG AA for 10-12h Counter Use) */
+  --color-ink-primary: #1a1d2b;
+  --color-ink-body: #334155;
   --color-ink-secondary: #475569;
-  --color-ink-muted: #94A3B8;
+  --color-ink-muted: #64748b;
 
-  /* Brand Primary (Trust & Grocery Freshness Emerald) */
-  --color-brand-default: #059669;
-  --color-brand-hover: #047857;
-  --color-brand-soft: #D1FAE5;
+  /* Semantic Financial States (Meaning-Driven Only) */
+  /* Cash In / Paid / Success / Profit */
+  --color-cash-bg: #ecfdf5;
+  --color-cash-text: #047857;
+  --color-cash-border: #a7f3d0;
+  --color-success: #059669;
+  --color-success-hover: #047857;
 
-  /* Financial Semantics */
-  --color-cash-bg: #DCFCE7;
-  --color-cash-text: #15803D;
+  /* Due / Payable / Wastage / Destructive */
+  --color-due-bg: #fef2f2;
+  --color-due-text: #b91c1c;
+  --color-due-border: #fecaca;
+  --color-danger: #dc2626;
+  --color-danger-hover: #b91c1c;
 
-  --color-due-bg: #FEE2E2;
-  --color-due-text: #B91C1C;
+  /* Wholesale Mode / Bulk Packaging / Stock Alert (Strictly Amber — No Purple/Indigo) */
+  --color-wholesale-bg: #fef3c7;
+  --color-wholesale-text: #b45309;
+  --color-wholesale-border: #f59e0b;
+  --color-wholesale-solid: #d97706;
+  --color-wholesale-hover: #b45309;
 
-  --color-wholesale-bg: #FEF3C7;
-  --color-wholesale-text: #B45309;
-  --color-wholesale-border: #F59E0B;
-
-  /* Typography */
+  /* Typography (Bangla-First with Noto Sans Bengali Fallback Inside Monospace Numbers) */
   --font-sans: var(--font-noto-sans-bengali), system-ui, sans-serif;
-  --font-mono: var(--font-mono-numbers), "Inter", monospace;
+  --font-mono: var(--font-mono-numbers), var(--font-noto-sans-bengali), "Inter", monospace;
 }
 
 /* Base Body Styles */
@@ -43,19 +63,20 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Monospace Decimal & Currency Alignment */
+/* Monospace / Tabular Decimal & Currency Alignment */
 .tabular-numbers {
   font-family: var(--font-mono);
   font-feature-settings: "tnum" 1;
   font-variant-numeric: tabular-nums;
 }
 
-/* High-Visibility Focus Ring for Fast POS Enter Navigation */
+/* High-Visibility Navy Focus Ring for Fast POS Keyboard Navigation */
 input:focus-visible,
 button:focus-visible,
-select:focus-visible {
+select:focus-visible,
+a:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-surface-card), 0 0 0 4px #059669;
+  box-shadow: 0 0 0 2px var(--color-surface-card), 0 0 0 4px var(--color-brand-deep);
 }
 
 /* Scrollbar Styling for High-Density Tables */

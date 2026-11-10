@@ -4,11 +4,10 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   SlidersHorizontal,
   CaretDown,
-  Check,
-  X,
   ArrowsClockwise,
   Table,
 } from '@phosphor-icons/react';
+import { formatNumber } from '@/lib/decimal';
 
 export interface ColumnDef<T> {
   key: string;
@@ -213,11 +212,11 @@ export function DynamicDataTable<T>({
 
   return (
     <div
-      className={`bg-white rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden flex flex-col ${className}`}
+      className={`bg-surface-card rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden flex flex-col ${className}`}
     >
-      {/* ── ১. ইন্টিগ্রেটেড টেবিল টুলবার (Toolbar) ── */}
+      {/* ── ১. ইন্টিগ্রেটেড টেবিল টুলবার ── */}
       {(toolbarLeft || toolbarRight || toggleableColumns.length > 0) && (
-        <div className="px-3.5 py-2.5 bg-slate-50/60 border-b border-slate-200/90 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+        <div className="px-3.5 py-2.5 bg-surface-subtle/60 border-b border-border-default flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             {toolbarLeft}
           </div>
@@ -231,18 +230,18 @@ export function DynamicDataTable<T>({
                 <button
                   type="button"
                   onClick={() => setIsColumnMenuOpen(!isColumnMenuOpen)}
-                  className={`h-7.5 px-2.5 rounded-md border text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] cursor-pointer shadow-2xs ${
+                  className={`h-8 px-2.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] cursor-pointer shadow-2xs ${
                     hiddenKeys.size > 0
-                      ? 'bg-slate-900 border-slate-900 text-white'
-                      : 'bg-white border-slate-200/90 text-slate-700 hover:bg-slate-50'
+                      ? 'bg-brand-deep border-brand-deep text-white'
+                      : 'bg-surface-card border-border-strong text-ink-body hover:bg-surface-subtle'
                   }`}
                   title="টেবিল কলাম প্রদর্শন নিয়ন্ত্রণ করুন"
                 >
                   <SlidersHorizontal size={13} weight="bold" />
                   <span>কলামসমূহ</span>
                   {hiddenKeys.size > 0 && (
-                    <span className="px-1 py-0.2 rounded-full text-[10px] font-mono bg-white/20 text-white">
-                      {visibleColumns.length}/{columns.length}
+                    <span className="px-1.5 py-0.5 rounded-full text-xs font-mono bg-white/20 text-white">
+                      {formatNumber(visibleColumns.length)}/{formatNumber(columns.length)}
                     </span>
                   )}
                   <CaretDown size={11} weight="bold" />
@@ -250,15 +249,15 @@ export function DynamicDataTable<T>({
 
                 {/* ড্রপডাউন পপওভার */}
                 {isColumnMenuOpen && (
-                  <div className="absolute right-0 top-full mt-1.5 w-56 bg-white border border-slate-200/90 rounded-lg shadow-[0_4px_20px_rgba(15,23,42,0.12)] p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
-                    <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-100 px-1">
-                      <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+                  <div className="absolute right-0 top-full mt-1.5 w-56 bg-surface-card border border-border-default rounded-xl shadow-[0_4px_20px_rgba(15,23,42,0.12)] p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                    <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-border-subtle px-1">
+                      <span className="text-xs font-bold text-ink-primary">
                         কলাম প্রদর্শন
                       </span>
                       <button
                         type="button"
                         onClick={handleResetColumns}
-                        className="text-[10px] font-semibold text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
+                        className="text-xs font-semibold text-brand-deep hover:underline cursor-pointer"
                       >
                         রিসেট
                       </button>
@@ -270,13 +269,13 @@ export function DynamicDataTable<T>({
                         return (
                           <label
                             key={col.key}
-                            className="flex items-center gap-2 px-2 py-1 rounded-md text-xs text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer select-none"
+                            className="flex items-center gap-2 px-2 py-1.5 rounded-md text-xs text-ink-body hover:bg-surface-subtle transition-colors cursor-pointer select-none"
                           >
                             <input
                               type="checkbox"
                               checked={isVisible}
                               onChange={() => handleToggleColumn(col.key)}
-                              className="w-3.5 h-3.5 rounded border-slate-300 text-slate-900 focus:ring-1 focus:ring-slate-900 cursor-pointer"
+                              className="w-3.5 h-3.5 rounded border-border-strong accent-brand-deep cursor-pointer"
                             />
                             <span className="truncate flex-1">
                               {typeof col.header === 'string' ? col.header : col.key}
@@ -296,28 +295,28 @@ export function DynamicDataTable<T>({
       {/* ── ২. মূল টেবিল এরিয়া ── */}
       <div className="overflow-x-auto relative flex-1">
         {isLoading && data.length === 0 ? (
-          <div className="py-16 text-center text-slate-500">
+          <div className="py-16 text-center text-ink-secondary">
             <ArrowsClockwise
               size={24}
               weight="bold"
-              className="animate-spin mx-auto mb-2 text-slate-700"
+              className="animate-spin mx-auto mb-2 text-brand-deep"
             />
             <p className="text-xs font-medium">তথ্য লোড হচ্ছে...</p>
           </div>
         ) : data.length === 0 ? (
           emptyState || (
-            <div className="py-16 text-center text-slate-400">
-              <Table size={32} weight="bold" className="mx-auto mb-2 text-slate-300" />
-              <h4 className="text-xs font-semibold text-slate-700">কোনো তথ্য পাওয়া যায়নি</h4>
-              <p className="text-[11px] text-slate-500 mt-0.5">
+            <div className="py-16 text-center text-ink-secondary">
+              <Table size={32} weight="bold" className="mx-auto mb-2 text-ink-muted" />
+              <h4 className="text-sm font-semibold text-ink-primary">কোনো তথ্য পাওয়া যায়নি</h4>
+              <p className="text-xs text-ink-secondary mt-0.5">
                 বর্তমান ফিল্টার অনুযায়ী কোনো রেকর্ড খুঁজে পাওয়া যায়নি।
               </p>
             </div>
           )
         ) : (
           <table className="w-full text-left border-collapse text-xs">
-            {/* স্টিকি হেডার (Sticky <thead>) */}
-            <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-xs z-10 border-b border-slate-200/90 text-slate-500 font-semibold tracking-wider uppercase text-[11px]">
+            {/* স্টিকি হেডার */}
+            <thead className="sticky top-0 bg-surface-subtle/95 backdrop-blur-xs z-10 border-b border-border-default text-ink-secondary font-bold text-xs">
               <tr>
                 {/* বাল্ক চেকবক্স কলাম */}
                 {selectable && (
@@ -329,7 +328,7 @@ export function DynamicDataTable<T>({
                         if (el) el.indeterminate = isSomeSelected;
                       }}
                       onChange={handleToggleSelectAll}
-                      className="w-3.5 h-3.5 rounded border-slate-300 text-slate-900 focus:ring-1 focus:ring-slate-900 cursor-pointer"
+                      className="w-3.5 h-3.5 rounded border-border-strong accent-brand-deep cursor-pointer"
                       title="সবগুলো নির্বাচন করুন"
                     />
                   </th>
@@ -346,8 +345,8 @@ export function DynamicDataTable<T>({
               </tr>
             </thead>
 
-            {/* টেবিল বডি (<tbody>) */}
-            <tbody className="divide-y divide-slate-100">
+            {/* টেবিল বডি */}
+            <tbody className="divide-y divide-border-subtle">
               {data.map((item, idx) => {
                 const rowKey = keyExtractor(item, idx);
                 const isSelected = Boolean(selectedKeys?.has(rowKey));
@@ -361,10 +360,10 @@ export function DynamicDataTable<T>({
                         onRowClick ? 'cursor-pointer' : ''
                       } ${
                         isSelected
-                          ? 'bg-slate-100/70'
+                          ? 'bg-brand-soft/60'
                           : isExpanded
-                          ? 'bg-slate-50/50'
-                          : 'hover:bg-slate-50/80'
+                          ? 'bg-surface-subtle/70'
+                          : 'hover:bg-surface-subtle/60'
                       }`}
                     >
                       {/* রো চেকবক্স */}
@@ -377,7 +376,7 @@ export function DynamicDataTable<T>({
                             type="checkbox"
                             checked={isSelected}
                             onChange={(e) => handleToggleRowSelect(e as any, rowKey)}
-                            className="w-3.5 h-3.5 rounded border-slate-300 text-slate-900 focus:ring-1 focus:ring-slate-900 cursor-pointer"
+                            className="w-3.5 h-3.5 rounded border-border-strong accent-brand-deep cursor-pointer"
                           />
                         </td>
                       )}
@@ -409,9 +408,9 @@ export function DynamicDataTable<T>({
               })}
             </tbody>
 
-            {/* ── ৩. স্বয়ংক্রিয় ফুটার সামারি রো (Automatic Footer Total) ── */}
+            {/* ── ৩. স্বয়ংক্রিয় ফুটার সামারি রো ── */}
             {hasFooter && (
-              <tfoot className="bg-slate-50/90 border-t-2 border-slate-200/90 font-bold text-slate-800">
+              <tfoot className="bg-surface-subtle/80 border-t-2 border-border-default font-bold text-ink-primary">
                 <tr>
                   {selectable && <td className="py-2.5 px-3" />}
                   {visibleColumns.map((col) => (
@@ -431,9 +430,9 @@ export function DynamicDataTable<T>({
         )}
       </div>
 
-      {/* ── ৪. পেজিনেশন স্লট (Pagination) ── */}
+      {/* ── ৪. পেজিনেশন স্লট ── */}
       {pagination && (
-        <div className="border-t border-slate-200/90 bg-slate-50/50 p-2">
+        <div className="border-t border-border-default bg-surface-subtle/40 p-2">
           {pagination}
         </div>
       )}

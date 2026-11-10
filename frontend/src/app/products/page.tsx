@@ -14,6 +14,8 @@ import { AddUnitModal } from '@/features/product/components/AddUnitModal';
 import { RecordWastageModal } from '@/features/product/components/RecordWastageModal';
 import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { AdminPagination } from '@/components/shared/AdminPagination';
+import { Badge } from '@/components/ui/Badge';
+import { buttonClasses } from '@/components/ui/Button';
 import { Product, ProductVariant } from '@/features/product/product.types';
 
 export default function ProductsPage() {
@@ -70,28 +72,23 @@ export default function ProductsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 flex flex-col font-sans pb-16">
-      {/* ১. স্টিকি পেজ হেডার (AdminPageHeader) */}
-      <div className="bg-white border-b border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+    <div className="min-h-screen bg-surface-canvas flex flex-col font-sans pb-16">
+      {/* ১. স্টিকি পেজ হেডার */}
+      <div className="bg-surface-card border-b border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
           <AdminPageHeader
             title="পণ্য ক্যাটালগ ও ইনভেন্টরি"
-            subtitle="মরিচপট্টি, ফেনী বাজার — ঐতিহ্যবাহী মুদি ও মসলার মাল্টি-ইউনিট স্টক, রূপান্তর ও মূল্য ব্যবস্থাপনা"
             backHref="/"
             backTitle="ড্যাশবোর্ডে ফিরে যান"
             icon={<Package size={16} weight="bold" />}
-            badge={
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                ক্যাটালগ
-              </span>
-            }
+            badge={<Badge variant="brand">ক্যাটালগ</Badge>}
             actions={
               <>
                 <button
                   type="button"
                   onClick={() => fetchProducts()}
                   disabled={isLoading}
-                  className="px-2.5 py-1.5 rounded-md border border-slate-200/90 bg-white hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 disabled:opacity-50 cursor-pointer"
+                  className={buttonClasses({ variant: 'secondary', size: 'xs' })}
                   title="তালিকা রিফ্রেশ করুন"
                 >
                   <ArrowsClockwise
@@ -104,10 +101,10 @@ export default function ProductsPage() {
 
                 <Link
                   href="/products/new"
-                  className="px-2.5 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white text-xs font-semibold flex items-center gap-1.5 transition-[background-color,transform] duration-150 shadow-[0_1px_2px_rgba(15,23,42,0.08)] cursor-pointer"
+                  className={buttonClasses({ variant: 'primary', size: 'xs' })}
                 >
                   <Plus size={14} weight="bold" />
-                  <span>+ নতুন পণ্য</span>
+                  <span>নতুন পণ্য যোগ</span>
                 </Link>
               </>
             }
@@ -116,14 +113,14 @@ export default function ProductsPage() {
       </div>
 
       {/* মূল কন্টেন্ট ক্যানভাস */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-3.5">
-        {/* ১. ৪-কার্ডের সুনির্দিষ্ট ইনভেন্টরি KPI সামারি */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 space-y-4">
+        {/* ১. ৪-কার্ডের ইনভেন্টরি KPI সামারি */}
         <ProductKpiSummary />
 
-        {/* ২. অ্যাকশন ও পোর্টাল ফিল্টার বার */}
+        {/* ২. অ্যাকশন ও ফিল্টার বার */}
         <ProductFilterBar />
 
-        {/* ৩. ডেস্কটপ টেবিল ভিউ (Golden Column Alignment) */}
+        {/* ৩. ডেস্কটপ টেবিল ভিউ */}
         <div className="hidden md:block">
           <ProductListTable
             products={products}
@@ -138,13 +135,13 @@ export default function ProductsPage() {
         {/* ৪. মোবাইল রেসপন্সিভ কার্ড স্ট্রিম */}
         <div className="block md:hidden space-y-2.5">
           {isLoading && products.length === 0 ? (
-            <div className="bg-white rounded-lg border border-slate-200/90 p-8 text-center">
-              <div className="w-6 h-6 border-2 border-slate-900 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-              <p className="text-xs text-slate-500">পণ্য তালিকা লোড হচ্ছে...</p>
+            <div className="bg-surface-card rounded-xl border border-border-default p-8 text-center">
+              <div className="w-6 h-6 border-2 border-brand-deep border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+              <p className="text-xs text-ink-secondary">পণ্য তালিকা লোড হচ্ছে...</p>
             </div>
           ) : products.length === 0 ? (
-            <div className="bg-white rounded-lg border border-slate-200/90 p-8 text-center text-slate-500">
-              <Package size={28} weight="bold" className="mx-auto mb-2 text-slate-400" />
+            <div className="bg-surface-card rounded-xl border border-border-default p-8 text-center text-ink-secondary">
+              <Package size={28} weight="bold" className="mx-auto mb-2 text-ink-muted" />
               <p className="text-xs font-semibold">কোনো পণ্য পাওয়া যায়নি</p>
             </div>
           ) : (

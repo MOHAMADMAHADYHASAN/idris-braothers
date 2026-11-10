@@ -167,16 +167,16 @@ export function CustomSelect<T = string>({
         onClick={toggleDropdown}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className={`h-8 px-2.5 rounded-md border border-slate-200/90 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 flex items-center justify-between gap-2 transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] cursor-pointer ${buttonClassName}`}
+        className={`h-9 px-3 rounded-lg border border-border-strong bg-surface-card text-xs font-semibold text-ink-body hover:bg-surface-subtle flex items-center justify-between gap-2 transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] cursor-pointer ${buttonClassName}`}
       >
         <div className="flex items-center gap-1.5 truncate">
-          {prefix && <span className="shrink-0 text-slate-400">{prefix}</span>}
+          {prefix && <span className="shrink-0 text-ink-secondary">{prefix}</span>}
           <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
         </div>
         <CaretDown
           size={12}
           weight="bold"
-          className={`text-slate-400 transition-transform duration-150 shrink-0 ${
+          className={`text-ink-secondary transition-transform duration-150 shrink-0 ${
             isOpen ? 'rotate-180' : ''
           }`}
         />
@@ -198,12 +198,12 @@ export function CustomSelect<T = string>({
               width: `${dropdownPosition.width}px`,
               zIndex: 99999,
             }}
-            className="bg-white border border-slate-200/90 rounded-md shadow-[0_4px_20px_rgba(15,23,42,0.12)] overflow-hidden flex flex-col max-h-60 animate-in fade-in-0 zoom-in-95 duration-100"
+            className="bg-surface-card border border-border-default rounded-lg shadow-[0_4px_20px_rgba(15,23,42,0.12)] overflow-hidden flex flex-col max-h-60 animate-in fade-in-0 zoom-in-95 duration-100"
           >
             {/* Optional search header */}
             {(enableSearch || options.length > 6) && (
-              <div className="p-1.5 border-b border-slate-100 bg-slate-50/50 flex items-center gap-1.5 shrink-0">
-                <MagnifyingGlass size={13} weight="bold" className="text-slate-400 ml-1" />
+              <div className="p-1.5 border-b border-border-subtle bg-surface-subtle/60 flex items-center gap-1.5 shrink-0">
+                <MagnifyingGlass size={13} weight="bold" className="text-ink-secondary ml-1" />
                 <input
                   ref={searchInputRef}
                   type="text"
@@ -213,13 +213,13 @@ export function CustomSelect<T = string>({
                     setHighlightIndex(0);
                   }}
                   placeholder="খুঁজুন..."
-                  className="w-full text-xs bg-transparent border-none outline-none text-slate-900 placeholder:text-slate-400"
+                  className="w-full text-xs bg-transparent border-none outline-none text-ink-primary placeholder:text-ink-muted"
                 />
                 {search && (
                   <button
                     type="button"
                     onClick={() => setSearch('')}
-                    className="p-0.5 text-slate-400 hover:text-slate-700"
+                    className="p-0.5 text-ink-secondary hover:text-ink-primary cursor-pointer"
                   >
                     <X size={12} weight="bold" />
                   </button>
@@ -230,7 +230,7 @@ export function CustomSelect<T = string>({
             {/* Options List */}
             <div className="overflow-y-auto py-1 max-h-48">
               {filteredOptions.length === 0 ? (
-                <div className="px-3 py-2 text-xs text-slate-400 text-center">
+                <div className="px-3 py-2 text-xs text-ink-secondary text-center">
                   কোনো অপশন পাওয়া যায়নি
                 </div>
               ) : (
@@ -247,12 +247,12 @@ export function CustomSelect<T = string>({
                         setIsOpen(false);
                       }}
                       onMouseEnter={() => setHighlightIndex(idx)}
-                      className={`w-full text-left px-2.5 py-1.5 text-xs flex items-center justify-between gap-2 transition-colors cursor-pointer ${
+                      className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between gap-2 transition-colors cursor-pointer ${
                         isSelected
-                          ? 'bg-slate-900 text-white font-semibold'
+                          ? 'bg-brand-deep text-white font-semibold'
                           : isHighlighted
-                          ? 'bg-slate-100 text-slate-900'
-                          : 'text-slate-700 hover:bg-slate-50'
+                          ? 'bg-brand-soft text-brand-deep font-medium'
+                          : 'text-ink-body hover:bg-surface-subtle'
                       }`}
                     >
                       <span className="truncate">{opt.label}</span>

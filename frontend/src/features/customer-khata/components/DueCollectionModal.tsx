@@ -9,7 +9,13 @@ import {
   CheckCircle,
   WarningCircle,
 } from '@phosphor-icons/react';
-import { formatCurrency } from '@/lib/decimal';
+import {
+  formatCurrency,
+  formatDateTimeBn,
+  formatNumber,
+  toBanglaDigits,
+} from '@/lib/decimal';
+import { buttonClasses } from '@/components/ui/Button';
 import { useCustomerKhataStore } from '../useCustomerKhataStore';
 
 export function DueCollectionModal() {
@@ -64,7 +70,7 @@ export function DueCollectionModal() {
           paidAmount: payAmount,
           previousDue: currentDue,
           newDue: res.customer.currentDue,
-          date: new Date().toLocaleString('bn-BD'),
+          date: formatDateTimeBn(new Date()),
           note: note.trim() || 'নগদ বকেয়া উশুল',
         });
       } else {
@@ -98,31 +104,31 @@ export function DueCollectionModal() {
             </div>
             <div>
               <h3 className="text-sm font-semibold text-slate-900">টাকা জমা সফল হয়েছে!</h3>
-              <p className="text-[11px] text-slate-500 mt-0.5">
+              <p className="text-xs text-slate-600 mt-0.5">
                 {successReceipt.customerName}-এর একাউন্টে {formatCurrency(successReceipt.paidAmount)} জমা হয়েছে।
               </p>
             </div>
 
             {/* প্রিন্ট স্লিপ বক্স (থার্মাল প্রিন্ট প্রিভিউ) */}
-            <div className="bg-slate-50/70 border border-dashed border-slate-300 p-3.5 rounded-md text-left font-mono tabular-nums tracking-tight text-xs space-y-1.5">
+            <div className="bg-slate-50/70 border border-dashed border-slate-300 p-3.5 rounded-lg text-left font-mono tabular-nums tracking-tight text-xs space-y-1.5">
               <div className="text-center font-bold pb-1.5 border-b border-slate-200 text-xs text-slate-900">
                 ইদ্রিস ব্রাদার্স — বাকি আদায়ের রসিদ
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">গ্রাহক:</span>
+                <span className="text-slate-600">গ্রাহক:</span>
                 <span className="font-semibold text-slate-900">{successReceipt.customerName}</span>
               </div>
               {successReceipt.customerPhone && (
                 <div className="flex justify-between">
-                  <span className="text-slate-500">মোবাইল:</span>
-                  <span>{successReceipt.customerPhone}</span>
+                  <span className="text-slate-600">মোবাইল:</span>
+                  <span>{toBanglaDigits(successReceipt.customerPhone)}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-slate-500">তারিখ:</span>
+                <span className="text-slate-600">তারিখ:</span>
                 <span>{successReceipt.date}</span>
               </div>
-              <div className="border-t border-slate-200 pt-1 flex justify-between text-slate-500">
+              <div className="border-t border-slate-200 pt-1 flex justify-between text-slate-600">
                 <span>পূর্বের বকেয়া:</span>
                 <span>{formatCurrency(successReceipt.previousDue)}</span>
               </div>
@@ -141,7 +147,7 @@ export function DueCollectionModal() {
               <button
                 type="button"
                 onClick={handlePrint}
-                className="flex-1 py-1.5 px-3 rounded-md bg-slate-900 hover:bg-slate-800 text-white font-medium text-xs flex items-center justify-center gap-1.5 transition-[background-color,transform] duration-150 active:scale-[0.98]"
+                className={buttonClasses({ variant: 'primary', size: 'sm', className: 'flex-1 gap-1.5' })}
               >
                 <Printer size={15} weight="bold" />
                 <span>স্লিপ প্রিন্ট করুন</span>
@@ -149,7 +155,7 @@ export function DueCollectionModal() {
               <button
                 type="button"
                 onClick={closeModal}
-                className="py-1.5 px-3.5 rounded-md border border-slate-200 hover:bg-slate-100 text-slate-700 font-medium text-xs transition-[background-color] duration-150 active:scale-[0.98]"
+                className={buttonClasses({ variant: 'secondary', size: 'sm' })}
               >
                 সম্পন্ন
               </button>
@@ -161,18 +167,18 @@ export function DueCollectionModal() {
             {/* হেডার */}
             <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center shrink-0">
                   <HandCoins size={17} weight="bold" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-900 text-xs sm:text-sm leading-tight">বাকি উশুল / জমা গ্রহণ</h3>
-                  <p className="text-[11px] text-slate-500">গ্রাহক: {selectedCustomer.name}</p>
+                  <h3 className="font-semibold text-slate-900 text-xs sm:text-sm leading-tight">বাকি উশুল ও জমা গ্রহণ</h3>
+                  <p className="text-xs text-slate-600">গ্রাহক: {selectedCustomer.name}</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={closeModal}
-                className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-[background-color,color] duration-150"
+                className="p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-[background-color,color] duration-150 cursor-pointer"
               >
                 <X size={16} weight="bold" />
               </button>
@@ -188,18 +194,18 @@ export function DueCollectionModal() {
               )}
 
               {/* বর্তমান বকেয়া ও লাইভ পরিবর্তন কার্ড */}
-              <div className="bg-slate-50/70 p-3 rounded-md border border-slate-200/80 grid grid-cols-2 gap-2 text-center">
+              <div className="bg-slate-50/70 p-3 rounded-lg border border-slate-200/80 grid grid-cols-2 gap-2 text-center">
                 <div className="border-r border-slate-200 pr-2">
-                  <span className="text-[11px] text-slate-500 font-medium block">পূর্বের বকেয়া</span>
+                  <span className="text-xs text-slate-600 font-medium block">পূর্বের বকেয়া</span>
                   <span className="text-base sm:text-lg font-black font-mono tabular-nums tracking-tight text-rose-700">
                     {formatCurrency(currentDue)}
                   </span>
                 </div>
                 <div className="pl-2">
-                  <span className="text-[11px] text-slate-500 font-medium block">অবশিষ্ট বকেয়া হবে</span>
+                  <span className="text-xs text-slate-600 font-medium block">অবশিষ্ট বকেয়া হবে</span>
                   <span
                     className={`text-base sm:text-lg font-black font-mono tabular-nums tracking-tight ${
-                      remainingDue <= 0 ? 'text-emerald-700' : 'text-slate-900'
+                      remainingDue <= 0 ? 'text-emerald-700' : 'text-brand-deep'
                     }`}
                   >
                     {formatCurrency(remainingDue)}
@@ -213,7 +219,7 @@ export function DueCollectionModal() {
                   নগদ জমার পরিমাণ (টাকা) <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-base font-bold">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 text-base font-bold">
                     ৳
                   </span>
                   <input
@@ -227,7 +233,7 @@ export function DueCollectionModal() {
                       setError(null);
                     }}
                     placeholder="০.০০"
-                    className="w-full pl-7 pr-3 py-2 bg-white border border-slate-200 rounded-md text-lg sm:text-xl font-bold font-mono tabular-nums tracking-tight text-slate-900 placeholder:text-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-[border-color,box-shadow]"
+                    className="w-full pl-7 pr-3 py-2 bg-white border border-slate-200 rounded-md text-lg sm:text-xl font-bold font-mono tabular-nums tracking-tight text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow]"
                   />
                 </div>
               </div>
@@ -239,16 +245,16 @@ export function DueCollectionModal() {
                     key={val}
                     type="button"
                     onClick={() => handleQuickAdd(val)}
-                    className="py-1 px-2 rounded-md border border-slate-200 bg-white hover:bg-slate-100 text-xs font-mono tabular-nums tracking-tight font-medium text-slate-700 transition-[background-color,border-color] duration-150 active:scale-[0.97]"
+                    className="py-1 px-2.5 rounded-md border border-slate-200 bg-white hover:bg-brand-soft/60 hover:border-brand-light text-xs font-mono tabular-nums tracking-tight font-semibold text-slate-700 hover:text-brand-deep transition-[background-color,border-color] duration-150 active:scale-[0.97] cursor-pointer"
                   >
-                    +{val}
+                    +{formatNumber(val)}
                   </button>
                 ))}
                 {currentDue > 0 && (
                   <button
                     type="button"
                     onClick={handlePayFull}
-                    className="py-1 px-2.5 rounded-md border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-xs font-medium text-emerald-800 transition-[background-color,border-color] duration-150 active:scale-[0.97] ml-auto"
+                    className="py-1 px-2.5 rounded-md border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-xs font-semibold text-emerald-800 transition-[background-color,border-color] duration-150 active:scale-[0.97] ml-auto cursor-pointer"
                   >
                     পুরো বাকি শোধ
                   </button>
@@ -264,8 +270,8 @@ export function DueCollectionModal() {
                   type="text"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="যেমন: ক্যাশ কাউন্টারে জমা / ব্যাংক চেক"
-                  className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900"
+                  placeholder="মন্তব্য বা রেফারেন্স"
+                  className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
                 />
               </div>
 
@@ -275,9 +281,9 @@ export function DueCollectionModal() {
                   type="checkbox"
                   checked={printReceipt}
                   onChange={(e) => setPrintReceipt(e.target.checked)}
-                  className="w-3.5 h-3.5 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+                  className="w-4 h-4 rounded border-slate-300 text-brand-deep focus:ring-brand-deep"
                 />
-                <span className="text-xs text-slate-600 font-medium">
+                <span className="text-xs text-slate-700 font-medium">
                   জমা শেষে গ্রাহককে প্রিন্ট স্লিপ প্রদান করুন
                 </span>
               </label>
@@ -289,14 +295,14 @@ export function DueCollectionModal() {
                 type="button"
                 onClick={closeModal}
                 disabled={isSubmitting}
-                className="px-3.5 py-1.5 rounded-md border border-slate-200 hover:bg-slate-100 text-xs font-medium text-slate-600 transition-[background-color,color] duration-150 active:scale-[0.98]"
+                className={buttonClasses({ variant: 'secondary', size: 'sm' })}
               >
                 বাতিল
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting || payAmount <= 0}
-                className="px-4 py-1.5 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium flex items-center gap-1.5 shadow-[0_1px_2px_rgba(5,150,105,0.2)] transition-[background-color,transform] duration-150 active:scale-[0.98] disabled:opacity-50"
+                className={buttonClasses({ variant: 'cash', size: 'sm', className: 'gap-1.5' })}
               >
                 {isSubmitting ? (
                   <span>জমা হচ্ছে...</span>

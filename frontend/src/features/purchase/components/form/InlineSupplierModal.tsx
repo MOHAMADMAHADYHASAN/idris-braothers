@@ -56,17 +56,17 @@ export function InlineSupplierModal({
         className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+        <div className="px-5 py-3.5 bg-surface-subtle border-b border-border-default flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="p-1 rounded-md bg-amber-50 text-amber-600">
+            <span className="p-1.5 rounded-lg bg-brand-soft text-brand-deep">
               <Buildings size={16} weight="bold" />
             </span>
-            <h3 className="font-bold text-slate-800 text-sm">নতুন মহাজন / আড়তদার যোগ</h3>
+            <h3 className="font-bold text-ink-primary text-sm">নতুন মহাজন ও আড়তদার যোগ</h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200/60"
+            className="p-1 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle cursor-pointer"
           >
             <X size={16} weight="bold" />
           </button>
@@ -74,42 +74,42 @@ export function InlineSupplierModal({
 
         <form onSubmit={handleSubmit} className="p-5 space-y-3.5">
           {error && (
-            <div className="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
+            <div className="p-2.5 rounded-lg bg-due-bg border border-due-border text-due-text text-xs font-medium">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              মহাজন বা ব্যক্তির নাম <span className="text-rose-500">*</span>
+            <label className="block text-xs font-semibold text-ink-body mb-1">
+              মহাজন বা ব্যক্তির নাম <span className="text-danger">*</span>
             </label>
             <input
               type="text"
               required
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="উদাঃ আলহাজ্ব কবির আহমেদ"
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 text-xs sm:text-sm text-slate-900"
+              placeholder="মহাজনের নাম"
+              className="w-full px-3 py-2 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep text-xs sm:text-sm text-ink-primary"
               autoFocus
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">
-              কোম্পানি / মোকামের গদির নাম
+            <label className="block text-xs font-semibold text-ink-body mb-1">
+              কোম্পানি ও মোকামের গদির নাম
             </label>
             <input
               type="text"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
-              placeholder="উদাঃ মেসার্স কবির এন্টারপ্রাইজ (খাতুনগঞ্জ)"
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 text-xs sm:text-sm text-slate-900"
+              placeholder="প্রতিষ্ঠানের নাম"
+              className="w-full px-3 py-2 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep text-xs sm:text-sm text-ink-primary"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label className="block text-xs font-semibold text-ink-body mb-1">
                 মোবাইল নম্বর
               </label>
               <input
@@ -117,19 +117,19 @@ export function InlineSupplierModal({
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="০১৮XXXXXXXX"
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 font-mono text-xs text-slate-900"
+                className="w-full px-3 py-2 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep font-mono text-xs text-ink-primary"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
-                মোকাম / ঠিকানা
+              <label className="block text-xs font-semibold text-ink-body mb-1">
+                মোকাম ও ঠিকানা
               </label>
               <input
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="খাতুনগঞ্জ / মৌলভীবাজার"
-                className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 text-xs text-slate-900"
+                placeholder="মোকাম / ঠিকানা"
+                className="w-full px-3 py-2 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep text-xs text-ink-primary"
               />
             </div>
           </div>
@@ -139,14 +139,14 @@ export function InlineSupplierModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="px-3.5 py-1.5 rounded-lg border border-slate-300 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors"
+              className="px-3.5 py-2 rounded-lg border border-border-strong text-ink-body text-xs font-semibold hover:bg-surface-subtle transition-colors cursor-pointer"
             >
               বাতিল
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="px-4 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-semibold hover:bg-slate-800 disabled:opacity-50 flex items-center gap-1.5 transition-colors shadow-sm"
+              className="px-4 py-2 rounded-lg bg-brand-deep text-white text-xs font-semibold hover:bg-brand-hover disabled:opacity-50 flex items-center gap-1.5 transition-colors shadow-sm cursor-pointer"
             >
               {isSubmitting && <Spinner size={13} className="animate-spin" />}
               <span>সংরক্ষণ করুন</span>

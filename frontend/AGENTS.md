@@ -44,8 +44,9 @@ src/features/[feature-name]/
    - এটি স্ক্রিন ডিসপ্লেতে ছোট সাইজেও সবচেয়ে নিখুঁত ও পরিষ্কার দেখায়।
    - **কড়া নিয়ম:** বাংলায় কখনোই কোনো `tracking` (letter-spacing) ব্যবহার করা যাবে না।
    - লাইন-হাইট সবসময় $\ge 1.4$ থেকে $1.5$ হতে হবে যাতে ওপর-নিচের কোনো কার-চিহ্ন না কাটে।
-2. **Numbers & Financial Decimals:** **`JetBrains Mono`** with `.tabular-numbers` / `tabular-nums`.
-   - মুদ্রা, ওজন (৪ দশমিক) এবং রানিং খাতার ব্যালেন্সে মোনোস্পেস ব্যবহার বাধ্যতামূলক যাতে দ্রুত স্ক্যানিংয়ের সময় দশমিক কলামগুলো কখনো ডানে-বামে না কাঁপে।
+2. **Numbers & Financial Decimals:** **`JetBrains Mono`** + `var(--font-noto-sans-bengali)` fallback with `tabular-nums`.
+   - মুদ্রা, ওজন (৪ দশমিক), কাউন্ট, শতাংশ ও রানিং খাতার ব্যালেন্সে মোনোস্পেস ব্যবহার বাধ্যতামূলক যাতে দ্রুত স্ক্যানিংয়ের সময় কলাম না কাঁপে।
+   - **সেন্ট্রালাইজড `bn-BD` বাংলা অঙ্ক (Strict Standard):** ডিসপ্লেতে থাকা সমস্ত টাকা, ওজন, সংখ্যা, শতাংশ, তারিখ ও সময় `src/lib/decimal.ts`-এর `bn-BD` হেল্পার (`formatCurrency`, `formatWeight`, `formatNumber`, `formatCompactTaka`, `formatPercent`, `formatDateBn`, `formatTimeBn`, `formatDateTimeBn`, `toBanglaDigits`) দিয়ে প্রদর্শিত হবে। শুধুমাত্র `<input type="number">` মান, হার্ডওয়্যার বারকোড SVG, SKU/ISO (`YYYY-MM-DD`) API কী ও `escpos.ts` USB বাইট ASCII থাকবে।
 3. *(Hind Siliguri বা অন্য কোনো ফন্ট সিস্টেম থেকে সম্পূর্ণ বর্জন করা হয়েছে)*।
 
 ### C. Iconography Standard (@phosphor-icons/react)
@@ -66,21 +67,14 @@ src/features/[feature-name]/
 
 ### D. Strict Ban on "AI Slop" Rainbow Icon Containers (রংধনু আইকন বক্স কঠোরভাবে নিষিদ্ধ)
 - **কঠোর নিষেধাজ্ঞা (STRICT BAN):** ড্যাশবোর্ড কার্ড, মডিউল নেভিগেশন গ্রিড, মেনু আইটেম বা বাটন আইকনের পেছনে কখনোই এলোমেলো বিভিন্ন প্যাস্টেল কালার বক্স (যেমন একটি কার্ডে `bg-emerald-50`, অন্যটিতে `bg-amber-50`, `bg-rose-50`, `bg-blue-50`, `bg-purple-50` ইত্যাদি) দেওয়া **সম্পূর্ণ নিষিদ্ধ**। এটি ইন্টারফেসে সস্তা ও জেনেরিক এআই-জেনারেটেড লুক ("pura AI slop") তৈরি করে।
-- **বাধ্যতামূলক ইউনিফায়েড নিউট্রাল স্ট্যান্ডার্ড (Unified Neutral Container):**
-  - সমস্ত সাধারণ ন্যাভিগেশন, মডিউল লঞ্চার ও ড্যাশবোর্ড কার্ড আইকনের জন্য **একই মার্জিত নিউট্রাল কন্টেইনার** ব্যবহার করতে হবে:
-    ```tsx
-    // সঠিক নিয়ম (Mandatory Standard):
-    <div className="w-12 h-12 rounded-xl bg-slate-100 border border-slate-200/70 text-slate-700 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 flex items-center justify-center transition-all duration-200 mb-2.5">
-      <Icon size={22} weight="bold" />
-    </div>
-    ```
-  - কার্ড হোভারে আইকন স্মুথলি ডার্ক স্লেট (`group-hover:bg-slate-900 group-hover:text-white`) বা ব্র্যান্ড কালারে ট্রানজিশন করবে। কোনো কার্ডেই আলাদা আলাদা ক্যান্ডি কালার দেওয়া যাবে না।
+- **বাধ্যতামূলক ইউনিফায়েড নেভি ব্র্যান্ড ও নিউট্রাল স্ট্যান্ডার্ড (Unified Brand `#1e4a7a` & Neutral Container):**
+  - সমস্ত প্রাইমারি CTA ও অ্যাক্টিভ স্টেট **Navy `#1e4a7a`** (`bg-brand-deep`, hover `#173a61`, soft `#eef4fb`, border `#c8ddf0`) ব্যবহার করবে — প্রতিদ্বন্দ্বী `bg-slate-900` বা `purple`/`indigo`/`violet` ক্লাস সম্পূর্ণ নিষিদ্ধ।
+  - সমস্ত সাধারণ ন্যাভিগেশন ও ড্যাশবোর্ড কার্ড আইকনে একক ইউনিফায়েড নিউট্রাল/সফট নেভি কন্টেইনার ব্যবহার করতে হবে এবং হোভারে `brand-deep` অ্যাক্সেন্ট দেখাবে। কোনো কার্ডে এলোমেলো প্যাস্টেল রঙ ছিটানো যাবে না।
 - **কালার ব্যবহারের একমাত্র ব্যতিক্রম (Semantic Color Only):**
-  - কালার (যেমন লাল, সবুজ, হলুদ) শুধুমাত্র এবং শুধুমাত্র **আসল ফিন্যান্সিয়াল স্ট্যাটাস ও সিস্টেম স্টেট** বোঝাতে ব্যবহার করা যাবে:
-    - বকেয়া দেনা-পাওনা / ডিউ / ঘাটতি ➔ Rose/Red (`text-rose-600` / `bg-rose-50 text-rose-700`)
-    - নগদ ক্যাশ ইন হ্যান্ড / লাভ / পরিশোধিত ➔ Emerald/Green (`text-emerald-600` / `bg-emerald-50 text-emerald-700`)
-    - ওয়ার্নিং / স্টক অ্যালার্ট / পাইকারি মোড ➔ Amber/Yellow
-  - মেনু বা ন্যাভিগেশন আইকনে কখনোই এই সেমান্টিক কালার ছিটানো যাবে না।
+  - কালার শুধুমাত্র **আসল ফিন্যান্সিয়াল স্ট্যাটাস ও সিস্টেম স্টেট** বোঝাতে ব্যবহার করা যাবে:
+    - বকেয়া দেনা-পাওনা / ডিউ / ঘাটতি ➔ Rose/Red (`text-rose-700` / `bg-due-bg text-due-text`)
+    - নগদ ক্যাশ আদায় / পরিশোধিত / লাভ ➔ Emerald/Green (`text-emerald-700` / `bg-cash-bg text-cash-text`)
+    - পাইকারি (Wholesale) মোড ও রিটার্ন/স্টক সতর্কতা ➔ **Amber** (`bg-wholesale-bg text-wholesale-text border-wholesale-border` / `wholesale-solid`) — পাইকারিতে কখনো বেগুনি/ইন্ডিগো ব্যবহার করা যাবে না।
 
 ### E. Imagery & Photos Standard (Unsplash CDN)
 - যদি কোনো পণ্যের ছবি, মসলার ব্যানার বা প্লেসহোল্ডার ফটো দরকার হয়, তবে **বাধ্যতামূলকভাবে Unsplash CDN** (`https://images.unsplash.com/...`) ব্যবহার করতে হবে।
@@ -127,11 +121,11 @@ src/features/[feature-name]/
    - `header`, `renderCell`, `headerClassName`, `cellClassName`, `footerClassName`, `disableToggle`।
 2. **কলাম ভিজিবিলিটি পারসিস্টেন্স (`localStorage`):**
    - `tableId` অনুযায়ী কলামের লুকানো/দেখানোর প্রেফারেন্স ব্রাউজারের `localStorage` (`dt_cols_${tableId}_v1`)-এ ক্র্যাশ-প্রুফভাবে সেভ থাকে।
-3. **গোল্ডেন কলাম অ্যালাইনমেন্ট রুলস:**
-   - **নাম / টাইটেল / SKU:** বামে অ্যালাইনড (`text-left`), ২-লাইন কন্টেক্সট (`font-semibold text-slate-900`, `text-[11px] text-slate-500`)।
-   - **ক্যাটাগরি / টাইপ / ব্যাজ:** সেন্টারে অ্যালাইনড (`text-center`), `inline-flex px-1.5 py-0.5 rounded text-[10px] font-medium`।
-   - **সংখ্যা / ওজন / টাকা:** ডানে অ্যালাইনড (`text-right`), `font-mono tabular-nums tracking-tight font-black` (`JetBrains Mono`)।
-   - **অ্যাকশন বাটন:** সেন্টার/রাইট (`text-center`), পিন্ড `h-7.5` বা `h-8` বাটন।
+3. **গোল্ডেন কলাম অ্যালাইনমেন্ট ও ফন্ট রুলস:**
+   - **নাম / টাইটেল / SKU:** বামে অ্যালাইনড (`text-left`), ২-লাইন কন্টেক্সট (`font-semibold text-slate-900`, `text-xs text-slate-600`)। ইন্টারঅ্যাক্টিভ স্ক্রিন UI-তে সর্বনিম্ন ফন্ট সাইজ **`12px` (`text-xs`)** (শুধুমাত্র থার্মাল রসিদ ও বারকোড প্রিন্ট স্লিপ ছাড়া)।
+   - **ক্যাটাগরি / টাইপ / ব্যাজ:** সেন্টারে অ্যালাইনড (`text-center`), শেয়ার্ড [`Badge`](file:///home/mahady-hasan/Desktop/idris-brothers/frontend/src/components/ui/Badge.tsx) কম্পোনেন্ট।
+   - **সংখ্যা / ওজন / টাকা:** ডানে অ্যালাইনড (`text-right`), `font-mono tabular-nums tracking-tight font-black` (`JetBrains Mono` + `bn-BD`)।
+   - **অ্যাকশন বাটন:** সেন্টার/রাইট (`text-center`), শেয়ার্ড [`Button`](file:///home/mahady-hasan/Desktop/idris-brothers/frontend/src/components/ui/Button.tsx) / `buttonClasses`।
 4. **স্বয়ংক্রিয় ফুটার সামারি (`<tfoot>`):**
    - `renderFooterCell: (data) => ReactNode` দিয়ে পৃষ্ঠার মোট বিল, পরিশোধ ও বকেয়ার স্বয়ংক্রিয় যোগফল প্রদর্শন।
 5. **ইভেন্ট বাবলিং সেফগার্ড:**
@@ -269,3 +263,10 @@ src/
    - `src/lib/decimal.ts`-এর `formatCurrency()` ফাংশনটি ইতোমধ্যেই ফলাফলে `৳` চিহ্ন যোগ করে দেয়; তাই JSX-এ কখনোই `৳{formatCurrency(...)}` লেখা যাবে না (সরাসরি `{formatCurrency(...)}` ব্যবহার করতে হবে)।
 3. **Minimal Editorial Shutter UI (`src/components/StoreShutterHero.tsx`):**
    - স্ক্যানলাইন ও অতিরিক্ত ব্যাজ/মাউস-স্ক্রোল প্রম্পট বাদ দিয়ে পরিষ্কার `bg-black/65` ওভারলে, বর্ডার্ড ইনফো স্ট্রিপ এবং একক `rounded-none` অ্যাম্বার অ্যাক্সেন্ট বাটন রাখা হয়েছে।
+4. **6-Digit SKU Auto-Generation & Optional Scanner-Ready Barcode (`src/lib/skuGenerator.ts`):**
+   - `/products/new`-তে সিম্পল পণ্যে অটো ৬-ডিজিট SKU (`684192`) বসে এবং ভ্যারিয়েন্ট প্রিসেটে বাংলা ওজন/প্যাক রূপান্তর হয়ে (`৫০০ গ্রাম` -> `684192-500G`, `১ কেজি` -> `684192-1KG`) জেনারেট হয় (`InventorySettingsCard.tsx`, `VariantsStockMatrixCard.tsx`)।
+   - `বারকোড` ঘরটি ম্যানুয়াল POS ব্যবহারের জন্য ঐচ্ছিক রাখা হয়েছে; ভবিষ্যতে স্ক্যানার মেশিন যুক্ত হলে ফ্যাক্টরি বারকোড স্ক্যান বা SKU-ভিত্তিক Code128 স্টিকার দুটোই কাজ করবে।
+5. **Unified Navy (`#1e4a7a`) Design System, Bangla Numerals & Shared Primitives Overhaul:**
+   - **ডিজাইন টোকেন ও ফন্ট (`src/app/globals.css`):** প্রাইমারি ব্র্যান্ড Navy `#1e4a7a` (`brand-deep`, `brand-hover`, `brand-mid`, `brand-soft`, `brand-light`), অ্যান্টি-ফ্যাটিগ হাই-কন্ট্রাস্ট কালি (`ink-primary`, `ink-body`, `ink-secondary`, `ink-muted`), এবং `font-mono`-তে `var(--font-noto-sans-bengali)` ফলব্যাক যুক্ত করা হয়েছে।
+   - **শেয়ার্ড UI প্রিমিটিভ ও ফরম্যাটার:** [`Button`](file:///home/mahady-hasan/Desktop/idris-brothers/frontend/src/components/ui/Button.tsx) (`buttonClasses` ভ্যারিয়েন্ট: `primary`, `secondary`, `wholesale`, `cash`, `danger`, `outlineDanger`, `ghost`), [`Badge`](file:///home/mahady-hasan/Desktop/idris-brothers/frontend/src/components/ui/Badge.tsx), [`Card`](file:///home/mahady-hasan/Desktop/idris-brothers/frontend/src/components/ui/Card.tsx), [`DashboardHeaderWithShutter`](file:///home/mahady-hasan/Desktop/idris-brothers/frontend/src/components/DashboardHeaderWithShutter.tsx), [`AdminPageHeader`](file:///home/mahady-hasan/Desktop/idris-brothers/frontend/src/components/shared/AdminPageHeader.tsx) (মোবাইলে অ্যাকশন র‍্যাপ করে শিরোনাম ট্রাঙ্কেশন রোধ), এবং `src/lib/decimal.ts`-এ `bn-BD` ফরম্যাটার (`toBanglaDigits`, `formatNumber`, `formatCompactTaka`, `formatPercent`, `formatDateBn`, `formatTimeBn` ও `formatDateTimeBn` বাংলা সময়-পর্ব `সকাল/দুপুর/বিকেল/সন্ধ্যা/রাত` সহ) যুক্ত করা হয়েছে।
+   - **ক্লিনআপ ও UI স্ট্যান্ডার্ড:** ব্যবহৃত নয় এমন ৭টি লিগ্যাসি প্রোটোটাইপ কম্পোনেন্ট (`CartPanel.tsx`, `CustomerView.tsx`, `Header.tsx`, `InventoryView.tsx`, `POSClientApp.tsx`, `ProductGrid.tsx`, `ReceiptModal.tsx`) অপসারণ করা হয়েছে; সমস্ত সক্রিয় পেজ ও মোডাল থেকে `purple-*`/`indigo-*` (পাইকারি শুধুমাত্র Amber), `bg-slate-900` কম্পিটিং CTA, `< 12px` স্ক্রিন টেক্সট এবং বাংলা লেখায় `uppercase tracking-wider` সম্পূর্ণ দূর করা হয়েছে।

@@ -13,7 +13,13 @@ import {
   Buildings,
 } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
-import { formatCurrency } from '@/lib/decimal';
+import {
+  formatCurrency,
+  formatDateTimeBn,
+  formatNumber,
+  toBanglaDigits,
+} from '@/lib/decimal';
+import { buttonClasses } from '@/components/ui/Button';
 import { useSupplierKhataStore } from '../useSupplierKhataStore';
 import { SupplierLedgerType } from '../supplierKhata.types';
 
@@ -38,12 +44,12 @@ function getEntryLabel(type: SupplierLedgerType): { label: string; badgeClass: s
     case 'ADJUSTMENT':
       return {
         label: 'শুকতি / কমিশন সমন্বয়',
-        badgeClass: 'bg-purple-50 text-purple-700 border-purple-200/80',
+        badgeClass: 'bg-brand-soft text-brand-deep border-brand-light',
       };
     case 'RETURN':
       return {
         label: 'ত্রুটিপূর্ণ মাল ফেরত',
-        badgeClass: 'bg-blue-50 text-blue-700 border-blue-200/80',
+        badgeClass: 'bg-rose-50 text-rose-700 border-rose-200/80',
       };
     default:
       return {
@@ -82,7 +88,7 @@ export function SupplierLedgerDrawer() {
         {/* হেডার */}
         <div className="px-4 py-3 border-b border-slate-200/90 flex items-center justify-between bg-slate-50/80 shrink-0">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center">
               <Scroll size={18} weight="bold" />
             </div>
             <div>
@@ -91,7 +97,7 @@ export function SupplierLedgerDrawer() {
                   {selectedSupplier.companyName || selectedSupplier.name} — খতিয়ান বিবরণী
                 </h3>
               </div>
-              <div className="flex items-center gap-3 text-xs text-slate-500 mt-0.5 flex-wrap">
+              <div className="flex items-center gap-3 text-xs text-slate-600 mt-0.5 flex-wrap">
                 {selectedSupplier.companyName && (
                   <span className="flex items-center gap-1">
                     <Buildings size={12} weight="bold" />
@@ -101,7 +107,7 @@ export function SupplierLedgerDrawer() {
                 {selectedSupplier.phone && (
                   <span className="flex items-center gap-1 font-mono tabular-nums tracking-tight">
                     <Phone size={12} weight="bold" />
-                    {selectedSupplier.phone}
+                    {toBanglaDigits(selectedSupplier.phone)}
                   </span>
                 )}
                 {selectedSupplier.address && (
@@ -116,16 +122,18 @@ export function SupplierLedgerDrawer() {
 
           <div className="flex items-center gap-2">
             <button
+              type="button"
               onClick={handlePrint}
-              className="px-2.5 py-1.5 border border-slate-200/90 rounded-md hover:bg-slate-100 active:scale-[0.98] text-slate-700 text-xs font-medium flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150"
+              className={buttonClasses({ variant: 'primary', size: 'sm', className: 'gap-1.5' })}
               title="খতিয়ান প্রিন্ট করুন"
             >
               <Printer size={15} weight="bold" />
               <span className="hidden sm:inline">প্রিন্ট</span>
             </button>
             <button
+              type="button"
               onClick={closeModal}
-              className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-[background-color,color] duration-150"
+              className="p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-200 transition-[background-color,color] duration-150 cursor-pointer"
             >
               <X size={18} weight="bold" />
             </button>
@@ -136,7 +144,9 @@ export function SupplierLedgerDrawer() {
         <div className="px-4 py-2 bg-slate-100/70 border-b border-slate-200/90 flex items-center justify-between text-xs shrink-0">
           <div className="flex items-center gap-2 text-slate-600">
             <span>সর্বমোট লেনদেন রেকর্ড:</span>
-            <strong className="text-slate-900 font-mono tabular-nums">{ledgerMeta.total} টি</strong>
+            <strong className="text-slate-900 font-mono tabular-nums">
+              {formatNumber(ledgerMeta.total)} টি
+            </strong>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-slate-600">দোকানের বর্তমান দেনা:</span>
@@ -146,7 +156,7 @@ export function SupplierLedgerDrawer() {
                   ? 'text-amber-800'
                   : selectedSupplier.currentPayable < 0
                   ? 'text-emerald-700'
-                  : 'text-slate-700'
+                  : 'text-slate-800'
               }`}
             >
               {formatCurrency(selectedSupplier.currentPayable)}
@@ -157,22 +167,22 @@ export function SupplierLedgerDrawer() {
         {/* খতিয়ান টেবিল বডি (স্ক্রলেবল) */}
         <div className="flex-1 overflow-y-auto p-3.5">
           {isLedgerLoading && ledgerEntries.length === 0 ? (
-            <div className="py-16 text-center text-slate-400">
-              <ArrowsClockwise size={24} weight="bold" className="animate-spin mx-auto mb-2 text-slate-600" />
+            <div className="py-16 text-center text-slate-600">
+              <ArrowsClockwise size={24} weight="bold" className="animate-spin mx-auto mb-2 text-brand-deep" />
               <p className="text-xs">মহাজনের খতিয়ান বিবরণী লোড হচ্ছে...</p>
             </div>
           ) : ledgerEntries.length === 0 ? (
-            <div className="py-16 text-center text-slate-400">
+            <div className="py-16 text-center text-slate-600">
               <p className="text-xs">কোনো লেনদেন রেকর্ড পাওয়া যায়নি</p>
             </div>
           ) : (
-            <div className="border border-slate-200/90 rounded-md overflow-hidden shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+            <div className="border border-slate-200/90 rounded-lg overflow-hidden shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50/80 border-b border-slate-200/90 text-slate-600 font-medium">
+                  <tr className="bg-slate-50/80 border-b border-slate-200/90 text-slate-700 font-semibold">
                     <th className="py-2.5 px-3">তারিখ ও সময়</th>
                     <th className="py-2.5 px-3">লেনদেনের ধরন</th>
-                    <th className="py-2.5 px-3">বিবরণ / চালান নোট</th>
+                    <th className="py-2.5 px-3">বিবরণ ও চালান নোট</th>
                     <th className="py-2.5 px-3 text-right">পরিশোধ (-)</th>
                     <th className="py-2.5 px-3 text-right">চালান ক্রয় (+)</th>
                     <th className="py-2.5 px-3.5 text-right">অবশিষ্ট দেনা</th>
@@ -181,32 +191,26 @@ export function SupplierLedgerDrawer() {
                 <tbody className="divide-y divide-slate-100">
                   {ledgerEntries.map((entry) => {
                     const badge = getEntryLabel(entry.entryType);
-                    const formattedDate = new Date(entry.createdAt).toLocaleDateString('bn-BD', {
-                      year: 'numeric',
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    });
+                    const formattedDate = formatDateTimeBn(entry.createdAt);
 
                     return (
                       <tr key={entry.id} className="hover:bg-slate-50/70 transition-colors">
                         {/* তারিখ */}
-                        <td className="py-2 px-3 font-mono tabular-nums text-slate-600 whitespace-nowrap">
+                        <td className="py-2 px-3 font-mono tabular-nums text-slate-600 whitespace-nowrap text-xs">
                           {formattedDate}
                         </td>
 
                         {/* টাইপ */}
                         <td className="py-2 px-3 whitespace-nowrap">
                           <span
-                            className={`inline-block px-1.5 py-0.5 rounded-md text-[10px] font-semibold border ${badge.badgeClass}`}
+                            className={`inline-block px-2 py-0.5 rounded-md text-xs font-semibold border ${badge.badgeClass}`}
                           >
                             {badge.label}
                           </span>
                         </td>
 
                         {/* বিবরণ / নোট */}
-                        <td className="py-2 px-3 text-slate-600 max-w-[200px] truncate">
+                        <td className="py-2 px-3 text-slate-700 max-w-[200px] truncate text-xs">
                           {entry.note || '-'}
                         </td>
 
@@ -235,9 +239,10 @@ export function SupplierLedgerDrawer() {
 
         {/* ফুটার পেজিনেশন */}
         {ledgerMeta.totalPages > 1 && (
-          <div className="px-4 py-2.5 bg-slate-50/80 border-t border-slate-200/90 flex items-center justify-between text-xs text-slate-500 shrink-0">
+          <div className="px-4 py-2.5 bg-slate-50/80 border-t border-slate-200/90 flex items-center justify-between text-xs text-slate-600 shrink-0">
             <span>
-              পৃষ্ঠা <strong className="text-slate-800 font-mono tabular-nums">{ledgerMeta.page}</strong> / <span className="font-mono tabular-nums">{ledgerMeta.totalPages}</span>
+              পৃষ্ঠা <strong className="text-slate-900 font-mono tabular-nums">{formatNumber(ledgerMeta.page)}</strong> /{' '}
+              <span className="font-mono tabular-nums">{formatNumber(ledgerMeta.totalPages)}</span>
             </span>
             <div className="flex items-center gap-1">
               <button

@@ -10,7 +10,14 @@ import {
   CheckCircle,
   ArrowCounterClockwise,
 } from '@phosphor-icons/react';
-import { formatCurrency } from '@/lib/decimal';
+import {
+  formatCurrency,
+  formatDateBn,
+  formatNumber,
+  formatTimeBn,
+  toBanglaDigits,
+} from '@/lib/decimal';
+import { Badge } from '@/components/ui/Badge';
 import { useSalesStore } from '../useSalesStore';
 import { SaleListItem } from '../sales.types';
 import { AdminPagination } from '@/components/shared/AdminPagination';
@@ -22,9 +29,7 @@ export function SalesTable() {
     sales,
     meta,
     isLoading,
-    openDetail,
     openCancelModal,
-    openReturnModal,
     setPage,
   } = useSalesStore();
 
@@ -35,29 +40,26 @@ export function SalesTable() {
         header: 'মেমো নং ও সময়',
         disableToggle: true,
         renderCell: (sale) => {
-          const dateStr = new Date(sale.createdAt).toLocaleDateString('bn-BD', {
+          const dateStr = formatDateBn(sale.createdAt, {
             year: 'numeric',
             month: 'short',
             day: 'numeric',
           });
-          const timeStr = new Date(sale.createdAt).toLocaleTimeString('bn-BD', {
-            hour: '2-digit',
-            minute: '2-digit',
-          });
+          const timeStr = formatTimeBn(sale.createdAt);
 
           return (
             <div>
               <span className="font-mono tabular-nums font-bold text-slate-900 text-xs block">
-                #{sale.invoiceNumber}
+                #{toBanglaDigits(sale.invoiceNumber)}
               </span>
-              <span className="text-[11px] text-slate-400 font-mono tabular-nums">
+              <span className="text-xs text-slate-600 font-mono tabular-nums">
                 {dateStr} • {timeStr}
               </span>
             </div>
           );
         },
         renderFooterCell: () => (
-          <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+          <span className="text-xs font-bold text-slate-700">
             পৃষ্ঠার মোট:
           </span>
         ),
@@ -67,7 +69,7 @@ export function SalesTable() {
         header: 'কাস্টমার / ক্রেতা',
         renderCell: (sale) => {
           if (!sale.customer) {
-            return <span className="text-slate-400 text-xs italic">খুচরা সাধারণ ক্রেতা</span>;
+            return <span className="text-slate-600 text-xs italic">খুচরা সাধারণ ক্রেতা</span>;
           }
           return (
             <div>
@@ -75,8 +77,8 @@ export function SalesTable() {
                 {sale.customer.name}
               </span>
               {sale.customer.phone && (
-                <span className="text-[11px] text-slate-500 font-mono tabular-nums">
-                  {sale.customer.phone}
+                <span className="text-xs text-slate-600 font-mono tabular-nums">
+                  {toBanglaDigits(sale.customer.phone)}
                 </span>
               )}
             </div>
@@ -89,25 +91,19 @@ export function SalesTable() {
         headerClassName: 'text-center',
         cellClassName: 'text-center whitespace-nowrap',
         renderCell: (sale) => (
-          <span
-            className={`inline-block px-1.5 py-0.5 rounded-md text-[10px] font-semibold border ${
-              sale.saleType === 'WHOLESALE'
-                ? 'bg-purple-50 text-purple-700 border-purple-200/80'
-                : 'bg-slate-100 text-slate-700 border-slate-200/80'
-            }`}
-          >
+          <Badge variant={sale.saleType === 'WHOLESALE' ? 'wholesale' : 'neutral'}>
             {sale.saleType === 'WHOLESALE' ? 'পাইকারি' : 'খুচরা'}
-          </span>
+          </Badge>
         ),
       },
       {
         key: 'itemCount',
         header: 'পণ্য সংখ্যা',
-        cellClassName: 'font-mono tabular-nums text-slate-600',
-        renderCell: (sale) => `${sale.items?.length || 0} টি আইটেম`,
+        cellClassName: 'font-mono tabular-nums text-slate-700',
+        renderCell: (sale) => `${formatNumber(sale.items?.length || 0)} টি আইটেম`,
         renderFooterCell: (data) => (
-          <span className="font-mono tabular-nums font-bold text-slate-700">
-            {data.reduce((sum, s) => sum + (s.items?.length || 0), 0)} টি আইটেম
+          <span className="font-mono tabular-nums font-bold text-slate-800">
+            {formatNumber(data.reduce((sum, s) => sum + (s.items?.length || 0), 0))} টি আইটেম
           </span>
         ),
       },
@@ -150,7 +146,7 @@ export function SalesTable() {
               </span>
             );
           }
-          return <span className="text-slate-400 text-[11px]">পরিশোধিত</span>;
+          return <span className="text-slate-600 text-xs">পরিশোধিত</span>;
         },
         renderFooterCell: (data) => {
           const totalDue = data.reduce(
@@ -177,27 +173,23 @@ export function SalesTable() {
 
           if (isCancelled) {
             return (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-rose-50 text-rose-700 border border-rose-200/80">
-                <XCircle size={11} weight="fill" />
+              <Badge variant="due" className="gap-1 bg-rose-50 text-rose-700 border-rose-200/80">
+                <XCircle size={12} weight="fill" />
                 <span>বাতিল</span>
-              </span>
+              </Badge>
             );
           }
 
           if (isFullPaid) {
             return (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
-                <CheckCircle size={11} weight="fill" />
+              <Badge variant="cash" className="gap-1">
+                <CheckCircle size={12} weight="fill" />
                 <span>পরিশোধিত</span>
-              </span>
+              </Badge>
             );
           }
 
-          return (
-            <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-200/80">
-              <span>আংশিক বাকি</span>
-            </span>
-          );
+          return <Badge variant="wholesale">আংশিক বাকি</Badge>;
         },
       },
       {
@@ -210,12 +202,12 @@ export function SalesTable() {
           const isCancelled = sale.status === 'CANCELLED';
 
           return (
-            <div className="flex items-center justify-center gap-1 no-row-click">
+            <div className="flex items-center justify-center gap-1.5 no-row-click">
               {/* রসিদ ও বিস্তারিত দেখুন */}
               <Link
                 href={`/sales/${sale.id}`}
                 onClick={(e) => e.stopPropagation()}
-                className="p-1 rounded-md border border-slate-200/90 hover:bg-slate-100 active:scale-[0.98] text-slate-600 hover:text-slate-900 transition-[background-color,border-color,transform] duration-150 cursor-pointer"
+                className="p-1.5 rounded-md border border-slate-200/90 hover:bg-brand-soft hover:border-brand-light active:scale-[0.98] text-slate-600 hover:text-brand-deep transition-[background-color,border-color,transform] duration-150 cursor-pointer"
                 title="মেমো বিস্তারিত দেখুন"
               >
                 <Eye size={14} weight="bold" />
@@ -225,7 +217,7 @@ export function SalesTable() {
               <Link
                 href={`/sales/${sale.id}`}
                 onClick={(e) => e.stopPropagation()}
-                className="p-1 rounded-md border border-slate-200/90 hover:bg-slate-100 active:scale-[0.98] text-slate-600 hover:text-slate-900 transition-[background-color,border-color,transform] duration-150 cursor-pointer"
+                className="p-1.5 rounded-md border border-slate-200/90 hover:bg-brand-soft hover:border-brand-light active:scale-[0.98] text-slate-600 hover:text-brand-deep transition-[background-color,border-color,transform] duration-150 cursor-pointer"
                 title="রসিদ ভাউচার ও প্রিন্ট"
               >
                 <Printer size={14} weight="bold" />
@@ -236,7 +228,7 @@ export function SalesTable() {
                 <Link
                   href={`/sales/${sale.id}/return`}
                   onClick={(e) => e.stopPropagation()}
-                  className="p-1 rounded-md border border-slate-200/90 hover:bg-amber-50 active:scale-[0.98] text-slate-500 hover:text-amber-700 transition-[background-color,border-color,transform] duration-150 cursor-pointer"
+                  className="p-1.5 rounded-md border border-slate-200/90 hover:bg-amber-50 hover:border-amber-200 active:scale-[0.98] text-slate-600 hover:text-amber-800 transition-[background-color,border-color,transform] duration-150 cursor-pointer"
                   title="পণ্য ফেরত ও রিফান্ড"
                 >
                   <ArrowCounterClockwise size={14} weight="bold" />
@@ -251,7 +243,7 @@ export function SalesTable() {
                     e.stopPropagation();
                     openCancelModal(sale);
                   }}
-                  className="p-1 rounded-md border border-slate-200/90 hover:bg-rose-50 active:scale-[0.98] text-slate-400 hover:text-rose-600 transition-[background-color,border-color,transform] duration-150 cursor-pointer"
+                  className="p-1.5 rounded-md border border-slate-200/90 hover:bg-rose-50 hover:border-rose-200 active:scale-[0.98] text-slate-600 hover:text-rose-700 transition-[background-color,border-color,transform] duration-150 cursor-pointer"
                   title="ভুল মেমো বাতিল করুন"
                 >
                   <XCircle size={14} weight="bold" />

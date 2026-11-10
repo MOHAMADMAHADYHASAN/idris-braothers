@@ -11,6 +11,7 @@ import {
   ResolvedDateRange,
   isValidYmd,
 } from '@/lib/dateFilter';
+import { toBanglaDigits } from '@/lib/decimal';
 
 interface Props {
   presets?: DateFilterPreset[];
@@ -164,7 +165,7 @@ function UnifiedDateRangeFilterInner({
   return (
     <div className={`relative flex items-center gap-1.5 ${className}`} ref={popoverRef}>
       {/* ── Preset Pills Bar ── */}
-      <div className="flex items-center p-0.5 rounded-md bg-slate-100 border border-slate-200/90 text-xs">
+      <div className="flex items-center p-0.5 rounded-lg bg-surface-subtle border border-border-default text-xs">
         {presets.map((p) => {
           const isActive = activeFilter === p.value && !isCustomActive;
           return (
@@ -172,10 +173,10 @@ function UnifiedDateRangeFilterInner({
               key={p.value}
               type="button"
               onClick={() => handleSelectPreset(p.value)}
-              className={`py-1 px-2.5 text-xs font-semibold rounded transition-[background-color,color,box-shadow,transform] duration-150 active:scale-[0.98] cursor-pointer whitespace-nowrap ${
+              className={`py-1 px-2.5 text-xs font-semibold rounded-md transition-[background-color,color,box-shadow,transform] duration-150 active:scale-[0.98] cursor-pointer whitespace-nowrap ${
                 isActive
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-brand-deep text-white shadow-xs'
+                  : 'text-ink-secondary hover:text-ink-primary'
               }`}
             >
               {p.label}
@@ -188,17 +189,17 @@ function UnifiedDateRangeFilterInner({
       <button
         type="button"
         onClick={() => setShowPicker(!showPicker)}
-        className={`h-7.5 px-2.5 rounded-md border flex items-center gap-1.5 text-xs font-semibold transition-[background-color,border-color,color,transform] duration-150 active:scale-[0.98] cursor-pointer ${
+        className={`h-8 px-2.5 rounded-lg border flex items-center gap-1.5 text-xs font-semibold transition-[background-color,border-color,color,transform] duration-150 active:scale-[0.98] cursor-pointer ${
           isCustomActive
-            ? 'bg-amber-50 border-amber-300 text-amber-900 ring-1 ring-amber-300'
-            : 'bg-white border-slate-200/90 text-slate-700 hover:bg-slate-50'
+            ? 'bg-wholesale-bg border-wholesale-border text-wholesale-text ring-1 ring-wholesale-border'
+            : 'bg-surface-card border-border-strong text-ink-body hover:bg-surface-subtle'
         }`}
         title="কাস্টম তারিখ নির্বাচন করুন"
       >
-        <CalendarBlank size={14} weight="bold" className={isCustomActive ? 'text-amber-700' : 'text-slate-500'} />
+        <CalendarBlank size={14} weight="bold" className={isCustomActive ? 'text-wholesale-text' : 'text-ink-secondary'} />
         {isCustomActive && currentStart && currentEnd ? (
-          <span className="text-[11px] font-mono tabular-nums font-bold">
-            {currentStart} ~ {currentEnd}
+          <span className="text-xs font-mono tabular-nums font-bold">
+            {toBanglaDigits(currentStart)} ~ {toBanglaDigits(currentEnd)}
           </span>
         ) : (
           <span>কাস্টম</span>
@@ -213,17 +214,17 @@ function UnifiedDateRangeFilterInner({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
-            className="absolute right-0 top-full mt-1.5 w-76 bg-white border border-slate-200/90 rounded-lg shadow-[0_4px_20px_rgba(15,23,42,0.12)] p-3.5 z-50 pointer-events-auto"
+            className="absolute right-0 top-full mt-1.5 w-76 bg-surface-card border border-border-default rounded-xl shadow-[0_4px_20px_rgba(15,23,42,0.12)] p-3.5 z-50 pointer-events-auto"
           >
-            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-              <span className="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-                <CalendarBlank size={14} weight="bold" className="text-slate-700" />
+            <div className="flex items-center justify-between pb-2 border-b border-border-subtle">
+              <span className="text-xs font-bold text-ink-primary flex items-center gap-1.5">
+                <CalendarBlank size={14} weight="bold" className="text-brand-deep" />
                 তারিখের সীমা নির্বাচন করুন
               </span>
               <button
                 type="button"
                 onClick={() => setShowPicker(false)}
-                className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+                className="p-1 rounded text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-colors cursor-pointer"
               >
                 <X size={14} weight="bold" />
               </button>
@@ -231,41 +232,41 @@ function UnifiedDateRangeFilterInner({
 
             <form onSubmit={handleApplyCustom} className="space-y-2.5 py-3 text-xs">
               <div>
-                <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">
-                  শুরুর তারিখ (Start Date)
+                <label className="text-xs font-semibold text-ink-secondary block mb-1">
+                  শুরুর তারিখ
                 </label>
                 <input
                   type="date"
                   value={startInput}
                   onChange={(e) => setStartInput(e.target.value)}
-                  className="w-full h-8 px-2.5 text-xs font-mono tabular-nums border border-slate-200 rounded-md bg-white text-slate-900 focus:outline-hidden focus:border-slate-800 focus:ring-1 focus:ring-slate-800"
+                  className="w-full h-8 px-2.5 text-xs font-mono tabular-nums border border-border-strong rounded-md bg-surface-card text-ink-primary focus:outline-hidden focus:border-brand-deep focus:ring-1 focus:ring-brand-deep"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-bold uppercase text-slate-500 block mb-1">
-                  শেষের তারিখ (End Date)
+                <label className="text-xs font-semibold text-ink-secondary block mb-1">
+                  শেষের তারিখ
                 </label>
                 <input
                   type="date"
                   value={endInput}
                   onChange={(e) => setEndInput(e.target.value)}
-                  className="w-full h-8 px-2.5 text-xs font-mono tabular-nums border border-slate-200 rounded-md bg-white text-slate-900 focus:outline-hidden focus:border-slate-800 focus:ring-1 focus:ring-slate-800"
+                  className="w-full h-8 px-2.5 text-xs font-mono tabular-nums border border-border-strong rounded-md bg-surface-card text-ink-primary focus:outline-hidden focus:border-brand-deep focus:ring-1 focus:ring-brand-deep"
                 />
               </div>
 
-              <div className="flex items-center gap-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center gap-2 pt-2 border-t border-border-subtle">
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="flex-1 h-8 rounded-md border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50 active:scale-[0.98] transition-colors cursor-pointer"
+                  className="flex-1 h-8 rounded-md border border-border-strong text-xs font-semibold text-ink-body hover:bg-surface-subtle active:scale-[0.98] transition-colors cursor-pointer"
                 >
                   রিসেট
                 </button>
                 <button
                   type="submit"
                   disabled={!startInput || !endInput}
-                  className="flex-1 h-8 rounded-md bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 active:scale-[0.98] transition-colors disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center justify-center gap-1"
+                  className="flex-1 h-8 rounded-md bg-brand-deep text-white text-xs font-bold hover:bg-brand-hover active:scale-[0.98] transition-colors disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center justify-center gap-1"
                 >
                   <Check size={13} weight="bold" />
                   <span>প্রয়োগ করুন</span>

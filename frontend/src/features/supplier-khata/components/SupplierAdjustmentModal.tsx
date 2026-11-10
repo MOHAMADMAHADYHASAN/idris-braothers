@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { X, SlidersHorizontal, WarningCircle, CheckCircle } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import { formatCurrency } from '@/lib/decimal';
+import { buttonClasses } from '@/components/ui/Button';
 import { useSupplierKhataStore } from '../useSupplierKhataStore';
 
 export function SupplierAdjustmentModal() {
@@ -67,15 +68,15 @@ export function SupplierAdjustmentModal() {
       >
         {/* হেডার */}
         <div className="px-4 py-3 border-b border-slate-200/90 flex items-center justify-between bg-slate-50/80">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-slate-100 border border-slate-200/80 text-slate-700 flex items-center justify-center">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center">
               <SlidersHorizontal size={16} weight="bold" />
             </div>
             <div>
               <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
                 শুকতি ও কমিশন সমন্বয়
               </h3>
-              <p className="text-[11px] text-slate-500">
+              <p className="text-xs text-slate-600">
                 মহাজন: {selectedSupplier.companyName || selectedSupplier.name}
               </p>
             </div>
@@ -83,7 +84,7 @@ export function SupplierAdjustmentModal() {
           <button
             type="button"
             onClick={closeModal}
-            className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200 transition-[background-color,color] duration-150"
+            className="p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-200 transition-[background-color,color] duration-150 cursor-pointer"
           >
             <X size={16} weight="bold" />
           </button>
@@ -100,16 +101,16 @@ export function SupplierAdjustmentModal() {
             )}
 
             {/* বর্তমান দেনা ও নতুন সম্ভাব্য দেনা */}
-            <div className="bg-slate-50/80 p-3 rounded-md border border-slate-200/90 grid grid-cols-2 gap-2 text-center">
+            <div className="bg-slate-50/80 p-3 rounded-lg border border-slate-200/90 grid grid-cols-2 gap-2 text-center">
               <div className="border-r border-slate-200 pr-2">
-                <span className="text-[10px] text-slate-500 font-medium block">বর্তমান দেনা</span>
+                <span className="text-xs text-slate-600 font-medium block">বর্তমান দেনা</span>
                 <span className="text-sm sm:text-base font-bold font-mono text-amber-800 tabular-nums tracking-tight">
                   {formatCurrency(currentPayable)}
                 </span>
               </div>
               <div className="pl-2">
-                <span className="text-[10px] text-slate-500 font-medium block">সমন্বয়ের পর দেনা</span>
-                <span className="text-sm sm:text-base font-bold font-mono text-slate-900 tabular-nums tracking-tight">
+                <span className="text-xs text-slate-600 font-medium block">সমন্বয়ের পর দেনা</span>
+                <span className="text-sm sm:text-base font-bold font-mono text-brand-deep tabular-nums tracking-tight">
                   {formatCurrency(newPayable)}
                 </span>
               </div>
@@ -120,14 +121,14 @@ export function SupplierAdjustmentModal() {
               <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 সমন্বয়ের ধরন নির্বাচন করুন
               </label>
-              <div className="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-md border border-slate-200/80">
+              <div className="grid grid-cols-2 gap-1.5 bg-slate-100 p-1 rounded-lg border border-slate-200/80">
                 <button
                   type="button"
                   onClick={() => setAdjustmentType('REBATE')}
-                  className={`py-1.5 px-3 rounded-md text-xs font-semibold transition-[background-color,color,box-shadow] duration-150 active:scale-[0.98] ${
+                  className={`py-1.5 px-3 rounded-md text-xs font-semibold transition-[background-color,color,box-shadow] duration-150 active:scale-[0.98] cursor-pointer ${
                     adjustmentType === 'REBATE'
-                      ? 'bg-white text-emerald-800 shadow-[0_1px_2px_rgba(15,23,42,0.06)] border border-slate-200/80'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-brand-deep text-white shadow-xs'
+                      : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
                   <span>মহাজন থেকে ছাড় (-)</span>
@@ -135,10 +136,10 @@ export function SupplierAdjustmentModal() {
                 <button
                   type="button"
                   onClick={() => setAdjustmentType('ADD_DEBT')}
-                  className={`py-1.5 px-3 rounded-md text-xs font-semibold transition-[background-color,color,box-shadow] duration-150 active:scale-[0.98] ${
+                  className={`py-1.5 px-3 rounded-md text-xs font-semibold transition-[background-color,color,box-shadow] duration-150 active:scale-[0.98] cursor-pointer ${
                     adjustmentType === 'ADD_DEBT'
-                      ? 'bg-white text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.06)] border border-slate-200/80'
-                      : 'text-slate-600 hover:text-slate-900'
+                      ? 'bg-brand-deep text-white shadow-xs'
+                      : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
                   <span>দেনা বৃদ্ধি (+)</span>
@@ -153,7 +154,7 @@ export function SupplierAdjustmentModal() {
                 <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 font-bold text-sm">
                   ৳
                 </span>
                 <input
@@ -164,7 +165,7 @@ export function SupplierAdjustmentModal() {
                   value={amountStr}
                   onChange={(e) => setAmountStr(e.target.value)}
                   placeholder="০.০০"
-                  className="w-full pl-7 pr-3 py-1.5 bg-white border border-slate-300 rounded-md text-base font-bold font-mono tabular-nums text-slate-900 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-[border-color,box-shadow] duration-150"
+                  className="w-full pl-7 pr-3 py-1.5 bg-white border border-slate-300 rounded-md text-base font-bold font-mono tabular-nums text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
                 />
               </div>
             </div>
@@ -179,8 +180,8 @@ export function SupplierAdjustmentModal() {
                 required
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
-                placeholder="যেমন: বস্তা প্রতি ২০০ গ্রাম শুকতি ছাড় / বিশেষ কমিশন"
-                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:border-slate-900 transition-[border-color,box-shadow] duration-150"
+                placeholder="সমন্বয়ের কারণ"
+                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
               />
             </div>
           </div>
@@ -191,14 +192,14 @@ export function SupplierAdjustmentModal() {
               type="button"
               onClick={closeModal}
               disabled={isSubmitting}
-              className="px-3.5 py-1.5 rounded-md border border-slate-200/90 hover:bg-slate-100 active:scale-[0.98] text-xs font-medium text-slate-600 transition-[background-color,border-color,transform] duration-150"
+              className={buttonClasses({ variant: 'secondary', size: 'sm' })}
             >
               বাতিল
             </button>
             <button
               type="submit"
               disabled={isSubmitting || inputAmount <= 0 || !reason.trim()}
-              className="px-4 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 shadow-[0_1px_2px_rgba(15,23,42,0.1)] disabled:opacity-50"
+              className={buttonClasses({ variant: 'primary', size: 'sm', className: 'gap-1.5' })}
             >
               <CheckCircle size={15} weight="bold" />
               <span>{isSubmitting ? 'সমন্বয় হচ্ছে...' : 'সমন্বয় নিশ্চিত করুন'}</span>

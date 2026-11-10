@@ -11,7 +11,8 @@ import {
   MapPin,
   Buildings,
 } from '@phosphor-icons/react';
-import { formatCurrency } from '@/lib/decimal';
+import { formatCurrency, toBanglaDigits } from '@/lib/decimal';
+import { buttonClasses } from '@/components/ui/Button';
 import { useSupplierKhataStore } from '../useSupplierKhataStore';
 import { Supplier } from '../supplierKhata.types';
 
@@ -22,34 +23,34 @@ export function SupplierMobileCard({ supplier }: { supplier: Supplier }) {
   const isAdvance = supplier.currentPayable < 0;
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200/90 p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between space-y-3">
+    <div className="bg-white rounded-xl border border-slate-200/90 p-3.5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between space-y-3">
       {/* টপ সেকশন: গদির নাম, মহাজনের নাম ও ফোন */}
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <Buildings size={15} weight="bold" className="text-slate-500 shrink-0" />
+            <Buildings size={15} weight="bold" className="text-brand-deep shrink-0" />
             <h4 className="font-semibold text-slate-900 text-xs sm:text-sm truncate">
               {supplier.companyName || supplier.name}
             </h4>
           </div>
 
           {supplier.companyName && (
-            <p className="text-[11px] text-slate-500 mt-0.5">মহাজন: {supplier.name}</p>
+            <p className="text-xs text-slate-600 mt-0.5">মহাজন: {supplier.name}</p>
           )}
 
           {supplier.phone && (
             <a
               href={`tel:${supplier.phone}`}
-              className="inline-flex items-center gap-1 text-xs text-slate-700 font-mono tabular-nums tracking-tight mt-0.5 hover:underline"
+              className="inline-flex items-center gap-1 text-xs text-slate-700 font-mono tabular-nums tracking-tight mt-0.5 hover:text-brand-deep hover:underline"
             >
-              <Phone size={12} weight="bold" className="text-slate-400" />
-              <span>{supplier.phone}</span>
+              <Phone size={12} weight="bold" className="text-slate-500" />
+              <span>{toBanglaDigits(supplier.phone)}</span>
             </a>
           )}
 
           {supplier.address && (
-            <div className="flex items-center gap-1 text-[11px] text-slate-500 mt-0.5 truncate">
-              <MapPin size={11} weight="bold" className="shrink-0 text-slate-400" />
+            <div className="flex items-center gap-1 text-xs text-slate-600 mt-0.5 truncate">
+              <MapPin size={12} weight="bold" className="shrink-0 text-slate-500" />
               <span className="truncate">{supplier.address}</span>
             </div>
           )}
@@ -58,32 +59,34 @@ export function SupplierMobileCard({ supplier }: { supplier: Supplier }) {
         {/* এডিট ও সমন্বয় বাটন */}
         <div className="flex items-center gap-1 shrink-0">
           <button
+            type="button"
             onClick={() => openModal('adjustment', supplier)}
-            className="p-1.5 rounded-md border border-slate-200/90 text-slate-500 hover:text-slate-800 active:scale-[0.98] active:bg-slate-100 transition-[background-color,border-color,transform] duration-150"
+            className="p-1.5 rounded-md border border-slate-200/90 text-slate-600 hover:text-brand-deep hover:bg-brand-soft/60 active:scale-[0.98] transition-[background-color,border-color,transform] duration-150 cursor-pointer"
             title="শুকতি / কমিশন সমন্বয়"
           >
-            <SlidersHorizontal size={13} weight="bold" />
+            <SlidersHorizontal size={14} weight="bold" />
           </button>
           <button
+            type="button"
             onClick={() => openModal('edit', supplier)}
-            className="p-1.5 rounded-md border border-slate-200/90 text-slate-500 hover:text-slate-800 active:scale-[0.98] active:bg-slate-100 transition-[background-color,border-color,transform] duration-150"
+            className="p-1.5 rounded-md border border-slate-200/90 text-slate-600 hover:text-brand-deep hover:bg-brand-soft/60 active:scale-[0.98] transition-[background-color,border-color,transform] duration-150 cursor-pointer"
             title="এডিট"
           >
-            <PencilSimple size={13} weight="bold" />
+            <PencilSimple size={14} weight="bold" />
           </button>
         </div>
       </div>
 
       {/* মিডল সেকশন: দেনার অবস্থা */}
-      <div className="bg-slate-50/80 p-2.5 rounded-md border border-slate-200/80 flex items-center justify-between">
-        <span className="text-xs text-slate-500 font-medium">দোকানের ব্যালেন্স:</span>
+      <div className="bg-slate-50/80 p-2.5 rounded-lg border border-slate-200/80 flex items-center justify-between">
+        <span className="text-xs text-slate-600 font-medium">দোকানের ব্যালেন্স:</span>
         <div>
           {isPayable ? (
             <div className="text-right">
               <span className="font-mono tabular-nums tracking-tight font-black text-amber-800 text-sm">
                 {formatCurrency(supplier.currentPayable)}
               </span>
-              <span className="block text-[10px] text-amber-700 font-semibold text-right">
+              <span className="block text-xs text-amber-800 font-semibold text-right">
                 দোকানের দেনা
               </span>
             </div>
@@ -92,12 +95,12 @@ export function SupplierMobileCard({ supplier }: { supplier: Supplier }) {
               <span className="font-mono tabular-nums tracking-tight font-black text-emerald-700 text-sm">
                 {formatCurrency(Math.abs(supplier.currentPayable))}
               </span>
-              <span className="block text-[10px] text-emerald-600 font-semibold text-right">
+              <span className="block text-xs text-emerald-700 font-semibold text-right">
                 অগ্রিম দেওয়া
               </span>
             </div>
           ) : (
-            <span className="text-xs font-semibold text-slate-500">পরিশোধিত (০.০০)</span>
+            <span className="text-xs font-semibold text-slate-600">পরিশোধিত (০.০০)</span>
           )}
         </div>
       </div>
@@ -106,15 +109,16 @@ export function SupplierMobileCard({ supplier }: { supplier: Supplier }) {
       <div className="grid grid-cols-2 gap-2 pt-0.5">
         <Link
           href={`/khata/suppliers/${supplier.id}`}
-          className="h-8 px-2.5 rounded-md border border-slate-200/90 hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-xs font-medium flex items-center justify-center gap-1.5 transition-[background-color,border-color,transform] duration-150"
+          className={buttonClasses({ variant: 'secondary', size: 'sm', className: 'gap-1.5' })}
         >
-          <Scroll size={14} weight="bold" className="text-slate-500" />
+          <Scroll size={14} weight="bold" className="text-brand-deep" />
           <span>খতিয়ান দেখুন</span>
         </Link>
 
         <button
+          type="button"
           onClick={() => openModal('payment', supplier)}
-          className="h-8 px-2.5 rounded-md bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-[background-color,border-color,transform] duration-150 shadow-[0_1px_2px_rgba(5,150,105,0.2)]"
+          className={buttonClasses({ variant: 'cash', size: 'sm', className: 'gap-1.5' })}
         >
           <HandCoins size={15} weight="bold" />
           <span>দেনা শোধ</span>

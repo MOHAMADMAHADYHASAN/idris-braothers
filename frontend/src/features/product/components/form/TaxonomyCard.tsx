@@ -41,40 +41,39 @@ export function TaxonomyCard({
 
   return (
     <>
-      <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden">
+      <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden">
         {/* কার্ড হেডার */}
-        <div className="px-5 py-3.5 bg-slate-50/80 border-b border-slate-200/80 flex items-center justify-between">
+        <div className="px-5 py-3.5 bg-surface-subtle/60 border-b border-border-default flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="p-1 rounded-md bg-amber-50 text-amber-600">
+            <span className="p-1.5 rounded-lg bg-wholesale-bg text-wholesale-text">
               <Folders size={16} weight="bold" />
             </span>
-            <h2 className="text-sm font-bold text-slate-800 tracking-tight">
+            <h2 className="text-sm font-bold text-ink-primary">
               ক্যাটাগরি ও ব্র্যান্ড
             </h2>
           </div>
-          <span className="text-[10px] text-slate-400">ট্যাক্সোনমি</span>
+          <span className="text-xs text-ink-secondary">শ্রেণিবিভাগ</span>
         </div>
 
         <div className="p-5 space-y-4">
-          {/* ক্যাটাগরি ফিল্ড উইথ ইনলাইন কুইক ক্রিয়েট */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold text-slate-700">
+              <label className="text-xs font-semibold text-ink-body">
                 ক্যাটাগরি
               </label>
               <button
                 type="button"
                 onClick={() => setModalType('category')}
-                className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-0.5 transition-colors cursor-pointer"
+                className="text-xs font-semibold text-brand-deep hover:text-brand-hover flex items-center gap-1 transition-colors cursor-pointer"
               >
                 <Plus size={12} weight="bold" />
-                <span>+ নতুন ক্যাটাগরি</span>
+                <span>নতুন ক্যাটাগরি</span>
               </button>
             </div>
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 text-xs sm:text-sm text-slate-900 bg-white"
+              className="w-full px-3 py-2.5 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep text-xs sm:text-sm text-ink-primary bg-surface-card"
             >
               <option value="">— ক্যাটাগরি নির্বাচন করুন —</option>
               {categories.map((c) => (
@@ -85,25 +84,24 @@ export function TaxonomyCard({
             </select>
           </div>
 
-          {/* ব্র্যান্ড ফিল্ড উইথ ইনলাইন কুইক ক্রিয়েট */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold text-slate-700">
+              <label className="text-xs font-semibold text-ink-body">
                 কোম্পানি / ব্র্যান্ড
               </label>
               <button
                 type="button"
                 onClick={() => setModalType('brand')}
-                className="text-[11px] font-semibold text-indigo-600 hover:text-indigo-800 flex items-center gap-0.5 transition-colors cursor-pointer"
+                className="text-xs font-semibold text-brand-deep hover:text-brand-hover flex items-center gap-1 transition-colors cursor-pointer"
               >
                 <Plus size={12} weight="bold" />
-                <span>+ নতুন ব্র্যান্ড</span>
+                <span>নতুন ব্র্যান্ড</span>
               </button>
             </div>
             <select
               value={brandId}
               onChange={(e) => setBrandId(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 text-xs sm:text-sm text-slate-900 bg-white"
+              className="w-full px-3 py-2.5 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep text-xs sm:text-sm text-ink-primary bg-surface-card"
             >
               <option value="">— ব্র্যান্ড নির্বাচন করুন (ঐচ্ছিক) —</option>
               {brands.map((b) => (
@@ -116,7 +114,6 @@ export function TaxonomyCard({
         </div>
       </div>
 
-      {/* ইনলাইন ফাস্ট-ক্রিয়েট মোডাল */}
       <InlineTaxonomyModal
         isOpen={Boolean(modalType)}
         type={modalType || 'category'}

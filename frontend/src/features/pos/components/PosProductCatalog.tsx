@@ -13,7 +13,7 @@ import {
 import { Product, ProductUnit } from '@/features/product/product.types';
 import { useProductStore } from '@/features/product/useProductStore';
 import { usePosStore } from '../usePosStore';
-import { formatCurrency, formatWeight } from '@/lib/decimal';
+import { formatCurrency, formatNumber, formatWeight } from '@/lib/decimal';
 
 export function PosProductCatalog() {
   const { products, categories: storeCategories, isLoading, fetchProducts, fetchCategories } = useProductStore();
@@ -65,41 +65,41 @@ export function PosProductCatalog() {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden">
-      {/* 1. Header: Search Bar & Barcode Indicator */}
-      <div className="p-3 border-b border-slate-200/80 bg-slate-50/60 space-y-2">
+    <div className="flex flex-col h-full bg-surface-card rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden">
+      {/* 1. Header: Search Bar & Category Filter */}
+      <div className="p-3 border-b border-border-default bg-surface-subtle/60 space-y-2.5">
         <div className="relative">
           <MagnifyingGlass
             size={16}
             weight="bold"
-            className="text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            className="text-ink-secondary absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
           />
           <input
             id="pos-search-input"
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="পণ্য খুঁজুন (নাম, বাংলা নাম, বারকোড বা SKU) [F2]"
-            className="w-full h-9.5 pl-9 pr-9 rounded-md border border-slate-200 bg-white text-xs font-medium text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:border-slate-800 focus:ring-2 focus:ring-slate-900/10 transition-[border-color,box-shadow] duration-150"
+            placeholder="পণ্য খুঁজুন (নাম, বারকোড বা SKU) [F2]"
+            className="w-full h-10 pl-9 pr-9 rounded-lg border border-border-strong bg-surface-card text-xs sm:text-sm font-medium text-ink-primary placeholder:text-ink-muted focus:outline-hidden focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
           />
           <Barcode
             size={18}
             weight="bold"
-            className="text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            className="text-ink-secondary absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
           />
         </div>
 
         {/* Category Pills */}
-        <div className="flex gap-1 overflow-x-auto pb-0.5 no-scrollbar">
+        <div className="flex gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
           {categoryList.map((cat) => (
             <button
               key={cat.id}
               type="button"
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-2.5 py-1 rounded-md text-xs font-medium whitespace-nowrap transition-[background-color,border-color,color] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] cursor-pointer active:scale-[0.98] ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-[background-color,border-color,color] duration-150 cursor-pointer active:scale-[0.98] ${
                 selectedCategory === cat.id
-                  ? 'bg-slate-900 text-white shadow-2xs'
-                  : 'bg-white border border-slate-200/80 text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                  ? 'bg-brand-deep text-white shadow-2xs'
+                  : 'bg-surface-card border border-border-default text-ink-body hover:bg-surface-subtle hover:text-ink-primary'
               }`}
             >
               {cat.label}
@@ -111,15 +111,14 @@ export function PosProductCatalog() {
       {/* 2. Products Grid */}
       <div className="flex-1 overflow-y-auto p-3">
         {isLoading ? (
-          <div className="h-64 flex flex-col items-center justify-center text-slate-400 text-xs font-medium">
-            <span className="w-5 h-5 border-2 border-slate-800 border-t-transparent rounded-full animate-spin mb-2" />
+          <div className="h-64 flex flex-col items-center justify-center text-ink-secondary text-xs font-medium">
+            <span className="w-5 h-5 border-2 border-brand-deep border-t-transparent rounded-full animate-spin mb-2" />
             পণ্য তালিকা লোড হচ্ছে...
           </div>
         ) : filteredProducts.length === 0 ? (
-          <div className="h-64 flex flex-col items-center justify-center text-slate-400 text-xs text-center p-4">
-            <WarningCircle size={28} weight="duotone" className="text-slate-300 mb-1.5" />
-            <p className="font-medium text-slate-600">কোনো পণ্য খুঁজে পাওয়া যায়নি</p>
-            <p className="text-[11px] text-slate-400 mt-0.5">অন্য নাম বা বারকোড দিয়ে চেষ্টা করুন</p>
+          <div className="h-64 flex flex-col items-center justify-center text-ink-secondary text-xs text-center p-4">
+            <WarningCircle size={28} weight="duotone" className="text-ink-muted mb-1.5" />
+            <p className="font-semibold text-sm text-ink-primary">কোনো পণ্য খুঁজে পাওয়া যায়নি</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-2.5">
@@ -132,26 +131,26 @@ export function PosProductCatalog() {
               return (
                 <div
                   key={product.id}
-                  className="bg-white border border-slate-200/80 hover:border-slate-400/80 rounded-md p-2.5 shadow-[0_1px_2px_rgba(15,23,42,0.02)] transition-[border-color,box-shadow] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col justify-between group"
+                  className="bg-surface-card border border-border-default hover:border-brand-mid rounded-lg p-3 shadow-[0_1px_2px_rgba(15,23,42,0.02)] transition-[border-color,box-shadow] duration-150 flex flex-col justify-between group"
                 >
                   <div>
                     {/* Top: Name & Stock Badge */}
-                    <div className="flex items-start justify-between gap-1.5 pb-1.5">
+                    <div className="flex items-start justify-between gap-2 pb-1.5">
                       <div className="min-w-0">
-                        <h3 className="font-semibold text-slate-900 text-xs sm:text-[13px] tracking-tight group-hover:text-slate-950 truncate">
+                        <h3 className="font-bold text-ink-primary text-xs sm:text-sm truncate">
                           {product.banglaName || product.name}
                         </h3>
                         {product.banglaName && (
-                          <p className="text-[10px] text-slate-400 truncate tracking-tight">
+                          <p className="text-xs text-ink-secondary truncate">
                             {product.name}
                           </p>
                         )}
                       </div>
                       <span
-                        className={`shrink-0 px-1.5 py-0.5 rounded text-[10px] font-medium border font-mono tabular-nums tracking-tight ${
+                        className={`shrink-0 px-2 py-0.5 rounded text-xs font-semibold border font-mono tabular-nums ${
                           isLowStock
-                            ? 'bg-rose-50 text-rose-700 border-rose-200/80'
-                            : 'bg-slate-100 text-slate-600 border-slate-200/80'
+                            ? 'bg-due-bg text-due-text border-due-border'
+                            : 'bg-surface-subtle text-ink-body border-border-default'
                         }`}
                         title="বর্তমান গুদাম স্টক"
                       >
@@ -159,17 +158,17 @@ export function PosProductCatalog() {
                       </span>
                     </div>
 
-                    {/* Price Tag with Tabular Numbers */}
-                    <div className="py-0.5">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-sm sm:text-base font-bold text-slate-900 font-mono tabular-nums tracking-tight">
+                    {/* Price Tag */}
+                    <div className="py-1">
+                      <div className="flex items-baseline gap-1.5 flex-wrap">
+                        <span className="text-base font-bold text-ink-primary font-mono tabular-nums">
                           {formatCurrency(activePrice, false)}
                         </span>
-                        <span className="text-[11px] text-slate-500 font-medium">
+                        <span className="text-xs text-ink-secondary font-medium">
                           / {product.baseUnitName}
                         </span>
                         {isWholesale && (
-                          <span className="text-[9px] bg-amber-100 text-amber-800 px-1 py-0.2 rounded font-semibold ml-0.5">
+                          <span className="text-xs bg-wholesale-bg text-wholesale-text border border-wholesale-border/60 px-1.5 py-0.5 rounded font-semibold">
                             পাইকারি
                           </span>
                         )}
@@ -178,18 +177,17 @@ export function PosProductCatalog() {
                   </div>
 
                   {/* Actions & Multi-Unit Buttons */}
-                  <div className="pt-2 mt-2 border-t border-slate-100 flex flex-col gap-1.5">
-                    {/* Primary Base Unit Add Button */}
+                  <div className="pt-2.5 mt-2 border-t border-border-subtle flex flex-col gap-1.5">
                     <button
                       type="button"
                       onClick={() => addItem(product)}
-                      className="w-full h-8 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-medium flex items-center justify-center gap-1.5 transition-[background-color,transform] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] shadow-[0_1px_2px_rgba(15,23,42,0.04)] active:scale-[0.98] cursor-pointer focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-slate-900/10"
+                      className="w-full h-9 rounded-lg bg-brand-deep hover:bg-brand-hover text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-[background-color,transform] duration-150 shadow-[0_1px_2px_rgba(30,74,122,0.16)] active:scale-[0.98] cursor-pointer"
                     >
                       <Plus size={14} weight="bold" />
                       <span>যোগ করুন (১ {product.baseUnitName})</span>
                     </button>
 
-                    {/* Quick Multi-Unit Pills (যেমন: বস্তা, কার্টন, পাল্লা) */}
+                    {/* Quick Multi-Unit Pills */}
                     {hasMultiUnits && (
                       <div className="flex flex-wrap gap-1">
                         {product.units?.map((unit: ProductUnit) => {
@@ -202,7 +200,7 @@ export function PosProductCatalog() {
                               key={unit.id}
                               type="button"
                               onClick={() => addItem(product, unit, 1)}
-                              className="flex-1 py-1 px-1.5 rounded-md bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/80 text-[10px] font-semibold transition-[background-color,border-color,transform] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98] text-center truncate cursor-pointer font-mono tabular-nums tracking-tight"
+                              className="flex-1 py-1.5 px-2 rounded-md bg-surface-subtle hover:bg-brand-soft text-ink-body hover:text-brand-deep border border-border-default hover:border-brand-light text-xs font-semibold transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] text-center truncate cursor-pointer font-mono tabular-nums"
                               title={`${unit.unitName} (${formatCurrency(unitRate, false)})`}
                             >
                               + {unit.unitName}
@@ -212,15 +210,15 @@ export function PosProductCatalog() {
                       </div>
                     )}
 
-                    {/* Loose Spice: টাকার অংকে বিক্রি (Reverse Calculation) */}
+                    {/* Loose Spice: টাকার অংকে বিক্রি */}
                     {product.baseUnitName === 'কেজি' && (
                       <button
                         type="button"
                         onClick={() => setReverseModalProduct(product)}
-                        className="w-full py-1 rounded-md bg-amber-50/70 hover:bg-amber-100/70 text-amber-900 border border-amber-200/70 text-[11px] font-medium flex items-center justify-center gap-1 transition-[background-color,transform] duration-150 ease-[cubic-bezier(0.16,1,0.3,1)] active:scale-[0.98] cursor-pointer"
+                        className="w-full py-1.5 rounded-md bg-wholesale-bg/70 hover:bg-wholesale-bg text-wholesale-text border border-wholesale-border/60 text-xs font-semibold flex items-center justify-center gap-1 transition-[background-color,transform] duration-150 active:scale-[0.98] cursor-pointer"
                       >
-                        <Lightning size={13} weight="fill" className="text-amber-600" />
-                        <span>টাকার অংকে বিক্রি (যেমন ২০ টাকার এলাচ)</span>
+                        <Lightning size={13} weight="fill" className="text-wholesale-solid" />
+                        <span>টাকার অংকে বিক্রি</span>
                       </button>
                     )}
                   </div>
@@ -231,7 +229,7 @@ export function PosProductCatalog() {
         )}
       </div>
 
-      {/* Reverse Price Modal with Spring Motion */}
+      {/* Reverse Price Modal */}
       <AnimatePresence>
         {reverseModalProduct && (
           <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4">
@@ -241,36 +239,36 @@ export function PosProductCatalog() {
               exit={{ opacity: 0, y: 4, scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
               onSubmit={handleReverseSubmit}
-              className="bg-white rounded-lg max-w-sm w-full p-4 shadow-xl border border-slate-200 space-y-3.5 relative"
+              className="bg-surface-card rounded-xl max-w-sm w-full p-4 shadow-xl border border-border-default space-y-3.5 relative"
             >
               <div className="flex items-start justify-between">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1">
+                  <span className="text-xs font-bold text-wholesale-text flex items-center gap-1">
                     <Lightning size={13} weight="fill" />
-                    টাকার অংকে বিক্রি (Reverse Weight)
+                    টাকার অংকে বিক্রি
                   </span>
-                  <h3 className="text-sm font-semibold text-slate-900 mt-0.5">
+                  <h3 className="text-sm font-bold text-ink-primary mt-0.5">
                     {reverseModalProduct.banglaName || reverseModalProduct.name}
                   </h3>
-                  <p className="text-xs text-slate-500 font-mono tabular-nums tracking-tight mt-0.5">
-                    দর: ৳{saleType === 'RETAIL' ? reverseModalProduct.retailPrice : reverseModalProduct.wholesalePrice} / কেজি
+                  <p className="text-xs text-ink-secondary font-mono tabular-nums mt-0.5">
+                    দর: {formatCurrency(saleType === 'RETAIL' ? reverseModalProduct.retailPrice : reverseModalProduct.wholesalePrice, false)} / কেজি
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setReverseModalProduct(null)}
-                  className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                  className="p-1 rounded text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-colors cursor-pointer"
                 >
                   <X size={16} weight="bold" />
                 </button>
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">
-                  কাস্টমার কত টাকার নিতে চান? (টাকার পরিমাণ):
+                <label className="block text-xs font-semibold text-ink-body mb-1">
+                  কাস্টমার কত টাকার নিতে চান?
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-500 text-xs">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-ink-secondary text-xs">
                     ৳
                   </span>
                   <input
@@ -281,52 +279,52 @@ export function PosProductCatalog() {
                     step="any"
                     value={customAmount}
                     onChange={(e) => setCustomAmount(e.target.value)}
-                    className="w-full h-10 pl-7 pr-3 rounded-md border border-slate-200 text-sm font-bold font-mono tabular-nums tracking-tight text-slate-900 focus:outline-hidden focus:border-slate-800 focus:ring-2 focus:ring-slate-900/10"
+                    className="w-full h-10 pl-7 pr-3 rounded-lg border border-border-strong text-sm font-bold font-mono tabular-nums text-ink-primary focus:outline-hidden focus:border-brand-deep"
                   />
                 </div>
 
-                {/* Quick denomination buttons */}
                 <div className="flex gap-1.5 mt-2">
                   {[10, 20, 50, 100].map((amt) => (
                     <button
                       key={amt}
                       type="button"
                       onClick={() => setCustomAmount(amt.toString())}
-                      className="flex-1 py-1 rounded bg-slate-100 hover:bg-slate-200 text-xs font-semibold font-mono tabular-nums text-slate-800 transition-colors"
+                      className="flex-1 py-1.5 rounded-md bg-surface-subtle hover:bg-brand-soft hover:text-brand-deep border border-border-default text-xs font-semibold font-mono tabular-nums text-ink-body transition-colors cursor-pointer"
                     >
-                      {amt}৳
+                      {formatNumber(amt)}৳
                     </button>
                   ))}
                 </div>
 
                 {parseFloat(customAmount) > 0 && (
-                  <div className="mt-2.5 p-2 bg-slate-50 border border-slate-200/80 rounded text-xs text-slate-700 font-mono tabular-nums tracking-tight flex justify-between items-center">
-                    <span className="text-slate-500">হিসাবকৃত পরিমাণ:</span>
-                    <span className="font-bold text-slate-900">
-                      {(
+                  <div className="mt-2.5 p-2.5 bg-surface-subtle border border-border-default rounded-lg text-xs text-ink-body font-mono tabular-nums flex justify-between items-center">
+                    <span className="text-ink-secondary">হিসাবকৃত পরিমাণ:</span>
+                    <span className="font-bold text-ink-primary">
+                      {formatNumber(
                         (parseFloat(customAmount) /
                           (saleType === 'RETAIL'
                             ? reverseModalProduct.retailPrice
                             : reverseModalProduct.wholesalePrice)) *
-                        1000
-                      ).toFixed(1)}{' '}
+                          1000,
+                        { minDecimals: 1, maxDecimals: 1 }
+                      )}{' '}
                       গ্রাম
                     </span>
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-border-subtle">
                 <button
                   type="button"
                   onClick={() => setReverseModalProduct(null)}
-                  className="px-3 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-md transition-colors"
+                  className="px-3.5 py-2 text-xs font-semibold text-ink-body border border-border-strong hover:bg-surface-subtle rounded-lg transition-colors cursor-pointer"
                 >
                   বাতিল
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-1.5 text-xs font-medium bg-slate-900 text-white rounded-md hover:bg-slate-800 transition-[background-color,transform] duration-150 active:scale-[0.98]"
+                  className="px-4 py-2 text-xs font-semibold bg-brand-deep text-white rounded-lg hover:bg-brand-hover transition-[background-color,transform] duration-150 active:scale-[0.98] cursor-pointer"
                 >
                   কার্টে যুক্ত করুন
                 </button>

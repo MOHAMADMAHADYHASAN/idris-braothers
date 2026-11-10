@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Printer, X, DownloadSimple, Copy, Check } from '@phosphor-icons/react';
 import { ThermalReceiptData } from '@/features/pos/pos.types';
-import { formatCurrency } from '@/lib/decimal';
+import { formatCurrency, formatNumber, toBanglaDigits } from '@/lib/decimal';
 import { downloadEscPosFile, generateEscPosCommands } from '@/lib/escpos';
 
 interface ThermalReceiptProps {
@@ -48,31 +48,31 @@ export function ThermalReceipt({
         className="bg-white rounded-lg border border-slate-200/90 shadow-[0_4px_20px_rgba(15,23,42,0.12)] max-w-md w-full overflow-hidden flex flex-col max-h-[95vh]"
       >
         {/* Modal Top Actions (Hidden on Print) */}
-        <div className="p-3 bg-slate-50 border-b border-slate-200/90 flex items-center justify-between gap-2 no-print shrink-0">
+        <div className="p-3 bg-surface-subtle border-b border-border-default flex items-center justify-between gap-2 no-print shrink-0">
           <div className="flex items-center gap-1.5">
             {/* Paper Size Switcher Pills */}
-            <div className="inline-flex rounded-md border border-slate-200/90 p-0.5 bg-white">
+            <div className="inline-flex rounded-md border border-border-default p-0.5 bg-surface-card">
               <button
                 type="button"
                 onClick={() => setPaperWidth('80mm')}
-                className={`px-2 py-1 rounded text-xs font-semibold transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ${
+                className={`px-2.5 py-1 rounded text-xs font-semibold transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ${
                   paperWidth === '80mm'
-                    ? 'bg-slate-900 text-white'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-brand-deep text-white'
+                    : 'text-ink-secondary hover:text-ink-primary'
                 }`}
               >
-                ৮০ মিমি (3-inch)
+                ৮০ মিমি
               </button>
               <button
                 type="button"
                 onClick={() => setPaperWidth('58mm')}
-                className={`px-2 py-1 rounded text-xs font-semibold transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ${
+                className={`px-2.5 py-1 rounded text-xs font-semibold transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ${
                   paperWidth === '58mm'
-                    ? 'bg-slate-900 text-white'
-                    : 'text-slate-600 hover:text-slate-900'
+                    ? 'bg-brand-deep text-white'
+                    : 'text-ink-secondary hover:text-ink-primary'
                 }`}
               >
-                ৫৮ মিমি (2-inch)
+                ৫৮ মিমি
               </button>
             </div>
           </div>
@@ -81,11 +81,11 @@ export function ThermalReceipt({
             <button
               type="button"
               onClick={handleCopyRawEscPos}
-              className="p-1.5 rounded-md border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
+              className="p-1.5 rounded-md border border-border-strong text-ink-body hover:text-ink-primary hover:bg-surface-subtle transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
               title="ESC/POS টেক্সট কপি করুন"
             >
               {copied ? (
-                <Check size={14} weight="bold" className="text-emerald-600" />
+                <Check size={14} weight="bold" className="text-success" />
               ) : (
                 <Copy size={14} weight="bold" />
               )}
@@ -94,7 +94,7 @@ export function ThermalReceipt({
             <button
               type="button"
               onClick={handleDownloadPrn}
-              className="p-1.5 rounded-md border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
+              className="p-1.5 rounded-md border border-border-strong text-ink-body hover:text-ink-primary hover:bg-surface-subtle transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
               title="ESC/POS বাইনারি ডাউনলোড (.prn)"
             >
               <DownloadSimple size={14} weight="bold" />
@@ -103,7 +103,7 @@ export function ThermalReceipt({
             <button
               type="button"
               onClick={handlePrint}
-              className="px-3 py-1.5 rounded-md bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-[background-color,transform] duration-150 flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
+              className="px-3.5 py-1.5 rounded-lg bg-brand-deep text-white text-xs font-semibold hover:bg-brand-hover transition-[background-color,transform] duration-150 flex items-center gap-1.5 cursor-pointer active:scale-[0.98]"
             >
               <Printer size={14} weight="bold" />
               <span>প্রিন্ট</span>
@@ -112,7 +112,7 @@ export function ThermalReceipt({
             <button
               type="button"
               onClick={onClose}
-              className="p-1.5 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
+              className="p-1.5 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
             >
               <X size={16} weight="bold" />
             </button>
@@ -129,7 +129,7 @@ export function ThermalReceipt({
           >
             {/* Header: Store Identity */}
             <div className="text-center pb-2 border-b border-dashed border-black">
-              <h2 className="text-base font-black tracking-tight uppercase">
+              <h2 className="text-base font-black tracking-tight">
                 {data.storeInfo.name}
               </h2>
               <p className="text-[11px] font-medium">{data.storeInfo.tagline}</p>
@@ -149,7 +149,7 @@ export function ThermalReceipt({
               <div className="flex justify-between">
                 <span>তারিখ ও সময়:</span>
                 <span className="tabular-nums">
-                  {data.invoice.date} {data.invoice.time}
+                  {toBanglaDigits(data.invoice.date)} {toBanglaDigits(data.invoice.time)}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -195,11 +195,11 @@ export function ThermalReceipt({
                   <div key={idx} className="py-1">
                     <div className="font-bold">{item.name}</div>
                     <div className="flex justify-between text-[10px] text-black">
-                      <span className="tabular-nums">৳{item.rate}/দর</span>
+                      <span className="tabular-nums">{formatCurrency(item.rate, false)}/দর</span>
                       <span className="tabular-nums">
-                        {item.qty} {item.unit}
+                        {formatNumber(item.qty)} {item.unit}
                       </span>
-                      <span className="font-bold tabular-nums">৳{item.total}</span>
+                      <span className="font-bold tabular-nums">{formatCurrency(item.total, false)}</span>
                     </div>
                   </div>
                 ))}

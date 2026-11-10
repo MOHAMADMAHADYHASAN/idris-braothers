@@ -19,6 +19,8 @@ import { SupplierFormModal } from '@/features/supplier-khata/components/Supplier
 import { SupplierAdjustmentModal } from '@/features/supplier-khata/components/SupplierAdjustmentModal';
 import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { AdminPagination } from '@/components/shared/AdminPagination';
+import { buttonClasses } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
 
 export default function SupplierKhataPage() {
   const { suppliers, meta, isLoading, fetchSuppliers, openModal, setPage } =
@@ -55,14 +57,13 @@ export default function SupplierKhataPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
           <AdminPageHeader
             title="মহাজন খাতা ও দেনা রেজিস্টার"
-            subtitle="মরিচপট্টি, ফেনী বাজার — মোকাম চালান ও নগদ দেনা পরিশোধ"
             backHref="/"
             backTitle="ড্যাশবোর্ডে ফিরে যান"
             icon={<Truck size={16} weight="bold" />}
             badge={
-              <span className="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+              <Badge variant="brand">
                 মহাজন
-              </span>
+              </Badge>
             }
             actions={
               <div className="flex items-center gap-2">
@@ -70,20 +71,20 @@ export default function SupplierKhataPage() {
                   type="button"
                   onClick={() => fetchSuppliers()}
                   disabled={isLoading}
-                  className="px-2.5 py-1.5 rounded-md border border-slate-200/90 bg-white hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 disabled:opacity-50 cursor-pointer shadow-2xs"
+                  className={buttonClasses({ variant: 'secondary', size: 'sm', className: 'gap-1.5' })}
                   title="তালিকা রিফ্রেশ করুন"
                 >
                   <ArrowsClockwise
                     size={14}
                     weight="bold"
-                    className={isLoading ? 'animate-spin' : ''}
+                    className={isLoading ? 'animate-spin text-brand-deep' : ''}
                   />
                   <span className="hidden sm:inline">রিফ্রেশ</span>
                 </button>
 
                 <Link
                   href="/purchases"
-                  className="px-2.5 py-1.5 rounded-md bg-white border border-slate-200/90 hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150"
+                  className={buttonClasses({ variant: 'secondary', size: 'sm', className: 'gap-1.5' })}
                 >
                   <Package size={14} weight="bold" />
                   <span className="hidden sm:inline">চালান এন্ট্রি</span>
@@ -92,7 +93,7 @@ export default function SupplierKhataPage() {
                 <button
                   type="button"
                   onClick={() => openModal('create')}
-                  className="px-2.5 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-[0_1px_2px_rgba(15,23,42,0.08)] transition-[background-color,transform] duration-150 active:scale-[0.98] cursor-pointer"
+                  className={buttonClasses({ variant: 'primary', size: 'sm', className: 'gap-1.5' })}
                 >
                   <UserPlus size={14} weight="bold" />
                   <span>+ নতুন মহাজন</span>
@@ -120,11 +121,11 @@ export default function SupplierKhataPage() {
         {/* মোবাইল কার্ড স্ট্রিম (< 768px) */}
         <div className="block md:hidden space-y-2.5">
           {isLoading && suppliers.length === 0 ? (
-            <div className="bg-white rounded-lg border border-slate-200/90 p-8 text-center text-xs text-slate-400">
+            <div className="bg-white rounded-xl border border-slate-200/90 p-8 text-center text-xs text-slate-600">
               মহাজনদের খাতা লোড হচ্ছে...
             </div>
           ) : suppliers.length === 0 ? (
-            <div className="bg-white rounded-lg border border-slate-200/90 p-8 text-center text-xs text-slate-400">
+            <div className="bg-white rounded-xl border border-slate-200/90 p-8 text-center text-xs text-slate-600">
               কোনো মহাজন পাওয়া যায়নি
             </div>
           ) : (

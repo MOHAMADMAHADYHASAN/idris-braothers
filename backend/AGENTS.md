@@ -265,3 +265,6 @@ npx tsx scripts/test-all-apis-e2e.ts
    - The `/api/v1/sales/:id/receipt` endpoint provides the exact receipt data structure. Format it for 58mm/80mm thermal POS printers.
 4. **Always Reference this Document:**
    - Whenever an agent creates a new frontend page or API call, verify endpoint URLs, payload types, and decimal conventions against this specification.
+5. **6-Digit Base SKU Engine & Hardware Barcode Lookup (`inventory/skuGenerator.ts`, `inventory.repository.ts`):**
+   - Blank SKUs auto-generate a DB-verified cryptographic 6-digit base code (`100000–999999`), appending Bengali-safe normalized size suffixes (`৫০০ গ্রাম` -> `500G`, `১ কেজি` -> `1KG`, `৫০ কেজি বস্তা` -> `50KG-BAG`) and collision retries.
+   - `GET /api/v1/inventory/barcode/:barcode` uses `findByScanCode()` (`variant.barcode` -> `unit.barcode` -> `variant.sku` fallback) so thermal SKU stickers scan seamlessly even when factory `barcode` is left optional/blank.
