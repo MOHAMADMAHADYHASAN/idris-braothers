@@ -69,7 +69,7 @@ export function CancelSaleModal() {
                 {Number(saleToCancel.dueAmount) > 0 && (
                   <li>
                     কাস্টমারের বকেয়া খাতা থেকে{' '}
-                    <strong>৳{formatCurrency(saleToCancel.dueAmount)}</strong> দেনা কমে যাবে।
+                    <strong>{formatCurrency(saleToCancel.dueAmount)}</strong> দেনা কমে যাবে।
                   </li>
                 )}
                 <li>ক্যাশ ড্রয়ার ও দৈনিক বিক্রয় হিসাব থেকে এই মেমোর অংক বাদ পড়বে।</li>
@@ -79,7 +79,7 @@ export function CancelSaleModal() {
             {/* মেমো ইনফো সামারি */}
             <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200/80 text-xs flex justify-between items-center font-mono tabular-nums">
               <span className="text-slate-600">মোট মেমো মূল্য:</span>
-              <strong className="text-slate-900 text-sm">৳{formatCurrency(saleToCancel.grandTotal)}</strong>
+              <strong className="text-slate-900 text-sm">{formatCurrency(saleToCancel.grandTotal)}</strong>
             </div>
 
             {/* বাতিলের কারণ */}

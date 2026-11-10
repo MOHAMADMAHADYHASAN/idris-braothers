@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   Eye,
   Printer,
@@ -15,6 +17,7 @@ import { AdminPagination } from '@/components/shared/AdminPagination';
 import { DynamicDataTable, ColumnDef } from '@/components/shared/DynamicDataTable';
 
 export function SalesTable() {
+  const router = useRouter();
   const {
     sales,
     meta,
@@ -114,9 +117,9 @@ export function SalesTable() {
         headerClassName: 'text-right',
         cellClassName: 'text-right font-mono tabular-nums tracking-tight font-black text-slate-900 text-xs sm:text-sm',
         footerClassName: 'text-right font-mono tabular-nums tracking-tight font-black text-slate-900 text-xs sm:text-sm',
-        renderCell: (sale) => `৳${formatCurrency(sale.grandTotal)}`,
+        renderCell: (sale) => `${formatCurrency(sale.grandTotal)}`,
         renderFooterCell: (data) =>
-          `৳${formatCurrency(
+          `${formatCurrency(
             data.reduce((sum, s) => sum + (Number(s.grandTotal) || 0), 0)
           )}`,
       },
@@ -126,9 +129,9 @@ export function SalesTable() {
         headerClassName: 'text-right',
         cellClassName: 'text-right font-mono tabular-nums tracking-tight font-semibold text-emerald-700',
         footerClassName: 'text-right font-mono tabular-nums tracking-tight font-bold text-emerald-700',
-        renderCell: (sale) => `৳${formatCurrency(sale.paidAmount)}`,
+        renderCell: (sale) => `${formatCurrency(sale.paidAmount)}`,
         renderFooterCell: (data) =>
-          `৳${formatCurrency(
+          `${formatCurrency(
             data.reduce((sum, s) => sum + (Number(s.paidAmount) || 0), 0)
           )}`,
       },
@@ -143,7 +146,7 @@ export function SalesTable() {
           if (due > 0) {
             return (
               <span className="font-bold text-amber-800">
-                ৳{formatCurrency(due)}
+                {formatCurrency(due)}
               </span>
             );
           }
@@ -156,7 +159,7 @@ export function SalesTable() {
           );
           return totalDue > 0 ? (
             <span className="text-amber-800 font-bold">
-              ৳{formatCurrency(totalDue)}
+              {formatCurrency(totalDue)}
             </span>
           ) : (
             <span className="text-emerald-700 font-semibold">০ বকেয়া</span>
@@ -209,44 +212,35 @@ export function SalesTable() {
           return (
             <div className="flex items-center justify-center gap-1 no-row-click">
               {/* রসিদ ও বিস্তারিত দেখুন */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openDetail(sale.id);
-                }}
+              <Link
+                href={`/sales/${sale.id}`}
+                onClick={(e) => e.stopPropagation()}
                 className="p-1 rounded-md border border-slate-200/90 hover:bg-slate-100 active:scale-[0.98] text-slate-600 hover:text-slate-900 transition-[background-color,border-color,transform] duration-150 cursor-pointer"
                 title="মেমো বিস্তারিত দেখুন"
               >
                 <Eye size={14} weight="bold" />
-              </button>
+              </Link>
 
               {/* থার্মাল রসিদ প্রিন্ট */}
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openDetail(sale.id);
-                }}
+              <Link
+                href={`/sales/${sale.id}`}
+                onClick={(e) => e.stopPropagation()}
                 className="p-1 rounded-md border border-slate-200/90 hover:bg-slate-100 active:scale-[0.98] text-slate-600 hover:text-slate-900 transition-[background-color,border-color,transform] duration-150 cursor-pointer"
-                title="রসিদ রি-প্রিন্ট করুন"
+                title="রসিদ ভাউচার ও প্রিন্ট"
               >
                 <Printer size={14} weight="bold" />
-              </button>
+              </Link>
 
               {/* পণ্য ফেরত বাটন */}
               {!isCancelled && (
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    openReturnModal(sale.id);
-                  }}
+                <Link
+                  href={`/sales/${sale.id}/return`}
+                  onClick={(e) => e.stopPropagation()}
                   className="p-1 rounded-md border border-slate-200/90 hover:bg-amber-50 active:scale-[0.98] text-slate-500 hover:text-amber-700 transition-[background-color,border-color,transform] duration-150 cursor-pointer"
                   title="পণ্য ফেরত ও রিফান্ড"
                 >
                   <ArrowCounterClockwise size={14} weight="bold" />
-                </button>
+                </Link>
               )}
 
               {/* মেমো বাতিল বাটন */}
@@ -268,7 +262,7 @@ export function SalesTable() {
         },
       },
     ],
-    [openDetail, openCancelModal, openReturnModal]
+    [openCancelModal]
   );
 
   return (
@@ -278,7 +272,7 @@ export function SalesTable() {
       columns={columns}
       keyExtractor={(sale) => sale.id}
       isLoading={isLoading}
-      onRowClick={(sale) => openDetail(sale.id)}
+      onRowClick={(sale) => router.push(`/sales/${sale.id}`)}
       pagination={
         meta.totalPages > 1 ? (
           <AdminPagination

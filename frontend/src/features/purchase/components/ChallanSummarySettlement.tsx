@@ -89,7 +89,7 @@ export function ChallanSummarySettlement() {
         <div className="flex items-center justify-between text-slate-600">
           <span>পণ্যের মোট মূল্য:</span>
           <span className="font-mono tabular-nums font-semibold text-slate-900 text-xs sm:text-sm">
-            ৳{formatCurrency(subTotal)}
+            {formatCurrency(subTotal)}
           </span>
         </div>
 
@@ -139,7 +139,7 @@ export function ChallanSummarySettlement() {
         <div className="p-2.5 bg-slate-50/80 rounded-md border border-slate-200/90 flex items-center justify-between">
           <span className="font-bold text-slate-900 text-xs sm:text-sm">সর্বমোট চালান বিল:</span>
           <span className="font-mono tabular-nums tracking-tight font-black text-base sm:text-lg text-slate-900">
-            ৳{formatCurrency(grandTotal)}
+            {formatCurrency(grandTotal)}
           </span>
         </div>
 
@@ -193,7 +193,7 @@ export function ChallanSummarySettlement() {
             </span>
           </div>
           <span className="font-mono tabular-nums tracking-tight font-black text-sm sm:text-base text-amber-800">
-            ৳{formatCurrency(dueAmount)}
+            {formatCurrency(dueAmount)}
           </span>
         </div>
       </div>

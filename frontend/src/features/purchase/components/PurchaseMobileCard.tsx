@@ -1,16 +1,18 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Eye, Truck, Receipt } from '@phosphor-icons/react';
 import { Purchase } from '../purchase.types';
 import { formatCurrency } from '@/lib/decimal';
 
 interface PurchaseMobileCardProps {
   purchase: Purchase;
-  onOpenDetail: (purchase: Purchase) => void;
+  onOpenDetail?: (purchase: Purchase) => void;
 }
 
 export function PurchaseMobileCard({ purchase, onOpenDetail }: PurchaseMobileCardProps) {
+  const router = useRouter();
   const isPaid = purchase.dueAmount <= 0;
   const dateStr = new Date(purchase.createdAt).toLocaleDateString('bn-BD', {
     year: 'numeric',
@@ -67,7 +69,7 @@ export function PurchaseMobileCard({ purchase, onOpenDetail }: PurchaseMobileCar
               গাড়িভাড়া
             </span>
             <span className="font-mono text-xs tabular-nums text-slate-700 font-semibold">
-              {purchase.transportCost > 0 ? `৳${formatCurrency(purchase.transportCost)}` : '০'}
+              {purchase.transportCost > 0 ? `${formatCurrency(purchase.transportCost)}` : '০'}
             </span>
           </div>
         </div>
@@ -78,7 +80,7 @@ export function PurchaseMobileCard({ purchase, onOpenDetail }: PurchaseMobileCar
               নগদ পরিশোধ
             </span>
             <span className="font-mono text-xs font-bold text-emerald-700 tabular-nums">
-              ৳{formatCurrency(purchase.paidAmount)}
+              {formatCurrency(purchase.paidAmount)}
             </span>
           </div>
 
@@ -87,11 +89,11 @@ export function PurchaseMobileCard({ purchase, onOpenDetail }: PurchaseMobileCar
               সর্বমোট বিল
             </span>
             <span className="font-mono text-sm font-black text-slate-900 tabular-nums">
-              ৳{formatCurrency(purchase.grandTotal)}
+              {formatCurrency(purchase.grandTotal)}
             </span>
             {purchase.dueAmount > 0 && (
               <span className="block text-[11px] font-mono text-amber-800 font-bold tabular-nums">
-                বকেয়া: ৳{formatCurrency(purchase.dueAmount)}
+                বকেয়া: {formatCurrency(purchase.dueAmount)}
               </span>
             )}
           </div>
@@ -102,7 +104,13 @@ export function PurchaseMobileCard({ purchase, onOpenDetail }: PurchaseMobileCar
       <div className="p-2 bg-slate-50/80 border-t border-slate-100">
         <button
           type="button"
-          onClick={() => onOpenDetail(purchase)}
+          onClick={() => {
+            if (onOpenDetail) {
+              onOpenDetail(purchase);
+            } else {
+              router.push(`/purchases/${purchase.id}`);
+            }
+          }}
           className="w-full h-9 px-3 rounded-md bg-white border border-slate-200/90 hover:bg-slate-100 active:scale-[0.98] text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition-[background-color,border-color,transform] duration-150 cursor-pointer shadow-2xs"
         >
           <Eye size={14} weight="bold" />

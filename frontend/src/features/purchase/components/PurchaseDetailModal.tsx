@@ -134,7 +134,11 @@ export function PurchaseDetailModal() {
                 {selectedPurchase.items?.map((item, idx) => (
                   <tr key={item.id || idx} className="hover:bg-slate-50/70">
                     <td className="py-2 px-3 font-semibold text-slate-900">
-                      {item.product?.name || 'অজ্ঞাত পণ্য'}
+                      {item.variant?.product?.banglaName ||
+                        item.variant?.product?.name ||
+                        item.product?.banglaName ||
+                        item.product?.name ||
+                        'অজ্ঞাত পণ্য'}
                     </td>
                     <td className="py-2 px-3">
                       <span className="inline-block px-1.5 py-0.5 rounded-md text-[10px] bg-slate-100 text-slate-700 border border-slate-200/80">
@@ -145,10 +149,10 @@ export function PurchaseDetailModal() {
                       {item.quantity}
                     </td>
                     <td className="py-2 px-3 text-right font-mono tabular-nums text-slate-600">
-                      ৳{formatCurrency(item.unitCost)}
+                      {formatCurrency(item.unitCost)}
                     </td>
                     <td className="py-2 px-3.5 text-right font-mono tabular-nums tracking-tight font-bold text-slate-900">
-                      ৳{formatCurrency(item.subTotal)}
+                      {formatCurrency(item.subTotal)}
                     </td>
                   </tr>
                 ))}
@@ -161,14 +165,14 @@ export function PurchaseDetailModal() {
             <div className="flex justify-between text-slate-600">
               <span>পণ্য উপমোট (Subtotal):</span>
               <span className="font-mono tabular-nums font-semibold text-slate-900">
-                ৳{formatCurrency(selectedPurchase.subTotal)}
+                {formatCurrency(selectedPurchase.subTotal)}
               </span>
             </div>
             {selectedPurchase.transportCost > 0 && (
               <div className="flex justify-between text-slate-600">
                 <span>গাড়িভাড়া / কুলি (+):</span>
                 <span className="font-mono tabular-nums font-semibold text-slate-900">
-                  +৳{formatCurrency(selectedPurchase.transportCost)}
+                  +{formatCurrency(selectedPurchase.transportCost)}
                 </span>
               </div>
             )}
@@ -176,21 +180,21 @@ export function PurchaseDetailModal() {
               <div className="flex justify-between text-emerald-800">
                 <span>চালান ছাড় (-):</span>
                 <span className="font-mono tabular-nums font-semibold">
-                  -৳{formatCurrency(selectedPurchase.discount)}
+                  -{formatCurrency(selectedPurchase.discount)}
                 </span>
               </div>
             )}
             <div className="border-t border-slate-200 pt-2 flex justify-between font-bold text-xs sm:text-sm text-slate-900">
               <span>সর্বমোট চালান বিল (Grand Total):</span>
-              <span className="font-mono tabular-nums tracking-tight text-sm sm:text-base">৳{formatCurrency(selectedPurchase.grandTotal)}</span>
+              <span className="font-mono tabular-nums tracking-tight text-sm sm:text-base">{formatCurrency(selectedPurchase.grandTotal)}</span>
             </div>
             <div className="flex justify-between text-emerald-700 font-semibold">
               <span>নগদ পরিশোধ:</span>
-              <span className="font-mono tabular-nums">৳{formatCurrency(selectedPurchase.paidAmount)}</span>
+              <span className="font-mono tabular-nums">{formatCurrency(selectedPurchase.paidAmount)}</span>
             </div>
             <div className="border-t border-slate-200 pt-2 flex justify-between font-bold text-amber-800 text-xs sm:text-sm">
               <span>মহাজন খাতায় বাকি যোগ হয়েছে:</span>
-              <span className="font-mono tabular-nums tracking-tight text-sm sm:text-base">৳{formatCurrency(selectedPurchase.dueAmount)}</span>
+              <span className="font-mono tabular-nums tracking-tight text-sm sm:text-base">{formatCurrency(selectedPurchase.dueAmount)}</span>
             </div>
           </div>
 

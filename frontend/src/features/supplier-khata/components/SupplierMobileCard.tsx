@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import {
   HandCoins,
   Scroll,
@@ -80,7 +81,7 @@ export function SupplierMobileCard({ supplier }: { supplier: Supplier }) {
           {isPayable ? (
             <div className="text-right">
               <span className="font-mono tabular-nums tracking-tight font-black text-amber-800 text-sm">
-                ৳{formatCurrency(supplier.currentPayable)}
+                {formatCurrency(supplier.currentPayable)}
               </span>
               <span className="block text-[10px] text-amber-700 font-semibold text-right">
                 দোকানের দেনা
@@ -89,7 +90,7 @@ export function SupplierMobileCard({ supplier }: { supplier: Supplier }) {
           ) : isAdvance ? (
             <div className="text-right">
               <span className="font-mono tabular-nums tracking-tight font-black text-emerald-700 text-sm">
-                ৳{formatCurrency(Math.abs(supplier.currentPayable))}
+                {formatCurrency(Math.abs(supplier.currentPayable))}
               </span>
               <span className="block text-[10px] text-emerald-600 font-semibold text-right">
                 অগ্রিম দেওয়া
@@ -103,13 +104,13 @@ export function SupplierMobileCard({ supplier }: { supplier: Supplier }) {
 
       {/* পিনড বটম ফুটার অ্যাকশনস */}
       <div className="grid grid-cols-2 gap-2 pt-0.5">
-        <button
-          onClick={() => openModal('ledger', supplier)}
+        <Link
+          href={`/khata/suppliers/${supplier.id}`}
           className="h-8 px-2.5 rounded-md border border-slate-200/90 hover:bg-slate-50 active:scale-[0.98] text-slate-700 text-xs font-medium flex items-center justify-center gap-1.5 transition-[background-color,border-color,transform] duration-150"
         >
           <Scroll size={14} weight="bold" className="text-slate-500" />
           <span>খতিয়ান দেখুন</span>
-        </button>
+        </Link>
 
         <button
           onClick={() => openModal('payment', supplier)}

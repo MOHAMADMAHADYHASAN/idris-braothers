@@ -99,7 +99,7 @@ export function DueCollectionModal() {
             <div>
               <h3 className="text-sm font-semibold text-slate-900">টাকা জমা সফল হয়েছে!</h3>
               <p className="text-[11px] text-slate-500 mt-0.5">
-                {successReceipt.customerName}-এর একাউন্টে ৳{formatCurrency(successReceipt.paidAmount)} জমা হয়েছে।
+                {successReceipt.customerName}-এর একাউন্টে {formatCurrency(successReceipt.paidAmount)} জমা হয়েছে।
               </p>
             </div>
 
@@ -124,15 +124,15 @@ export function DueCollectionModal() {
               </div>
               <div className="border-t border-slate-200 pt-1 flex justify-between text-slate-500">
                 <span>পূর্বের বকেয়া:</span>
-                <span>৳{formatCurrency(successReceipt.previousDue)}</span>
+                <span>{formatCurrency(successReceipt.previousDue)}</span>
               </div>
               <div className="flex justify-between font-bold text-emerald-700">
                 <span>নগদ জমা:</span>
-                <span>৳{formatCurrency(successReceipt.paidAmount)}</span>
+                <span>{formatCurrency(successReceipt.paidAmount)}</span>
               </div>
               <div className="border-t border-slate-200 pt-1 flex justify-between font-bold text-rose-700">
                 <span>বর্তমান অবশিষ্ট বাকি:</span>
-                <span>৳{formatCurrency(successReceipt.newDue)}</span>
+                <span>{formatCurrency(successReceipt.newDue)}</span>
               </div>
             </div>
 
@@ -192,7 +192,7 @@ export function DueCollectionModal() {
                 <div className="border-r border-slate-200 pr-2">
                   <span className="text-[11px] text-slate-500 font-medium block">পূর্বের বকেয়া</span>
                   <span className="text-base sm:text-lg font-black font-mono tabular-nums tracking-tight text-rose-700">
-                    ৳{formatCurrency(currentDue)}
+                    {formatCurrency(currentDue)}
                   </span>
                 </div>
                 <div className="pl-2">
@@ -202,7 +202,7 @@ export function DueCollectionModal() {
                       remainingDue <= 0 ? 'text-emerald-700' : 'text-slate-900'
                     }`}
                   >
-                    ৳{formatCurrency(remainingDue)}
+                    {formatCurrency(remainingDue)}
                   </span>
                 </div>
               </div>

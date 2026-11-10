@@ -45,7 +45,7 @@ export function PurchaseKpiSummary() {
         </div>
         <div className="mt-2">
           <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900 truncate">
-            ৳{formatCurrency(totalAmount)}
+            {formatCurrency(totalAmount)}
           </div>
           <p className="text-[11px] text-slate-400 mt-0.5">গাড়িভাড়া সহ সর্বমোট স্টক ইন</p>
         </div>
@@ -63,7 +63,7 @@ export function PurchaseKpiSummary() {
         </div>
         <div className="mt-2">
           <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-emerald-700 truncate">
-            ৳{formatCurrency(totalPaid)}
+            {formatCurrency(totalPaid)}
           </div>
           <p className="text-[11px] text-slate-400 mt-0.5">মোকাম বা ব্যাংকে প্রদত্ত ক্যাশ</p>
         </div>
@@ -99,7 +99,7 @@ export function PurchaseKpiSummary() {
               totalDue > 0 ? 'text-amber-800' : 'text-slate-900'
             }`}
           >
-            ৳{formatCurrency(totalDue)}
+            {formatCurrency(totalDue)}
           </div>
           <p className="text-[11px] text-slate-400 mt-0.5">মোকাম আড়তের অবশিষ্ট দেনা</p>
         </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { Eye, XCircle, CheckCircle, ArrowCounterClockwise } from '@phosphor-icons/react';
 import { formatCurrency } from '@/lib/decimal';
 import { useSalesStore } from '../useSalesStore';
@@ -81,16 +82,16 @@ export function SalesMobileCard({ sale }: { sale: SaleListItem }) {
         <div className="flex items-center justify-between pt-1 border-t border-dashed border-slate-200">
           <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">সর্বমোট বিল</span>
           <span className="font-mono tabular-nums font-black text-slate-900 text-sm">
-            ৳{formatCurrency(sale.grandTotal)}
+            {formatCurrency(sale.grandTotal)}
           </span>
         </div>
 
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">নগদ আদায় / বাকি</span>
           <div className="text-right font-mono tabular-nums text-xs">
-            <span className="text-emerald-700 font-bold">৳{formatCurrency(sale.paidAmount)}</span>
+            <span className="text-emerald-700 font-bold">{formatCurrency(sale.paidAmount)}</span>
             {Number(sale.dueAmount) > 0 && (
-              <span className="text-amber-800 font-bold ml-1.5">(বাকি ৳{formatCurrency(sale.dueAmount)})</span>
+              <span className="text-amber-800 font-bold ml-1.5">(বাকি {formatCurrency(sale.dueAmount)})</span>
             )}
           </div>
         </div>
@@ -98,25 +99,23 @@ export function SalesMobileCard({ sale }: { sale: SaleListItem }) {
 
       {/* 3. Pinned Full-Width Footer Action Bar (Touch-Friendly h-9) */}
       <div className="pt-2.5 border-t border-slate-100 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => openDetail(sale.id)}
+        <Link
+          href={`/sales/${sale.id}`}
           className="flex-1 h-9 rounded-md border border-slate-200/90 bg-white text-xs text-slate-800 font-semibold flex items-center justify-center gap-1.5 active:scale-[0.98] transition-colors hover:bg-slate-50 cursor-pointer"
         >
           <Eye size={14} weight="bold" />
           <span>রসিদ দেখুন</span>
-        </button>
+        </Link>
 
         {!isCancelled && (
-          <button
-            type="button"
-            onClick={() => openReturnModal(sale.id)}
+          <Link
+            href={`/sales/${sale.id}/return`}
             className="h-9 px-3 rounded-md border border-amber-200/90 bg-amber-50/60 text-xs text-amber-800 font-semibold flex items-center justify-center gap-1 active:scale-[0.98] transition-colors hover:bg-amber-100/70 cursor-pointer"
             title="পণ্য ফেরত ও রিফান্ড"
           >
             <ArrowCounterClockwise size={14} weight="bold" />
             <span>ফেরত</span>
-          </button>
+          </Link>
         )}
 
         {!isCancelled && (

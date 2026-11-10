@@ -365,7 +365,7 @@ export function ChallanItemEntry() {
                 <div className="text-xs text-slate-500 mb-1 flex items-center justify-between">
                   <span>আইটেম মোট:</span>
                   <span className="font-bold font-mono tabular-nums tracking-tight text-slate-900 text-xs sm:text-sm">
-                    ৳{formatCurrency(lineSubTotal)}
+                    {formatCurrency(lineSubTotal)}
                   </span>
                 </div>
                 <button

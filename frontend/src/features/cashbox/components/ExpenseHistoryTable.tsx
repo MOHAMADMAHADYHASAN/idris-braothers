@@ -115,9 +115,9 @@ export function ExpenseHistoryTable() {
         headerClassName: 'text-right',
         cellClassName: 'text-right font-mono tabular-nums tracking-tight font-bold text-rose-600 text-xs sm:text-sm',
         footerClassName: 'text-right font-mono tabular-nums tracking-tight font-black text-rose-700 text-xs sm:text-sm',
-        renderCell: (expense) => `-৳${formatCurrency(expense.amount)}`,
+        renderCell: (expense) => `-${formatCurrency(expense.amount)}`,
         renderFooterCell: (data) =>
-          `-৳${formatCurrency(
+          `-${formatCurrency(
             data.reduce((sum, e) => sum + (Number(e.amount) || 0), 0)
           )}`,
       },

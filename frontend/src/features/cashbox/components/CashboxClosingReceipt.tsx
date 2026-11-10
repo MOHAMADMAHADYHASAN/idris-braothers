@@ -111,12 +111,12 @@ export function CashboxClosingReceipt() {
           <div className="border-t-2 border-b-2 border-dashed border-slate-800 py-2 space-y-1">
             <div className="flex justify-between font-black text-sm">
               <span>ড্রয়ারে নেট ক্যাশ:</span>
-              <span className="font-mono tabular-nums font-bold">৳{formatCurrency(netCash)}</span>
+              <span className="font-mono tabular-nums font-bold">{formatCurrency(netCash)}</span>
             </div>
             {countedNotes > 0 && (
               <div className="flex justify-between text-[11px]">
                 <span>গণনাকৃত ফিজিক্যাল ক্যাশ:</span>
-                <span className="font-mono tabular-nums">৳{formatCurrency(countedNotes)}</span>
+                <span className="font-mono tabular-nums">{formatCurrency(countedNotes)}</span>
               </div>
             )}
           </div>

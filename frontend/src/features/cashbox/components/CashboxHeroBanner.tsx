@@ -75,7 +75,7 @@ export function CashboxHeroBanner() {
           </div>
           <div className="mt-2.5">
             <span className="text-xl sm:text-2xl font-black font-mono text-emerald-700 tabular-nums tracking-tight">
-              +৳{formatCurrency(totalIn)}
+              +{formatCurrency(totalIn)}
             </span>
             <p className="text-[11px] text-slate-500 mt-0.5">
               বিক্রি ও কাস্টমার বাকি আদায় থেকে প্রাপ্ত
@@ -96,7 +96,7 @@ export function CashboxHeroBanner() {
           </div>
           <div className="mt-2.5">
             <span className="text-xl sm:text-2xl font-black font-mono text-amber-800 tabular-nums tracking-tight">
-              -৳{formatCurrency(totalOut)}
+              -{formatCurrency(totalOut)}
             </span>
             <p className="text-[11px] text-slate-500 mt-0.5">
               চালান মাল, মহাজন পেমেন্ট ও দোকানের খরচ
@@ -115,7 +115,7 @@ export function CashboxHeroBanner() {
           </div>
           <div className="mt-2.5">
             <span className="text-xl sm:text-2xl font-black font-mono text-emerald-400 tabular-nums tracking-tight">
-              ৳{formatCurrency(netCash)}
+              {formatCurrency(netCash)}
             </span>
             <p className="text-[11px] text-slate-400 mt-0.5">
               ক্যাশবাক্স গণনা শেষে ঠিক এই পরিমাণ ক্যাশ থাকবে

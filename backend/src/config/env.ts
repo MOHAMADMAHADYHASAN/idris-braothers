@@ -9,7 +9,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
   CORS_ORIGIN: z.string().default('*'),
   RATE_LIMIT_WINDOW_MS: z.string().default('900000').transform((val) => parseInt(val, 10)), // 15 mins
-  RATE_LIMIT_MAX: z.string().default('100').transform((val) => parseInt(val, 10)), // 100 requests per window
+  RATE_LIMIT_MAX: z.string().default('2000').transform((val) => parseInt(val, 10)), // 2000 requests per 15 mins (multi-terminal POS friendly)
 });
 
 const _env = envSchema.safeParse(process.env);

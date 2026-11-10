@@ -89,7 +89,7 @@ export function SalesKpiSummary() {
           </div>
           <div className="mt-2">
             <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900">
-              ৳{formatCurrency(totalRevenue)}
+              {formatCurrency(totalRevenue)}
             </div>
             <span className="text-[10px] text-slate-400 mt-0.5 block">
               ছাড় পরবর্তী সর্বমোট প্রদেয়
@@ -109,7 +109,7 @@ export function SalesKpiSummary() {
           </div>
           <div className="mt-2">
             <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-emerald-700">
-              ৳{formatCurrency(totalCashPaid)}
+              {formatCurrency(totalCashPaid)}
             </div>
             <span className="text-[10px] text-emerald-800 mt-0.5 block">
               ক্যাশবাক্সে সরাসরি জমা
@@ -129,7 +129,7 @@ export function SalesKpiSummary() {
           </div>
           <div className="mt-2">
             <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-amber-800">
-              ৳{formatCurrency(totalDues)}
+              {formatCurrency(totalDues)}
             </div>
             <span className="text-[10px] text-amber-700 mt-0.5 block">
               কাস্টমার খাতায় বকেয়া

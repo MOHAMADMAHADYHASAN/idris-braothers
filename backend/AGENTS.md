@@ -1,11 +1,18 @@
-# AGENT.md — Backend Architecture & Frontend Sync Specification
+# AGENTS.md — Backend Architecture & Engine Rules
 **Project:** Idris Brothers Inventory, POS & Khata Management System  
 **Location:** Morichpotti, Feni Bazar, Feni, Bangladesh  
 **Stack:** Node.js, Express, TypeScript, PostgreSQL, Prisma ORM  
+**Master Bridge Reference:** `../AGENTS.md` (Contains global business domain & core rules)  
 **Version:** 1.0.0 (Production-Ready Backend)
 
-> **🔴 MANDATORY AGENT DIRECTIVE — AUTOMATIC AGENT.MD LOGGING:**
-> **যেকোনো নতুন পরিবর্তন, ফিচার যোগ, রিফ্যাক্টরিং বা আর্কিটেকচারাল সিদ্ধান্ত বাস্তবায়নের সাথে সাথেই `AGENT.md`-তে তাৎক্ষণিকভাবে নোট (record) করতে হবে। কোনো কোড পরিবর্তন ডকুমেন্টেশন ছাড়া অসম্পূর্ণ হিসেবে গণ্য হবে।**
+> **🔴 MANDATORY AGENT DIRECTIVE — AUTOMATIC AGENTS.MD LOGGING:**
+> **যেকোনো নতুন পরিবর্তন, ফিচার যোগ, রিফ্যাক্টরিং বা আর্কিটেকচারাল সিদ্ধান্ত বাস্তবায়নের সাথে সাথেই সংশ্লিষ্ট `AGENTS.md`-তে তাৎক্ষণিকভাবে নোট (record) করতে হবে। কোনো কোড পরিবর্তন ডকুমেন্টেশন ছাড়া অসম্পূর্ণ হিসেবে গণ্য হবে।**
+
+> **🛑 STRICT SAFETY DIRECTIVE — NO GIT COMMANDS WITHOUT USER PERMISSION:**
+> **ইউজারের সুস্পষ্ট ও প্রত্যক্ষ অনুমতি ছাড়া কোনো প্রকার Git কমান্ড (`git add`, `git commit`, `git push`, `git checkout`, `git reset`, `git stash`, ইত্যাদি) রান করা সম্পূর্ণ নিষিদ্ধ। সমস্ত গিট অপারেশন শুধুমাত্র ইউজার নিজে পরিচালনা করবেন অথবা ইউজারের সুস্পষ্ট লিখিত নির্দেশে চালানো যাবে।**
+
+> **🛑 STRICT BROWSER & TESTING DIRECTIVE — NO PLAYWRIGHT / BROWSER TESTING WITHOUT EXPLICIT USER REQUEST:**
+> **ইউজারের সুস্পষ্ট ও প্রত্যক্ষ নির্দেশ ছাড়া কোনো অবস্থাতেই Playwright, Playwright MCP, বা হেডলেস ব্রাউজার E2E টেস্টিং স্বয়ংক্রিয়ভাবে রান করা যাবে না।**
 
 ---
 
@@ -67,7 +74,57 @@ Request ──► Routes ──► Controllers ──► Services ──► Repo
 
 ---
 
-## 3. Frontend-Backend Contract & Type Synchronization (Frontend Sync)
+## 3. Database ACID Compliance, Data Consistency & Integrity Protocol (বাধ্যতামূলক ডেটাবেজ প্রটোকল)
+
+ইদ্রিস ব্রাদার্স ERP / POS সিস্টেমে কোনো অবস্থাতেই অসম্পূর্ণ, ত্রুটিযুক্ত বা ভারসাম্যহীন (Corrupted/Inconsistent) ফিন্যান্সিয়াল ও ইনভেন্টরি ডেটা প্রবেশ করতে পারবে না। প্রতিটি ডেভেলপার ও এআই এজেন্টকে নিচের ৭টি ডেটাবেজ কনসিস্টেন্সি নিয়ম ১০০% অনুসরণ করতে হবে:
+
+### ৩.১ বাধ্যতামূলক পারমাণবিক লেনদেন (Mandatory ACID Transactions via `prisma.$transaction`)
+- **জিরো পার্শিয়াল রাইট:** একাধিক টেবিলে প্রভাব ফেলে এমন যেকোনো অপারেশন (যেমন: সেলস ইনভয়েস তৈরি, পণ্য ও ভ্যারিয়েন্ট এডিট, পারচেজ চালান রিসিভ, খাতা জমা/পরিশোধ) একক কোয়েরিতে সম্পন্ন করা কঠোরভাবে নিষিদ্ধ।
+- **বাধ্যতামূলক ব্লকিং:** সর্বদা `prisma.$transaction(async (tx) => { ... })` ব্লকের ভেতরে সমস্ত রাইট ও আপডেট অপারেশন একত্রিত করতে হবে।
+- **অল-অর-নাথিং (All-or-Nothing):** যদি ইনভয়েস তৈরি হওয়ার পর স্টক আপডেট বা লেজার এন্ট্রিতে কোনো এরর হয়, সম্পূর্ণ ট্রানজ্যাকশন তৎক্ষণাৎ স্বয়ংক্রিয়ভাবে রোলব্যাক (Rollback) হতে হবে। ডেটাবেজে কোনো অনাথ (Orphaned) বা আংশিক রেকর্ড রেখে আসা যাবে না।
+- **রেপোজিটরি কন্ট্রাক্ট:** প্রতিটি ডেটা অ্যাক্সেস মেথডে ঐচ্ছিক `tx?: Prisma.TransactionClient` প্যারামিটার থাকতে হবে এবং কোয়েরি চালানোর সময় `this.getDb(tx)` ব্যবহার করতে হবে।
+
+### ৩.২ ডেটাবেজ-লেভেল পারমাণবিক স্টক ও ব্যালেন্স গণনা (Atomic Increments vs In-Memory Math)
+- **রেস কন্ডিশন ও ফ্যান্টম স্টক রোধ:** ক্যাশিয়ারদের একাধিক কাউন্টার থেকে একই মুহূর্তে বিক্রয় বা চালান আসার সময় অ্যাপ্লিকেশন মেমরিতে হিসাব করে (`newStock = currentStock - soldQty`) ডেটাবেজে সেট করা নিষিদ্ধ।
+- **বাধ্যতামূলক অ্যাটমিক অপারেটর:** সর্বদা ডেটাবেজ ইঞ্জিনের নিজস্ব পারমাণবিক ইনক্রিমেন্ট/ডিক্রিমেন্ট ব্যবহার করতে হবে:
+  ```typescript
+  // সঠিক নিয়ম (Database-Level Atomic Calculation):
+  stockQuantity: operation === 'ADD' ? { increment: baseQuantity } : { decrement: baseQuantity }
+  currentDue: { increment: dueAmount }
+  currentPayable: { increment: payableAmount }
+  ```
+
+### ৩.৩ অপরিবর্তনীয় লেজার ও ঐতিহাসিক ডেটা সুরক্ষা (Immutable Ledgers & Soft-Deactivation)
+- **হার্ড ডিলিট সম্পূর্ণ নিষিদ্ধ:** যে পণ্য, ভ্যারিয়েন্ট, কাস্টমার বা মহাজনের অতীতে ন্যূনতম একটি লেনদেন (`SaleItem`, `PurchaseItem`, `StockWastage`, `CustomerLedger`, `SupplierLedger`) রয়েছে, তাদের ডেটাবেজ থেকে মুছে ফেলা (`DELETE`) কঠোরভাবে নিষিদ্ধ।
+- **হিস্ট্রি প্রটেকশন গার্ড (Variant & Ledger Reconciliation):**
+  - ডিলিট করার পূর্বে রিলেশনাল টেবিলগুলোতে হিস্ট্রি কাউন্ট চেক করতে হবে (`saleCount > 0 || purchaseCount > 0 || wastageCount > 0`)।
+  - অতীত লেনদেন থাকলে হার্ড ডিলিটের পরিবর্তে সফট-ডিয়েক্টিভেট (`isActive: false`) করতে হবে।
+  - খাতার সমস্ত লেজার (`CustomerLedger`, `SupplierLedger`, `CashboxRecord`) হবে **Append-Only** (শুধুমাত্র নতুন এন্ট্রি ইনসার্ট হবে; পূর্বের এন্ট্রি এডিট বা ডিলিট করা নিষিদ্ধ)।
+
+### ৩.৪ ফিন্যান্সিয়াল ব্যালেন্স সমতা নীতি (Double-Entry Balance Invariance)
+- **রানিং খাতা সমতা:** কাস্টমারের `currentDue` বা মহাজনের `currentPayable`-এর প্রতিটি পাই-পয়সার পরিবর্তনের পেছনে একই ট্রানজ্যাকশনে লেজার টেবিলে একটি সুনির্দিষ্ট রো (`debit`, `credit`, `balanceAfter`) থাকতে হবে।
+- **গাণিতিক স্বতঃসিদ্ধ (Mathematical Invariant):**
+  $$\text{Customer.currentDue} = \sum (\text{Debits}) - \sum (\text{Credits}) = \text{Latest CustomerLedger.balanceAfter}$$
+  যদি কোনো কারণে এই সমতা বিঘ্নিত হয়, তবে ট্রানজ্যাকশন রিজেক্ট হবে।
+
+### ৩.৫ শূন্য ফ্লোটিং-পয়েন্ট লিক নীতি (Lossless 4-Decimal & Currency Arithmetic)
+- **ফ্লোটিং পয়েন্ট নিষিদ্ধ:** জাভাস্ক্রিপ্টের সাধারণ ফ্লোটিং পয়েন্ট মেকানিক্সে টাকার হিসাব বা মাইক্রো-মসলার ওজন ক্যালকুলেশন সম্পূর্ণ নিষিদ্ধ।
+- **প্রিজমা স্কেলিং:**
+  - ওজন ও রূপান্তর গুণক: `@db.Decimal(12, 4)` (৪ দশমিক নির্ভুলতা — এলাচ/দারুচিনি/লবঙ্গের গ্রাম ওজনে যাতে কোনো আর্থিক ক্ষতি না হয়)।
+  - মুদ্রা ও মূল্য: `@db.Decimal(12, 2)` (২ দশমিক — পয়সা নির্ভুলতা)।
+- **সার্ভিস লেয়ারে নিরাপদ হিসাব:** সমস্ত গুণ, ভাগ ও বিয়োগ `Prisma.Decimal` ইনস্ট্যান্স মেথড (`.mul()`, `.div()`, `.add()`, `.sub()`) এবং `src/common/utils/decimalUtils.ts` দিয়ে সম্পন্ন করতে হবে।
+
+### ৩.৬ মিউটেশন শেষে সম্পূর্ণ রিলেশনাল গ্রাফ রিটার্ন (Full Hydration Pattern)
+- **আংশিক অবজেক্ট রিটার্ন নিষিদ্ধ:** কোনো প্রোডাক্ট বা সেলস এডিট/তৈরি করার পর শুধুমাত্র ফ্ল্যাট প্যারেন্ট রেকর্ড রিটার্ন করা যাবে না।
+- **পূর্ণাঙ্গ গ্রাফ হাইড্রেশন:** ট্রানজ্যাকশনের শেষ ধাপে সর্বদা `findById(id, tx)` কল করে সংযুক্ত সমস্ত সাব-রিলেশন (`variants`, `units`, `category`, `brand` ইত্যাদি) সহ রি-হাইড্রেটেড অবজেক্ট রিটার্ন করতে হবে। এটি ফ্রন্টএন্ডে রিলোড ছাড়াই রিয়েল-টাইম টেবিল ও স্টেট ১০০% নির্ভুল রাখে।
+
+### ৩.৭ ইউনিক আইডেন্টিফায়ার ও কনকারেন্সি সেফটি (Idempotency & Collision Guards)
+- **ইউনিক ইনডেক্স সুরক্ষা:** `sku`, `barcode`, ইনভয়েস কোড (`INV-YYMMDD-XXXX`), চালান কোড (`PUR-YYMMDD-XXXX`) ডেটাবেজ লেভেলে ইউনিক ইনডেক্স দ্বারা সুরক্ষিত।
+- **আপডেট কনফ্লিক্ট যাচাই:** যেকোনো পণ্য বা ভ্যারিয়েন্ট এডিট করার সময় বারকোড বা SKU কনফ্লিক্ট চেক করার ক্ষেত্রে বর্তমান সত্তাটি বাদ দিয়ে (`conflict.id !== currentId`) যাচাই করতে হবে।
+
+---
+
+## 4. Frontend-Backend Contract & Type Synchronization (Frontend Sync)
 
 When building or updating the **Next.js Frontend**, all API integrations must strictly conform to this contract:
 
@@ -112,7 +169,7 @@ interface ApiErrorResponse {
 
 ---
 
-## 4. Complete API Endpoints Matrix
+## 5. Complete API Endpoints Matrix
 
 | Module | Method | Endpoint | Description & Key Parameters |
 | :--- | :--- | :--- | :--- |
@@ -166,16 +223,16 @@ interface ApiErrorResponse {
 
 ---
 
-## 5. Security & Rate Limiting
+## 6. Security & Rate Limiting
 
 - **Helmet:** Active security headers.
 - **CORS:** Configurable via `CORS_ORIGIN` (defaults to `*` or `http://localhost:3000`).
-- **Rate Limiting:** Protects backend with window limit (default: 1,000 requests per 15 minutes).
+- **Rate Limiting:** Protects backend with window limit (`RATE_LIMIT_MAX=2000` per 15 minutes in `.env` / `.env.example` / `env.ts` to support concurrent POS + Admin terminals on local WiFi).
 - **Zod Validation:** All incoming request bodies and query params are strictly validated; invalid inputs return `400 Bad Request` with an explanatory array of field errors.
 
 ---
 
-## 6. Development & Operational Commands
+## 7. Development & Operational Commands
 
 All commands are run from `backend/`:
 
@@ -198,7 +255,7 @@ npx tsx scripts/test-all-apis-e2e.ts
 
 ---
 
-## 7. Instructions for Agents Building the Frontend (Next.js)
+## 8. Instructions for Agents Building the Frontend (Next.js)
 
 1. **State Management & Data Fetching:**
    - Use SWR or TanStack Query (React Query) for caching and optimistic updates.

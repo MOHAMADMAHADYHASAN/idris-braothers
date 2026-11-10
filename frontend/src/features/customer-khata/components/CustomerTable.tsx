@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   HandCoins,
   Scroll,
@@ -16,6 +18,7 @@ import { AdminPagination } from '@/components/shared/AdminPagination';
 import { DynamicDataTable, ColumnDef } from '@/components/shared/DynamicDataTable';
 
 export function CustomerTable() {
+  const router = useRouter();
   const {
     customers,
     meta,
@@ -94,7 +97,7 @@ export function CustomerTable() {
             return (
               <div className="inline-block text-right">
                 <span className="font-mono tabular-nums tracking-tight font-black text-rose-700 text-xs sm:text-sm">
-                  ৳{formatCurrency(c.currentDue)}
+                  {formatCurrency(c.currentDue)}
                 </span>
                 <span className="block text-[10px] text-rose-500 font-semibold uppercase tracking-wider">
                   বকেয়া বাকি
@@ -107,7 +110,7 @@ export function CustomerTable() {
             return (
               <div className="inline-block text-right">
                 <span className="font-mono tabular-nums tracking-tight font-black text-emerald-700 text-xs sm:text-sm">
-                  ৳{formatCurrency(Math.abs(c.currentDue))}
+                  {formatCurrency(Math.abs(c.currentDue))}
                 </span>
                 <span className="block text-[10px] text-emerald-600 font-semibold uppercase tracking-wider">
                   অগ্রিম জমা
@@ -129,7 +132,7 @@ export function CustomerTable() {
           );
           return (
             <span className="text-rose-700 font-mono font-black text-xs sm:text-sm">
-              ৳{formatCurrency(totalDue)}
+              {formatCurrency(totalDue)}
             </span>
           );
         },
@@ -157,18 +160,15 @@ export function CustomerTable() {
             </button>
 
             {/* খতিয়ান বিবরণী বাটন */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                openModal('ledger', c);
-              }}
+            <Link
+              href={`/khata/customers/${c.id}`}
+              onClick={(e) => e.stopPropagation()}
               className="px-2 py-1 rounded-md border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1 transition-[background-color] duration-150 active:scale-[0.98] cursor-pointer shadow-2xs"
               title="রানিং খতিয়ান ও লেনদেন স্টেটমেন্ট"
             >
               <Scroll size={14} weight="bold" className="text-slate-500" />
               <span>খতিয়ান</span>
-            </button>
+            </Link>
 
             {/* হিসাব সমন্বয় (ছাড়) */}
             <button
@@ -209,7 +209,7 @@ export function CustomerTable() {
       columns={columns}
       keyExtractor={(c) => c.id}
       isLoading={isLoading}
-      onRowClick={(c) => openModal('ledger', c)}
+      onRowClick={(c) => router.push(`/khata/customers/${c.id}`)}
       pagination={
         meta.totalPages > 1 ? (
           <AdminPagination

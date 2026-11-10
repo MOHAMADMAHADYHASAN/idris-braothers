@@ -6,6 +6,7 @@
 export type SupplierLedgerType =
   | 'OPENING_BALANCE'
   | 'PURCHASE'
+  | 'PURCHASE_DUE'
   | 'PAYMENT_PAID'
   | 'ADJUSTMENT'
   | 'RETURN';

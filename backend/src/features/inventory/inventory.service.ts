@@ -254,22 +254,241 @@ export class InventoryService {
   }
 
   /**
-   * Update general parent product details
+   * Update general product details, default variant or variable variants in an atomic transaction
    */
   async updateProduct(id: string, data: UpdateProductInput) {
-    await this.getProductById(id);
+    const existing = await this.getProductById(id);
 
-    return await inventoryRepository.update(id, {
-      ...(data.name && { name: data.name }),
-      ...(data.banglaName !== undefined && { banglaName: data.banglaName }),
-      ...(data.description !== undefined && { description: data.description }),
-      ...(data.categoryId !== undefined && {
-        category: data.categoryId ? { connect: { id: data.categoryId } } : { disconnect: true },
-      }),
-      ...(data.brandId !== undefined && {
-        brand: data.brandId ? { connect: { id: data.brandId } } : { disconnect: true },
-      }),
-      ...(data.isActive !== undefined && { isActive: data.isActive }),
+    return await prisma.$transaction(async (tx) => {
+      // 1. Update parent product attributes
+      await tx.product.update({
+        where: { id },
+        data: {
+          ...(data.name && { name: data.name }),
+          ...(data.banglaName !== undefined && { banglaName: data.banglaName }),
+          ...(data.description !== undefined && { description: data.description }),
+          ...(data.categoryId !== undefined && {
+            category: data.categoryId ? { connect: { id: data.categoryId } } : { disconnect: true },
+          }),
+          ...(data.brandId !== undefined && {
+            brand: data.brandId ? { connect: { id: data.brandId } } : { disconnect: true },
+          }),
+          ...(data.isActive !== undefined && { isActive: data.isActive }),
+        },
+      });
+
+      // 2. Simple Product Mode (!hasVariants)
+      if (!existing.hasVariants) {
+        const primaryVariant = existing.variants[0];
+
+        // Check SKU collision if changed
+        if (data.sku && (!primaryVariant || primaryVariant.sku !== data.sku)) {
+          const skuConflict = await inventoryRepository.findVariantBySku(data.sku, tx);
+          if (skuConflict && skuConflict.id !== primaryVariant?.id) {
+            throw new AppError(`Variant with SKU "${data.sku}" already exists`, 409);
+          }
+        }
+
+        // Check Barcode collision if changed
+        if (data.barcode && (!primaryVariant || primaryVariant.barcode !== data.barcode)) {
+          const barcodeConflict = await inventoryRepository.findVariantByBarcode(data.barcode, tx);
+          if (barcodeConflict && barcodeConflict.variant.id !== primaryVariant?.id) {
+            throw new AppError(`Variant with barcode "${data.barcode}" already exists`, 409);
+          }
+        }
+
+        let targetVariantId: string;
+
+        if (primaryVariant) {
+          targetVariantId = primaryVariant.id;
+          await tx.productVariant.update({
+            where: { id: primaryVariant.id },
+            data: {
+              ...(data.sku !== undefined && { sku: data.sku || primaryVariant.sku }),
+              ...(data.barcode !== undefined && { barcode: data.barcode || null }),
+              ...(data.baseUnitName && { baseUnitName: data.baseUnitName }),
+              ...(data.allowDecimalQty !== undefined && { allowDecimalQty: data.allowDecimalQty }),
+              ...(data.attributes !== undefined && { attributes: data.attributes }),
+              ...(data.stockQuantity !== undefined && { stockQuantity: new Prisma.Decimal(data.stockQuantity) }),
+              ...(data.lowStockAlert !== undefined && { lowStockAlert: new Prisma.Decimal(data.lowStockAlert) }),
+              ...(data.currentPurchasePrice !== undefined && { currentPurchasePrice: new Prisma.Decimal(data.currentPurchasePrice) }),
+              ...(data.retailPrice !== undefined && { retailPrice: new Prisma.Decimal(data.retailPrice) }),
+              ...(data.wholesalePrice !== undefined && { wholesalePrice: new Prisma.Decimal(data.wholesalePrice) }),
+              ...(data.isActive !== undefined && { isActive: data.isActive }),
+            },
+          });
+        } else {
+          // If primary variant was somehow missing, create it
+          const createdVariant = await tx.productVariant.create({
+            data: {
+              productId: id,
+              variantName: 'Default',
+              sku: data.sku || generateSku(data.name || existing.name),
+              barcode: data.barcode || null,
+              baseUnitName: data.baseUnitName || 'কেজি',
+              allowDecimalQty: data.allowDecimalQty !== undefined ? data.allowDecimalQty : true,
+              attributes: data.attributes || {},
+              stockQuantity: new Prisma.Decimal(data.stockQuantity || 0),
+              lowStockAlert: new Prisma.Decimal(data.lowStockAlert || 10),
+              currentPurchasePrice: new Prisma.Decimal(data.currentPurchasePrice || 0),
+              retailPrice: new Prisma.Decimal(data.retailPrice || 0),
+              wholesalePrice: new Prisma.Decimal(data.wholesalePrice || 0),
+            },
+          });
+          targetVariantId = createdVariant.id;
+        }
+
+        // Sync units if provided
+        if (data.units !== undefined) {
+          await tx.variantUnit.deleteMany({
+            where: { variantId: targetVariantId },
+          });
+
+          if (data.units.length > 0) {
+            await tx.variantUnit.createMany({
+              data: data.units.map((u) => ({
+                variantId: targetVariantId,
+                unitName: u.unitName,
+                conversionFactor: new Prisma.Decimal(u.conversionFactor),
+                retailPrice: u.retailPrice ? new Prisma.Decimal(u.retailPrice) : null,
+                wholesalePrice: u.wholesalePrice ? new Prisma.Decimal(u.wholesalePrice) : null,
+                barcode: u.barcode || null,
+                isDefault: u.isDefault ?? false,
+              })),
+            });
+          }
+        }
+      }
+
+      // 3. Variable Product Mode (hasVariants)
+      if (existing.hasVariants && data.variants && data.variants.length > 0) {
+        // Collect submitted existing variant IDs
+        const submittedIds = new Set(data.variants.filter((v) => v.id).map((v) => v.id!));
+
+        // Soft-deactivate or delete removed variants
+        const removedVariants = existing.variants.filter((v) => !submittedIds.has(v.id));
+        for (const rem of removedVariants) {
+          const [saleCount, purchaseCount, wastageCount] = await Promise.all([
+            tx.saleItem.count({ where: { variantId: rem.id } }),
+            tx.purchaseItem.count({ where: { variantId: rem.id } }),
+            tx.stockWastage.count({ where: { variantId: rem.id } }),
+          ]);
+
+          if (saleCount > 0 || purchaseCount > 0 || wastageCount > 0) {
+            await tx.productVariant.update({
+              where: { id: rem.id },
+              data: { isActive: false },
+            });
+          } else {
+            await tx.productVariant.delete({
+              where: { id: rem.id },
+            });
+          }
+        }
+
+        // Upsert / update submitted variants
+        for (let idx = 0; idx < data.variants.length; idx++) {
+          const v = data.variants[idx];
+
+          if (v.id) {
+            // Check SKU / Barcode conflicts
+            if (v.sku) {
+              const skuConflict = await inventoryRepository.findVariantBySku(v.sku, tx);
+              if (skuConflict && skuConflict.id !== v.id) {
+                throw new AppError(`Variant with SKU "${v.sku}" already exists`, 409);
+              }
+            }
+            if (v.barcode) {
+              const barcodeConflict = await inventoryRepository.findVariantByBarcode(v.barcode, tx);
+              if (barcodeConflict && barcodeConflict.variant.id !== v.id) {
+                throw new AppError(`Variant with barcode "${v.barcode}" already exists`, 409);
+              }
+            }
+
+            await tx.productVariant.update({
+              where: { id: v.id },
+              data: {
+                ...(v.variantName && { variantName: v.variantName }),
+                ...(v.sku !== undefined && { sku: v.sku || undefined }),
+                ...(v.barcode !== undefined && { barcode: v.barcode || null }),
+                ...(v.baseUnitName && { baseUnitName: v.baseUnitName }),
+                ...(v.allowDecimalQty !== undefined && { allowDecimalQty: v.allowDecimalQty }),
+                ...(v.attributes !== undefined && { attributes: v.attributes }),
+                ...(v.stockQuantity !== undefined && { stockQuantity: new Prisma.Decimal(v.stockQuantity) }),
+                ...(v.lowStockAlert !== undefined && { lowStockAlert: new Prisma.Decimal(v.lowStockAlert) }),
+                ...(v.currentPurchasePrice !== undefined && { currentPurchasePrice: new Prisma.Decimal(v.currentPurchasePrice) }),
+                ...(v.retailPrice !== undefined && { retailPrice: new Prisma.Decimal(v.retailPrice) }),
+                ...(v.wholesalePrice !== undefined && { wholesalePrice: new Prisma.Decimal(v.wholesalePrice) }),
+                ...(v.isActive !== undefined && { isActive: v.isActive }),
+              },
+            });
+
+            if (v.units !== undefined) {
+              await tx.variantUnit.deleteMany({
+                where: { variantId: v.id },
+              });
+              if (v.units.length > 0) {
+                await tx.variantUnit.createMany({
+                  data: v.units.map((u) => ({
+                    variantId: v.id!,
+                    unitName: u.unitName,
+                    conversionFactor: new Prisma.Decimal(u.conversionFactor),
+                    retailPrice: u.retailPrice ? new Prisma.Decimal(u.retailPrice) : null,
+                    wholesalePrice: u.wholesalePrice ? new Prisma.Decimal(u.wholesalePrice) : null,
+                    barcode: u.barcode || null,
+                    isDefault: u.isDefault ?? false,
+                  })),
+                });
+              }
+            }
+          } else {
+            // New variant added in modal
+            const sku = v.sku?.trim() || generateSku(data.name || existing.name, `V${idx + 1}`);
+            if (v.barcode) {
+              const barcodeConflict = await inventoryRepository.findVariantByBarcode(v.barcode, tx);
+              if (barcodeConflict) {
+                throw new AppError(`Variant with barcode "${v.barcode}" already exists`, 409);
+              }
+            }
+            const skuConflict = await inventoryRepository.findVariantBySku(sku, tx);
+            if (skuConflict) {
+              throw new AppError(`Variant with SKU "${sku}" already exists`, 409);
+            }
+
+            await tx.productVariant.create({
+              data: {
+                productId: id,
+                variantName: v.variantName || `ভ্যারিয়েন্ট ${idx + 1}`,
+                sku,
+                barcode: v.barcode || null,
+                baseUnitName: v.baseUnitName || 'কেজি',
+                allowDecimalQty: v.allowDecimalQty !== undefined ? v.allowDecimalQty : true,
+                attributes: v.attributes || {},
+                stockQuantity: new Prisma.Decimal(v.stockQuantity || 0),
+                lowStockAlert: new Prisma.Decimal(v.lowStockAlert || 10),
+                currentPurchasePrice: new Prisma.Decimal(v.currentPurchasePrice || 0),
+                retailPrice: new Prisma.Decimal(v.retailPrice || 0),
+                wholesalePrice: new Prisma.Decimal(v.wholesalePrice || 0),
+                ...(v.units && v.units.length > 0 && {
+                  units: {
+                    create: v.units.map((u) => ({
+                      unitName: u.unitName,
+                      conversionFactor: new Prisma.Decimal(u.conversionFactor),
+                      retailPrice: u.retailPrice ? new Prisma.Decimal(u.retailPrice) : null,
+                      wholesalePrice: u.wholesalePrice ? new Prisma.Decimal(u.wholesalePrice) : null,
+                      barcode: u.barcode || null,
+                      isDefault: u.isDefault ?? false,
+                    })),
+                  },
+                }),
+              },
+            });
+          }
+        }
+      }
+
+      // 4. Return the fully re-hydrated product with category, brand, and all variants + units
+      return (await inventoryRepository.findById(id, tx))!;
     });
   }
 

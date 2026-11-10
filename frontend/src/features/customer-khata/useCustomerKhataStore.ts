@@ -67,6 +67,7 @@ interface CustomerKhataState {
   closeModal: () => void;
 
   fetchCustomers: () => Promise<void>;
+  fetchCustomerById: (id: string) => Promise<Customer | null>;
   fetchCustomerLedger: (customerId: string, page?: number) => Promise<void>;
 
   submitPayment: (
@@ -168,6 +169,17 @@ export const useCustomerKhataStore = create<CustomerKhataState>((set, get) => ({
         error: err.message || 'কাস্টমার তালিকা লোড করতে সমস্যা হয়েছে',
         isLoading: false,
       });
+    }
+  },
+
+  fetchCustomerById: async (id: string) => {
+    try {
+      const customer = await customerKhataService.getCustomerById(id);
+      set({ selectedCustomer: customer });
+      return customer;
+    } catch (err: any) {
+      console.error('Failed to fetch customer by id', err);
+      return null;
     }
   },
 

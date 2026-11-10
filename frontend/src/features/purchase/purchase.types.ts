@@ -4,7 +4,8 @@
  */
 
 export interface PurchaseItemDTO {
-  productId: string;
+  productId?: string;
+  variantId?: string;
   productName?: string;
   baseUnitName?: string;
   unitName: string;
@@ -30,12 +31,25 @@ export interface PurchaseItem {
   id: string;
   purchaseId: string;
   productId: string;
+  variantId?: string;
   product?: {
     id: string;
     name: string;
     banglaName?: string | null;
     barcode?: string | null;
     baseUnitName?: string;
+  };
+  variant?: {
+    id: string;
+    variantName: string;
+    baseUnitName?: string;
+    sku?: string;
+    barcode?: string | null;
+    product?: {
+      id: string;
+      name: string;
+      banglaName?: string | null;
+    };
   };
   unitName: string;
   conversionFactor: number;

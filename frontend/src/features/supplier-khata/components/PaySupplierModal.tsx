@@ -135,15 +135,15 @@ export function PaySupplierModal() {
               </div>
               <div className="border-t border-slate-200 pt-1.5 flex justify-between text-slate-500">
                 <span>পূর্বের দেনা:</span>
-                <span className="font-mono tabular-nums">৳{formatCurrency(successReceipt.previousPayable)}</span>
+                <span className="font-mono tabular-nums">{formatCurrency(successReceipt.previousPayable)}</span>
               </div>
               <div className="flex justify-between font-bold text-emerald-700 text-xs">
                 <span>নগদ পরিশোধ:</span>
-                <span className="font-mono tabular-nums">৳{formatCurrency(successReceipt.paidAmount)}</span>
+                <span className="font-mono tabular-nums">{formatCurrency(successReceipt.paidAmount)}</span>
               </div>
               <div className="border-t border-slate-200 pt-1.5 flex justify-between font-bold text-amber-800 text-xs">
                 <span>অবশিষ্ট দেনা:</span>
-                <span className="font-mono tabular-nums">৳{formatCurrency(successReceipt.newPayable)}</span>
+                <span className="font-mono tabular-nums">{formatCurrency(successReceipt.newPayable)}</span>
               </div>
             </div>
 
@@ -207,7 +207,7 @@ export function PaySupplierModal() {
                 <div className="border-r border-slate-200 pr-2">
                   <span className="text-[10px] text-slate-500 font-medium block">পূর্বের দেনা</span>
                   <span className="text-sm sm:text-base font-bold font-mono text-amber-800 tabular-nums tracking-tight">
-                    ৳{formatCurrency(currentPayable)}
+                    {formatCurrency(currentPayable)}
                   </span>
                 </div>
                 <div className="pl-2">
@@ -217,7 +217,7 @@ export function PaySupplierModal() {
                       remainingPayable <= 0 ? 'text-emerald-700' : 'text-slate-900'
                     }`}
                   >
-                    ৳{formatCurrency(remainingPayable)}
+                    {formatCurrency(remainingPayable)}
                   </span>
                 </div>
               </div>

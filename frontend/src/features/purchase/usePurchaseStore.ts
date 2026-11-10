@@ -59,6 +59,7 @@ interface PurchaseState {
   setDateRange: (start?: string, end?: string) => void;
   setPage: (page: number) => void;
   fetchPurchases: () => Promise<void>;
+  fetchPurchaseById: (id: string) => Promise<Purchase | null>;
   openDetailModal: (purchase: Purchase) => void;
   closeDetailModal: () => void;
 
@@ -254,6 +255,17 @@ export const usePurchaseStore = create<PurchaseState>((set, get) => ({
         historyError: err.message || 'চালান রেজিস্টার লোড করতে সমস্যা হয়েছে',
         isLoadingHistory: false,
       });
+    }
+  },
+
+  fetchPurchaseById: async (id: string) => {
+    try {
+      const purchase = await purchaseService.getPurchaseById(id);
+      set({ selectedPurchase: purchase });
+      return purchase;
+    } catch (err: any) {
+      console.error('Failed to fetch purchase by id', err);
+      return null;
     }
   },
 

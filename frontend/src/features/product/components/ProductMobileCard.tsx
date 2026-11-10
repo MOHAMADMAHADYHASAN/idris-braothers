@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import {
   Package,
   Coins,
@@ -45,9 +46,12 @@ export function ProductMobileCard({
       <div className="p-3 bg-slate-50/50 border-b border-slate-100 flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="font-bold text-slate-900 text-sm tracking-tight">
+            <Link
+              href={`/products/${product.id}`}
+              className="font-bold text-slate-900 text-sm tracking-tight hover:underline hover:text-blue-700"
+            >
               {product.name}
-            </span>
+            </Link>
             {product.category && (
               <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200/70">
                 {product.category.banglaName || product.category.name}

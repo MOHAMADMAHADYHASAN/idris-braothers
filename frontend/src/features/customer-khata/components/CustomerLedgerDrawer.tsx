@@ -19,6 +19,7 @@ import { CustomerLedgerType } from '../customerKhata.types';
 function getEntryLabel(type: CustomerLedgerType): { label: string; badgeClass: string } {
   switch (type) {
     case 'SALE':
+    case 'SALE_DUE':
       return {
         label: 'পণ্য বিক্রয় (বাকি)',
         badgeClass: 'bg-amber-50 text-amber-800 border-amber-200/80',
@@ -150,7 +151,7 @@ export function CustomerLedgerDrawer() {
                   : 'text-slate-700'
               }`}
             >
-              ৳{formatCurrency(selectedCustomer.currentDue)}
+              {formatCurrency(selectedCustomer.currentDue)}
             </span>
           </div>
         </div>
@@ -213,17 +214,17 @@ export function CustomerLedgerDrawer() {
 
                         {/* ডেবিট / বাকি (+) */}
                         <td className="py-2 px-3 text-right font-mono tabular-nums tracking-tight font-semibold text-rose-700">
-                          {entry.debit > 0 ? `+৳${formatCurrency(entry.debit)}` : '-'}
+                          {entry.debit > 0 ? `+${formatCurrency(entry.debit)}` : '-'}
                         </td>
 
                         {/* ক্রেডিট / জমা (-) */}
                         <td className="py-2 px-3 text-right font-mono tabular-nums tracking-tight font-semibold text-emerald-700">
-                          {entry.credit > 0 ? `-৳${formatCurrency(entry.credit)}` : '-'}
+                          {entry.credit > 0 ? `-${formatCurrency(entry.credit)}` : '-'}
                         </td>
 
                         {/* ব্যালেন্স */}
                         <td className="py-2 px-4 text-right font-mono tabular-nums tracking-tight font-bold text-slate-900">
-                          ৳{formatCurrency(entry.balanceAfter)}
+                          {formatCurrency(entry.balanceAfter)}
                         </td>
                       </tr>
                     );

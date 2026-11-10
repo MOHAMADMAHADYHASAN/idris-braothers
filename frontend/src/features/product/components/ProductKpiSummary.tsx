@@ -108,7 +108,7 @@ export function ProductKpiSummary() {
         </div>
         <div className="mt-2">
           <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900 truncate">
-            ৳{formatCurrency(totalInventoryCapital)}
+            {formatCurrency(totalInventoryCapital)}
           </div>
           <p className="text-[11px] text-slate-400 mt-0.5">কেনা দরে বর্তমান চালানের মোট মূলধন</p>
         </div>

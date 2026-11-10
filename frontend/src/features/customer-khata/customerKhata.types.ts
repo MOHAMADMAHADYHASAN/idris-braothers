@@ -8,6 +8,7 @@ export type CustomerType = 'RETAIL' | 'WHOLESALE';
 export type CustomerLedgerType =
   | 'OPENING_BALANCE'
   | 'SALE'
+  | 'SALE_DUE'
   | 'PAYMENT_RECEIVED'
   | 'ADJUSTMENT'
   | 'RETURN';

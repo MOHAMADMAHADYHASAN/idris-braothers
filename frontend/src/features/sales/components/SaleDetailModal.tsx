@@ -189,10 +189,10 @@ export function SaleDetailModal() {
                             {item.quantity}
                           </td>
                           <td className="py-2 px-3 text-right font-mono tabular-nums text-slate-600">
-                            ৳{formatCurrency(item.unitPrice)}
+                            {formatCurrency(item.unitPrice)}
                           </td>
                           <td className="py-2 px-3.5 text-right font-mono tabular-nums tracking-tight font-bold text-slate-900">
-                            ৳{formatCurrency(item.subTotal)}
+                            {formatCurrency(item.subTotal)}
                           </td>
                         </tr>
                       );
@@ -206,7 +206,7 @@ export function SaleDetailModal() {
                 <div className="flex justify-between text-slate-600">
                   <span>পণ্য উপমোট (Subtotal):</span>
                   <span className="font-mono tabular-nums font-semibold text-slate-900">
-                    ৳{formatCurrency(selectedSale.subTotal)}
+                    {formatCurrency(selectedSale.subTotal)}
                   </span>
                 </div>
 
@@ -214,7 +214,7 @@ export function SaleDetailModal() {
                   <div className="flex justify-between text-emerald-800">
                     <span>প্রদত্ত ছাড় (Discount):</span>
                     <span className="font-mono tabular-nums font-semibold">
-                      -৳{formatCurrency(selectedSale.discount)}
+                      -{formatCurrency(selectedSale.discount)}
                     </span>
                   </div>
                 )}
@@ -222,14 +222,14 @@ export function SaleDetailModal() {
                 <div className="border-t border-slate-200 pt-1.5 flex justify-between font-bold text-xs sm:text-sm text-slate-900">
                   <span>সর্বমোট প্রদেয় বিল (Grand Total):</span>
                   <span className="font-mono tabular-nums tracking-tight text-sm sm:text-base">
-                    ৳{formatCurrency(selectedSale.grandTotal)}
+                    {formatCurrency(selectedSale.grandTotal)}
                   </span>
                 </div>
 
                 <div className="flex justify-between text-emerald-700 font-semibold">
                   <span>নগদ গ্রহণ (Cash Paid):</span>
                   <span className="font-mono tabular-nums font-bold">
-                    ৳{formatCurrency(selectedSale.paidAmount)}
+                    {formatCurrency(selectedSale.paidAmount)}
                   </span>
                 </div>
 
@@ -238,7 +238,7 @@ export function SaleDetailModal() {
                     এই মেমোর বকেয়া (Due on Invoice):
                   </span>
                   <span className={`font-mono tabular-nums text-sm ${Number(selectedSale.dueAmount) > 0 ? 'text-amber-800' : 'text-slate-700'}`}>
-                    ৳{formatCurrency(selectedSale.dueAmount)}
+                    {formatCurrency(selectedSale.dueAmount)}
                   </span>
                 </div>
 
@@ -248,13 +248,13 @@ export function SaleDetailModal() {
                     <div className="flex justify-between">
                       <span>এই মেমোর পূর্বের বকেয়া:</span>
                       <span className="font-mono tabular-nums">
-                        ৳{formatCurrency(selectedReceipt.billing.previousDue || 0)}
+                        {formatCurrency(selectedReceipt.billing.previousDue || 0)}
                       </span>
                     </div>
                     <div className="flex justify-between font-bold text-slate-800">
                       <span>কাস্টমারের বর্তমান মোট বকেয়া:</span>
                       <span className="font-mono tabular-nums text-amber-800">
-                        ৳{formatCurrency(selectedReceipt.billing.totalCurrentDue || 0)}
+                        {formatCurrency(selectedReceipt.billing.totalCurrentDue || 0)}
                       </span>
                     </div>
                   </div>

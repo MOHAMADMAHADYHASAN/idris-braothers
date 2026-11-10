@@ -63,6 +63,7 @@ interface SupplierKhataState {
   closeModal: () => void;
 
   fetchSuppliers: () => Promise<void>;
+  fetchSupplierById: (id: string) => Promise<Supplier | null>;
   fetchSupplierLedger: (supplierId: string, page?: number) => Promise<void>;
 
   submitPayment: (
@@ -157,6 +158,17 @@ export const useSupplierKhataStore = create<SupplierKhataState>((set, get) => ({
         error: err.message || 'মহাজনদের তালিকা লোড করতে সমস্যা হয়েছে',
         isLoading: false,
       });
+    }
+  },
+
+  fetchSupplierById: async (id: string) => {
+    try {
+      const supplier = await supplierKhataService.getSupplierById(id);
+      set({ selectedSupplier: supplier });
+      return supplier;
+    } catch (err: any) {
+      console.error('Failed to fetch supplier by id', err);
+      return null;
     }
   },
 

@@ -3,7 +3,7 @@ import { env } from '../../config/env';
 
 export const appRateLimiter = rateLimit({
   windowMs: env.RATE_LIMIT_WINDOW_MS, // Default: 15 minutes
-  max: env.RATE_LIMIT_MAX, // Default: 100 requests per 15 mins per IP
+  max: env.RATE_LIMIT_MAX, // Default: 2000 requests per 15 mins per IP
   standardHeaders: true, // Return standard RateLimit-* headers
   legacyHeaders: false, // Disable X-RateLimit-* headers
   message: {

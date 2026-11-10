@@ -100,13 +100,13 @@ export function CustomerAdjustmentModal() {
               <div className="border-r border-slate-200 pr-2">
                 <span className="text-[11px] text-slate-500 font-medium block">বর্তমান বকেয়া</span>
                 <span className="text-base font-black font-mono tabular-nums tracking-tight text-rose-700">
-                  ৳{formatCurrency(currentDue)}
+                  {formatCurrency(currentDue)}
                 </span>
               </div>
               <div className="pl-2">
                 <span className="text-[11px] text-slate-500 font-medium block">সমন্বয়ের পর বকেয়া</span>
                 <span className="text-base font-black font-mono tabular-nums tracking-tight text-slate-900">
-                  ৳{formatCurrency(newDue)}
+                  {formatCurrency(newDue)}
                 </span>
               </div>
             </div>

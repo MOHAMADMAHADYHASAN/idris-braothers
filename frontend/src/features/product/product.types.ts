@@ -174,6 +174,51 @@ export interface UpdateProductDTO {
   categoryId?: string;
   brandId?: string;
   isActive?: boolean;
+
+  // For Simple Products (hasVariants: false)
+  sku?: string;
+  barcode?: string;
+  baseUnitName?: string;
+  allowDecimalQty?: boolean;
+  attributes?: Record<string, any>;
+  stockQuantity?: number;
+  lowStockAlert?: number;
+  currentPurchasePrice?: number;
+  retailPrice?: number;
+  wholesalePrice?: number;
+  units?: Array<{
+    unitName: string;
+    conversionFactor: number;
+    retailPrice?: number;
+    wholesalePrice?: number;
+    barcode?: string;
+    isDefault?: boolean;
+  }>;
+
+  // For Variable Products (hasVariants: true)
+  variants?: Array<{
+    id?: string;
+    variantName: string;
+    sku?: string;
+    barcode?: string;
+    baseUnitName?: string;
+    allowDecimalQty?: boolean;
+    attributes?: Record<string, any>;
+    stockQuantity?: number;
+    lowStockAlert?: number;
+    currentPurchasePrice: number;
+    retailPrice: number;
+    wholesalePrice: number;
+    isActive?: boolean;
+    units?: Array<{
+      unitName: string;
+      conversionFactor: number;
+      retailPrice?: number;
+      wholesalePrice?: number;
+      barcode?: string;
+      isDefault?: boolean;
+    }>;
+  }>;
 }
 
 export interface UpdateVariantDTO {

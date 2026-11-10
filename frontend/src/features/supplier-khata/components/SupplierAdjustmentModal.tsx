@@ -104,13 +104,13 @@ export function SupplierAdjustmentModal() {
               <div className="border-r border-slate-200 pr-2">
                 <span className="text-[10px] text-slate-500 font-medium block">বর্তমান দেনা</span>
                 <span className="text-sm sm:text-base font-bold font-mono text-amber-800 tabular-nums tracking-tight">
-                  ৳{formatCurrency(currentPayable)}
+                  {formatCurrency(currentPayable)}
                 </span>
               </div>
               <div className="pl-2">
                 <span className="text-[10px] text-slate-500 font-medium block">সমন্বয়ের পর দেনা</span>
                 <span className="text-sm sm:text-base font-bold font-mono text-slate-900 tabular-nums tracking-tight">
-                  ৳{formatCurrency(newPayable)}
+                  {formatCurrency(newPayable)}
                 </span>
               </div>
             </div>

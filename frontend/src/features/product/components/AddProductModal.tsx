@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { X, Plus, Trash, Package, Sparkle, Tag, Info, Check } from '@phosphor-icons/react';
-import { Product, CreateProductDTO, CreateVariantDTO } from '../product.types';
+import { Product, CreateProductDTO, CreateVariantDTO, UpdateProductDTO } from '../product.types';
 import { useProductStore } from '../useProductStore';
 
 interface AddProductModalProps {
@@ -448,15 +448,102 @@ export function AddProductModal({ isOpen, onClose, initialProduct }: AddProductM
     try {
       if (initialProduct) {
         // Edit Mode
-        await updateProduct(initialProduct.id, {
-          name: name.trim(),
-          banglaName: banglaName.trim() || undefined,
-          description: description.trim() || undefined,
-          categoryId: categoryId || undefined,
-          brandId: brandId || undefined,
-        });
-        onClose();
-        return;
+        if (!hasVariants) {
+          const pPrice = parseFloat(currentPurchasePrice);
+          const rPrice = parseFloat(retailPrice);
+          const wPrice = parseFloat(wholesalePrice);
+
+          if (isNaN(pPrice) || pPrice <= 0 || isNaN(rPrice) || rPrice <= 0 || isNaN(wPrice) || wPrice <= 0) {
+            setError('বর্তমান ক্রয়মূল্য, খুচরা ও পাইকারি বিক্রয়মূল্য অবশ্যই ০ এর বেশি হতে হবে');
+            return;
+          }
+
+          const payload: UpdateProductDTO = {
+            name: name.trim(),
+            banglaName: banglaName.trim() || undefined,
+            description: description.trim() || undefined,
+            categoryId: categoryId || undefined,
+            brandId: brandId || undefined,
+            baseUnitName: baseUnitName.trim() || 'কেজি',
+            allowDecimalQty,
+            sku: sku.trim() || undefined,
+            barcode: barcode.trim() || undefined,
+            currentPurchasePrice: pPrice,
+            retailPrice: rPrice,
+            wholesalePrice: wPrice,
+            stockQuantity: parseFloat(stockQuantity) || 0,
+            lowStockAlert: parseFloat(lowStockAlert) || 10,
+            units: simpleUnits
+              .filter((u) => u.unitName.trim() && parseFloat(u.conversionFactor) > 0)
+              .map((u) => ({
+                unitName: u.unitName.trim(),
+                conversionFactor: parseFloat(u.conversionFactor),
+                retailPrice: u.retailPrice ? parseFloat(u.retailPrice) : undefined,
+                wholesalePrice: u.wholesalePrice ? parseFloat(u.wholesalePrice) : undefined,
+              })),
+          };
+
+          await updateProduct(initialProduct.id, payload);
+          onClose();
+          return;
+        } else {
+          // Variable Product Edit Mode
+          if (variants.length === 0) {
+            setError('অন্তত একটি ভ্যারিয়েন্ট যোগ করুন');
+            return;
+          }
+
+          const preparedVariants = [];
+          for (const [idx, v] of variants.entries()) {
+            if (!v.variantName.trim()) {
+              setError(`ভ্যারিয়েন্ট #${idx + 1}-এর নাম লিখুন`);
+              return;
+            }
+            const pPrice = parseFloat(v.currentPurchasePrice);
+            const rPrice = parseFloat(v.retailPrice);
+            const wPrice = parseFloat(v.wholesalePrice);
+            if (isNaN(pPrice) || pPrice <= 0 || isNaN(rPrice) || rPrice <= 0 || isNaN(wPrice) || wPrice <= 0) {
+              setError(`ভ্যারিয়েন্ট "${v.variantName}"-এর মূল্যসমূহ সঠিকভাবে পূরণ করুন`);
+              return;
+            }
+
+            preparedVariants.push({
+              id: v.id && !v.id.startsWith('temp-') ? v.id : undefined,
+              variantName: v.variantName.trim(),
+              sku: v.sku.trim() || undefined,
+              barcode: v.barcode.trim() || undefined,
+              baseUnitName: v.baseUnitName.trim() || 'প্যাকেট',
+              allowDecimalQty: v.allowDecimalQty,
+              currentPurchasePrice: pPrice,
+              retailPrice: rPrice,
+              wholesalePrice: wPrice,
+              stockQuantity: parseFloat(v.stockQuantity) || 0,
+              lowStockAlert: parseFloat(v.lowStockAlert) || 10,
+              units: (v.units || [])
+                .filter((u) => u.unitName.trim() && parseFloat(u.conversionFactor) > 0)
+                .map((u) => ({
+                  unitName: u.unitName.trim(),
+                  conversionFactor: parseFloat(u.conversionFactor),
+                  retailPrice: u.retailPrice ? parseFloat(u.retailPrice) : undefined,
+                  wholesalePrice: u.wholesalePrice ? parseFloat(u.wholesalePrice) : undefined,
+                  barcode: u.barcode?.trim() || undefined,
+                })),
+            });
+          }
+
+          const payload: UpdateProductDTO = {
+            name: name.trim(),
+            banglaName: banglaName.trim() || undefined,
+            description: description.trim() || undefined,
+            categoryId: categoryId || undefined,
+            brandId: brandId || undefined,
+            variants: preparedVariants,
+          };
+
+          await updateProduct(initialProduct.id, payload);
+          onClose();
+          return;
+        }
       }
 
       // Create Mode

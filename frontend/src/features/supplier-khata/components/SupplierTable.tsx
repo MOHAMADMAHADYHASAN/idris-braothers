@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   HandCoins,
   Scroll,
@@ -17,6 +19,7 @@ import { AdminPagination } from '@/components/shared/AdminPagination';
 import { DynamicDataTable, ColumnDef } from '@/components/shared/DynamicDataTable';
 
 export function SupplierTable() {
+  const router = useRouter();
   const {
     suppliers,
     meta,
@@ -91,7 +94,7 @@ export function SupplierTable() {
             return (
               <div className="inline-block text-right">
                 <span className="font-mono tabular-nums tracking-tight font-black text-amber-800 text-xs sm:text-sm">
-                  ৳{formatCurrency(s.currentPayable)}
+                  {formatCurrency(s.currentPayable)}
                 </span>
                 <span className="block text-[10px] text-amber-700 font-semibold uppercase tracking-wider">
                   দোকানের দেনা
@@ -104,7 +107,7 @@ export function SupplierTable() {
             return (
               <div className="inline-block text-right">
                 <span className="font-mono tabular-nums tracking-tight font-black text-emerald-700 text-xs sm:text-sm">
-                  ৳{formatCurrency(Math.abs(s.currentPayable))}
+                  {formatCurrency(Math.abs(s.currentPayable))}
                 </span>
                 <span className="block text-[10px] text-emerald-600 font-semibold uppercase tracking-wider">
                   অগ্রিম দেওয়া
@@ -126,7 +129,7 @@ export function SupplierTable() {
           );
           return (
             <span className="text-amber-800 font-mono font-black text-xs sm:text-sm">
-              ৳{formatCurrency(totalPayable)}
+              {formatCurrency(totalPayable)}
             </span>
           );
         },
@@ -154,18 +157,15 @@ export function SupplierTable() {
             </button>
 
             {/* খতিয়ান বিবরণী বাটন */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                openModal('ledger', s);
-              }}
+            <Link
+              href={`/khata/suppliers/${s.id}`}
+              onClick={(e) => e.stopPropagation()}
               className="px-2.5 py-1 rounded-md border border-slate-200/90 hover:bg-slate-100 active:scale-[0.98] text-slate-700 text-xs font-semibold flex items-center gap-1 transition-[background-color,border-color,transform] duration-150 cursor-pointer shadow-2xs"
               title="মহাজনের রানিং চালান ও খতিয়ান"
             >
               <Scroll size={14} weight="bold" className="text-slate-500" />
               <span>খতিয়ান</span>
-            </button>
+            </Link>
 
             {/* ছাড় / সমন্বয় */}
             <button
@@ -206,7 +206,7 @@ export function SupplierTable() {
       columns={columns}
       keyExtractor={(s) => s.id}
       isLoading={isLoading}
-      onRowClick={(s) => openModal('ledger', s)}
+      onRowClick={(s) => router.push(`/khata/suppliers/${s.id}`)}
       pagination={
         meta.totalPages > 1 ? (
           <AdminPagination

@@ -143,11 +143,18 @@ export class InventoryRepository extends BaseRepository {
   /**
    * Update parent product attributes
    */
-  async update(id: string, data: Prisma.ProductUpdateInput, tx?: Prisma.TransactionClient): Promise<Product> {
+  async update(id: string, data: Prisma.ProductUpdateInput, tx?: Prisma.TransactionClient): Promise<ProductWithDetails> {
     return await this.getDb(tx).product.update({
       where: { id },
       data,
-    });
+      include: {
+        category: { select: { id: true, name: true, banglaName: true } },
+        brand: { select: { id: true, name: true, banglaName: true } },
+        variants: {
+          include: { units: true },
+        },
+      },
+    }) as ProductWithDetails;
   }
 
   /**
@@ -157,10 +164,14 @@ export class InventoryRepository extends BaseRepository {
     variantId: string,
     data: Prisma.ProductVariantUpdateInput,
     tx?: Prisma.TransactionClient
-  ): Promise<ProductVariant> {
+  ): Promise<VariantWithDetails> {
     return await this.getDb(tx).productVariant.update({
       where: { id: variantId },
       data,
+      include: {
+        product: true,
+        units: true,
+      },
     });
   }
 

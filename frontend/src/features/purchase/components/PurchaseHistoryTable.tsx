@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { Eye } from '@phosphor-icons/react';
 import { formatCurrency } from '@/lib/decimal';
 import { usePurchaseStore } from '../usePurchaseStore';
@@ -13,6 +14,7 @@ interface PurchaseHistoryTableProps {
 }
 
 export function PurchaseHistoryTable({ onOpenDetail }: PurchaseHistoryTableProps) {
+  const router = useRouter();
   const {
     purchases,
     meta,
@@ -25,7 +27,7 @@ export function PurchaseHistoryTable({ onOpenDetail }: PurchaseHistoryTableProps
     if (onOpenDetail) {
       onOpenDetail(p);
     } else {
-      openDetailModal(p);
+      router.push(`/purchases/${p.id}`);
     }
   };
 
@@ -82,9 +84,9 @@ export function PurchaseHistoryTable({ onOpenDetail }: PurchaseHistoryTableProps
         cellClassName: 'text-right font-mono tabular-nums text-slate-600 text-xs',
         footerClassName: 'text-right font-mono tabular-nums text-slate-700 font-bold',
         renderCell: (p) =>
-          p.transportCost > 0 ? `৳${formatCurrency(p.transportCost)}` : '-',
+          p.transportCost > 0 ? `${formatCurrency(p.transportCost)}` : '-',
         renderFooterCell: (data) =>
-          `৳${formatCurrency(
+          `${formatCurrency(
             data.reduce((sum, p) => sum + (Number(p.transportCost) || 0), 0)
           )}`,
       },
@@ -94,9 +96,9 @@ export function PurchaseHistoryTable({ onOpenDetail }: PurchaseHistoryTableProps
         headerClassName: 'text-right',
         cellClassName: 'text-right font-mono tabular-nums tracking-tight font-black text-slate-900 text-xs sm:text-sm',
         footerClassName: 'text-right font-mono tabular-nums tracking-tight font-black text-slate-900 text-xs sm:text-sm',
-        renderCell: (p) => `৳${formatCurrency(p.grandTotal)}`,
+        renderCell: (p) => `${formatCurrency(p.grandTotal)}`,
         renderFooterCell: (data) =>
-          `৳${formatCurrency(
+          `${formatCurrency(
             data.reduce((sum, p) => sum + (Number(p.grandTotal) || 0), 0)
           )}`,
       },
@@ -106,9 +108,9 @@ export function PurchaseHistoryTable({ onOpenDetail }: PurchaseHistoryTableProps
         headerClassName: 'text-right',
         cellClassName: 'text-right font-mono tabular-nums tracking-tight font-bold text-emerald-700',
         footerClassName: 'text-right font-mono tabular-nums tracking-tight font-bold text-emerald-700',
-        renderCell: (p) => `৳${formatCurrency(p.paidAmount)}`,
+        renderCell: (p) => `${formatCurrency(p.paidAmount)}`,
         renderFooterCell: (data) =>
-          `৳${formatCurrency(
+          `${formatCurrency(
             data.reduce((sum, p) => sum + (Number(p.paidAmount) || 0), 0)
           )}`,
       },
@@ -122,7 +124,7 @@ export function PurchaseHistoryTable({ onOpenDetail }: PurchaseHistoryTableProps
           if (p.dueAmount > 0) {
             return (
               <span className="text-amber-800">
-                ৳{formatCurrency(p.dueAmount)}
+                {formatCurrency(p.dueAmount)}
               </span>
             );
           }
@@ -139,7 +141,7 @@ export function PurchaseHistoryTable({ onOpenDetail }: PurchaseHistoryTableProps
           );
           return totalDue > 0 ? (
             <span className="text-amber-800">
-              ৳{formatCurrency(totalDue)}
+              {formatCurrency(totalDue)}
             </span>
           ) : (
             <span className="text-emerald-700 font-semibold">০ দেনা</span>

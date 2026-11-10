@@ -24,7 +24,7 @@ export function CustomerKpiSummary() {
         </div>
         <div className="mt-2">
           <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-rose-700">
-            ৳{formatCurrency(totalDue)}
+            {formatCurrency(totalDue)}
           </div>
           <p className="text-[11px] text-slate-400 mt-0.5">বর্তমান ফিল্টারে থাকা মোট পাওনা</p>
         </div>

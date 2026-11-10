@@ -236,8 +236,8 @@ export const useProductStore = create<ProductState>((set, get) => ({
     try {
       const updated = await productService.updateProduct(id, dto);
       set((state) => ({
-        products: state.products.map((p) => (p.id === id ? { ...p, ...updated } : p)),
-        selectedProduct: state.selectedProduct?.id === id ? { ...state.selectedProduct, ...updated } : state.selectedProduct,
+        products: state.products.map((p) => (p.id === id ? updated : p)),
+        selectedProduct: state.selectedProduct?.id === id ? updated : state.selectedProduct,
         isSaving: false,
       }));
       return updated;

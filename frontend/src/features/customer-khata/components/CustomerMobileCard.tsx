@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import {
   HandCoins,
   Scroll,
@@ -83,7 +84,7 @@ export function CustomerMobileCard({ customer }: { customer: Customer }) {
           {isDue ? (
             <div className="text-right">
               <span className="font-mono tabular-nums tracking-tight font-black text-rose-700 text-sm">
-                ৳{formatCurrency(customer.currentDue)}
+                {formatCurrency(customer.currentDue)}
               </span>
               <span className="block text-[10px] text-rose-500 font-semibold text-right">
                 বাকি পাওনা
@@ -92,7 +93,7 @@ export function CustomerMobileCard({ customer }: { customer: Customer }) {
           ) : isAdvance ? (
             <div className="text-right">
               <span className="font-mono tabular-nums tracking-tight font-black text-emerald-700 text-sm">
-                ৳{formatCurrency(Math.abs(customer.currentDue))}
+                {formatCurrency(Math.abs(customer.currentDue))}
               </span>
               <span className="block text-[10px] text-emerald-600 font-semibold text-right">
                 অগ্রিম জমা
@@ -106,14 +107,13 @@ export function CustomerMobileCard({ customer }: { customer: Customer }) {
 
       {/* পিনড বটম ফুটার অ্যাকশনস */}
       <div className="grid grid-cols-2 gap-2 pt-0.5">
-        <button
-          type="button"
-          onClick={() => openModal('ledger', customer)}
+        <Link
+          href={`/khata/customers/${customer.id}`}
           className="h-8 px-3 rounded-md border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-medium flex items-center justify-center gap-1.5 transition-[background-color] duration-150 active:scale-[0.98]"
         >
           <Scroll size={14} weight="bold" className="text-slate-500" />
           <span>খতিয়ান দেখুন</span>
-        </button>
+        </Link>
 
         <button
           type="button"

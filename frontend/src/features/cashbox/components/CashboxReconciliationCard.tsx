@@ -74,19 +74,19 @@ export function CashboxReconciliationCard() {
             <div className="flex items-center justify-between text-slate-700">
               <span>কাউন্টার নগদ বিক্রি ({summary?.inflow.salesCount || 0} টি মেমো):</span>
               <strong className="font-mono tabular-nums tracking-tight font-bold text-emerald-700 text-sm">
-                +৳{formatCurrency(summary?.inflow.cashFromSales || 0)}
+                +{formatCurrency(summary?.inflow.cashFromSales || 0)}
               </strong>
             </div>
             <div className="flex items-center justify-between text-slate-700">
               <span>কাস্টমার বকেয়া আদায় ({summary?.inflow.customerRepaymentsCount || 0} জন):</span>
               <strong className="font-mono tabular-nums tracking-tight font-bold text-emerald-700 text-sm">
-                +৳{formatCurrency(summary?.inflow.cashFromCustomerRepayments || 0)}
+                +{formatCurrency(summary?.inflow.cashFromCustomerRepayments || 0)}
               </strong>
             </div>
             <div className="border-t border-slate-200 pt-2 flex items-center justify-between font-bold text-slate-900">
               <span>সর্বমোট নগদ জমা (Total Cash In):</span>
               <span className="font-mono tabular-nums tracking-tight text-emerald-800 text-base">
-                +৳{formatCurrency(summary?.inflow.totalCashIn || 0)}
+                +{formatCurrency(summary?.inflow.totalCashIn || 0)}
               </span>
             </div>
           </div>
@@ -102,25 +102,25 @@ export function CashboxReconciliationCard() {
             <div className="flex items-center justify-between text-slate-700">
               <span>চালান মাল কেনার নগদ প্রদান ({summary?.outflow.purchasesCount || 0} টি চালান):</span>
               <strong className="font-mono tabular-nums tracking-tight font-bold text-amber-800 text-sm">
-                -৳{formatCurrency(summary?.outflow.cashForPurchases || 0)}
+                -{formatCurrency(summary?.outflow.cashForPurchases || 0)}
               </strong>
             </div>
             <div className="flex items-center justify-between text-slate-700">
               <span>মহাজনদের দেনা শোধ ({summary?.outflow.supplierRepaymentsCount || 0} টি পেমেন্ট):</span>
               <strong className="font-mono tabular-nums tracking-tight font-bold text-amber-800 text-sm">
-                -৳{formatCurrency(summary?.outflow.cashForSupplierRepayments || 0)}
+                -{formatCurrency(summary?.outflow.cashForSupplierRepayments || 0)}
               </strong>
             </div>
             <div className="flex items-center justify-between text-slate-700">
               <span>দোকানের দৈনন্দিন খরচ ({summary?.outflow.expensesCount || 0} টি ভাউচার):</span>
               <strong className="font-mono tabular-nums tracking-tight font-bold text-red-600 text-sm">
-                -৳{formatCurrency(summary?.outflow.totalExpenses || 0)}
+                -{formatCurrency(summary?.outflow.totalExpenses || 0)}
               </strong>
             </div>
             <div className="border-t border-slate-200 pt-2 flex items-center justify-between font-bold text-slate-900">
               <span>সর্বমোট নগদ ব্যয় (Total Cash Out):</span>
               <span className="font-mono tabular-nums tracking-tight text-amber-800 text-base">
-                -৳{formatCurrency(summary?.outflow.totalCashOut || 0)}
+                -{formatCurrency(summary?.outflow.totalCashOut || 0)}
               </span>
             </div>
           </div>
@@ -140,7 +140,7 @@ export function CashboxReconciliationCard() {
                 >
                   <span className="text-slate-600 text-[11px]">{getCategoryBangla(b.category)}:</span>
                   <strong className="font-mono tabular-nums tracking-tight text-slate-900 text-xs">
-                    ৳{formatCurrency(b.amount)}
+                    {formatCurrency(b.amount)}
                   </strong>
                 </div>
               ))}
@@ -203,7 +203,7 @@ export function CashboxReconciliationCard() {
                   />
                   <span className="text-slate-400 text-[11px]">=</span>
                   <span className="font-mono tabular-nums tracking-tight font-bold text-slate-900 w-20 text-right">
-                    ৳{formatCurrency(sub)}
+                    {formatCurrency(sub)}
                   </span>
                 </div>
               </div>
@@ -216,14 +216,14 @@ export function CashboxReconciliationCard() {
           <div className="flex justify-between items-center text-xs">
             <span className="text-slate-600">গণনাকৃত মোট ক্যাশ:</span>
             <span className="font-mono tabular-nums tracking-tight font-black text-base text-slate-900">
-              ৳{formatCurrency(countedTotal)}
+              {formatCurrency(countedTotal)}
             </span>
           </div>
 
           <div className="flex justify-between items-center text-xs">
             <span className="text-slate-600">সফটওয়্যার ব্যালেন্স:</span>
             <span className="font-mono tabular-nums tracking-tight font-bold text-sm text-slate-700">
-              ৳{formatCurrency(netCashInHand)}
+              {formatCurrency(netCashInHand)}
             </span>
           </div>
 
@@ -246,12 +246,12 @@ export function CashboxReconciliationCard() {
               ) : mismatch > 0 ? (
                 <>
                   <CheckCircle size={16} weight="fill" className="text-blue-600 shrink-0" />
-                  <span>ড্রয়ারে ৳{formatCurrency(mismatch)} ক্যাশ উদ্বৃত্ত আছে</span>
+                  <span>ড্রয়ারে {formatCurrency(mismatch)} ক্যাশ উদ্বৃত্ত আছে</span>
                 </>
               ) : (
                 <>
                   <Warning size={16} weight="fill" className="text-red-600 shrink-0" />
-                  <span>ড্রয়ারে ৳{formatCurrency(Math.abs(mismatch))} ক্যাশ ঘাটতি দেখা যাচ্ছে!</span>
+                  <span>ড্রয়ারে {formatCurrency(Math.abs(mismatch))} ক্যাশ ঘাটতি দেখা যাচ্ছে!</span>
                 </>
               )}
             </div>

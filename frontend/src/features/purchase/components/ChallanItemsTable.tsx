@@ -94,12 +94,12 @@ export function ChallanItemsTable() {
 
                   {/* কেনা দর */}
                   <td className="py-2 px-3 text-right font-mono tabular-nums font-medium text-slate-700 text-xs">
-                    ৳{formatCurrency(item.unitCost)}
+                    {formatCurrency(item.unitCost)}
                   </td>
 
                   {/* মোট */}
                   <td className="py-2 px-3.5 text-right font-mono tabular-nums tracking-tight font-bold text-slate-900 text-xs sm:text-sm">
-                    ৳{formatCurrency(lineTotal)}
+                    {formatCurrency(lineTotal)}
                   </td>
 
                   {/* ডিলিট বাটন */}

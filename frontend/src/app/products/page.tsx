@@ -1,13 +1,14 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Package, Plus, ArrowsClockwise } from '@phosphor-icons/react';
 import { useProductStore } from '@/features/product/useProductStore';
 import { ProductListTable } from '@/features/product/components/ProductListTable';
 import { ProductMobileCard } from '@/features/product/components/ProductMobileCard';
 import { ProductKpiSummary } from '@/features/product/components/ProductKpiSummary';
 import { ProductFilterBar } from '@/features/product/components/ProductFilterBar';
-import { AddProductModal } from '@/features/product/components/AddProductModal';
 import { QuickPriceModal } from '@/features/product/components/QuickPriceModal';
 import { AddUnitModal } from '@/features/product/components/AddUnitModal';
 import { RecordWastageModal } from '@/features/product/components/RecordWastageModal';
@@ -16,6 +17,7 @@ import { AdminPagination } from '@/components/shared/AdminPagination';
 import { Product, ProductVariant } from '@/features/product/product.types';
 
 export default function ProductsPage() {
+  const router = useRouter();
   const {
     products,
     pagination,
@@ -26,10 +28,7 @@ export default function ProductsPage() {
     deleteVariant,
   } = useProductStore();
 
-  // Modals state
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-
+  // Quick Action Modals state (Price, Unit, Wastage)
   const [priceModalData, setPriceModalData] = useState<{
     variant: ProductVariant;
     productName: string;
@@ -51,13 +50,7 @@ export default function ProductsPage() {
   }, [fetchMetadata, fetchProducts]);
 
   const handleEditProduct = (product: Product) => {
-    setEditingProduct(product);
-    setIsAddModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsAddModalOpen(false);
-    setEditingProduct(null);
+    router.push(`/products/edit/${product.id}`);
   };
 
   const handleDeleteVariant = async (variantId: string, variantName: string) => {
@@ -109,17 +102,13 @@ export default function ProductsPage() {
                   <span className="hidden sm:inline">রিফ্রেশ</span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingProduct(null);
-                    setIsAddModalOpen(true);
-                  }}
+                <Link
+                  href="/products/new"
                   className="px-2.5 py-1.5 rounded-md bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white text-xs font-semibold flex items-center gap-1.5 transition-[background-color,transform] duration-150 shadow-[0_1px_2px_rgba(15,23,42,0.08)] cursor-pointer"
                 >
                   <Plus size={14} weight="bold" />
                   <span>+ নতুন পণ্য</span>
-                </button>
+                </Link>
               </>
             }
           />
@@ -188,12 +177,6 @@ export default function ProductsPage() {
         )}
       </main>
 
-      {/* নতুন পণ্য তৈরি ও সম্পাদনা মডাল */}
-      <AddProductModal
-        isOpen={isAddModalOpen}
-        onClose={handleCloseModal}
-        initialProduct={editingProduct}
-      />
 
       {/* কুইক দর পরিবর্তন মডাল */}
       <QuickPriceModal

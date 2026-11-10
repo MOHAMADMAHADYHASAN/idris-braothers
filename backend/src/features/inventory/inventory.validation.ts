@@ -49,6 +49,23 @@ export const createProductSchema = z.object({
   variants: z.array(variantInputSchema).optional(),
 });
 
+export const updateProductVariantItemSchema = z.object({
+  id: z.string().optional(),
+  variantName: z.string().min(1).optional(),
+  sku: z.string().optional().nullable(),
+  barcode: z.string().optional().nullable(),
+  baseUnitName: z.string().min(1).optional(),
+  allowDecimalQty: z.boolean().optional(),
+  attributes: z.record(z.any()).optional(),
+  stockQuantity: z.number().min(0).optional(),
+  lowStockAlert: z.number().min(0).optional(),
+  currentPurchasePrice: z.number().positive().optional(),
+  retailPrice: z.number().positive().optional(),
+  wholesalePrice: z.number().positive().optional(),
+  isActive: z.boolean().optional(),
+  units: z.array(variantUnitInputSchema).optional(),
+});
+
 export const updateProductSchema = z.object({
   name: z.string().min(2).optional(),
   banglaName: z.string().optional().nullable(),
@@ -56,6 +73,22 @@ export const updateProductSchema = z.object({
   categoryId: z.string().optional().nullable(),
   brandId: z.string().optional().nullable(),
   isActive: z.boolean().optional(),
+
+  // For Simple Products (hasVariants: false)
+  sku: z.string().optional().nullable(),
+  barcode: z.string().optional().nullable(),
+  baseUnitName: z.string().min(1).optional(),
+  allowDecimalQty: z.boolean().optional(),
+  attributes: z.record(z.any()).optional(),
+  stockQuantity: z.number().min(0).optional(),
+  lowStockAlert: z.number().min(0).optional(),
+  currentPurchasePrice: z.number().positive().optional(),
+  retailPrice: z.number().positive().optional(),
+  wholesalePrice: z.number().positive().optional(),
+  units: z.array(variantUnitInputSchema).optional(),
+
+  // For Variable Products (hasVariants: true)
+  variants: z.array(updateProductVariantItemSchema).optional(),
 });
 
 export const updateVariantPricesSchema = z.object({
