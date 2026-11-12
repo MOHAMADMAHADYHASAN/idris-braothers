@@ -112,7 +112,7 @@ export function PosSettlementPanel({ onSaleSuccess }: PosSettlementPanelProps) {
               />
 
               {showCustomerDropdown && (
-                <div className="absolute z-20 left-0 right-0 top-10 bg-surface-card border border-border-default rounded-lg shadow-lg max-h-48 overflow-y-auto divide-y divide-border-subtle animate-in fade-in zoom-in-98 duration-100">
+                <div className="absolute z-20 left-0 right-0 top-10 surface-glass-popover border border-border-default rounded-lg max-h-48 overflow-y-auto divide-y divide-border-subtle animate-in fade-in zoom-in-98 duration-100">
                   <button
                     type="button"
                     onClick={() => {

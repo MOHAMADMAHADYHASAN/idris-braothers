@@ -4,6 +4,7 @@ import React, { useState, useId } from 'react';
 import { Folders, Plus } from '@phosphor-icons/react';
 import { Category, Brand } from '../../product.types';
 import { InlineTaxonomyModal } from './InlineTaxonomyModal';
+import { CustomSelect } from '@/components/shared/CustomSelect';
 
 interface TaxonomyCardProps {
   categoryId: string;
@@ -71,19 +72,22 @@ export function TaxonomyCard({
                 <span>নতুন ক্যাটাগরি</span>
               </button>
             </div>
-            <select
+            <CustomSelect
               id={`${formId}-category`}
+              options={[
+                { value: '', label: '— ক্যাটাগরি নির্বাচন করুন —' },
+                ...categories.map((c) => ({
+                  value: c.id,
+                  label: c.banglaName ? `${c.banglaName} (${c.name})` : c.name,
+                })),
+              ]}
               value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep text-xs sm:text-sm text-ink-primary bg-surface-card"
-            >
-              <option value="">— ক্যাটাগরি নির্বাচন করুন —</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.banglaName ? `${c.banglaName} (${c.name})` : c.name}
-                </option>
-              ))}
-            </select>
+              onChange={setCategoryId}
+              placeholder="— ক্যাটাগরি নির্বাচন করুন —"
+              enableSearch={categories.length > 6}
+              className="w-full"
+              buttonClassName="w-full h-10 text-xs sm:text-sm"
+            />
           </div>
 
           <div>
@@ -100,19 +104,22 @@ export function TaxonomyCard({
                 <span>নতুন ব্র্যান্ড</span>
               </button>
             </div>
-            <select
+            <CustomSelect
               id={`${formId}-brand`}
+              options={[
+                { value: '', label: '— ব্র্যান্ড নির্বাচন করুন (ঐচ্ছিক) —' },
+                ...brands.map((b) => ({
+                  value: b.id,
+                  label: b.banglaName ? `${b.banglaName} (${b.name})` : b.name,
+                })),
+              ]}
               value={brandId}
-              onChange={(e) => setBrandId(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep text-xs sm:text-sm text-ink-primary bg-surface-card"
-            >
-              <option value="">— ব্র্যান্ড নির্বাচন করুন (ঐচ্ছিক) —</option>
-              {brands.map((b) => (
-                <option key={b.id} value={b.id}>
-                  {b.banglaName ? `${b.banglaName} (${b.name})` : b.name}
-                </option>
-              ))}
-            </select>
+              onChange={setBrandId}
+              placeholder="— ব্র্যান্ড নির্বাচন করুন (ঐচ্ছিক) —"
+              enableSearch={brands.length > 6}
+              className="w-full"
+              buttonClassName="w-full h-10 text-xs sm:text-sm"
+            />
           </div>
         </div>
       </div>

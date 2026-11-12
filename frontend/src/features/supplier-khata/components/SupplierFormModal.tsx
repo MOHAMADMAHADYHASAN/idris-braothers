@@ -87,7 +87,7 @@ export function SupplierFormModal() {
   };
 
   return (
-    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-backdrop-frosted">
       <motion.div
         {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
@@ -152,7 +152,7 @@ export function SupplierFormModal() {
             {/* মহাজনের নাম (ব্যক্তি) */}
             <div>
               <label htmlFor={`${formId}-name`} className="block text-xs font-semibold text-ink-body mb-1">
-                মহাজনের নাম (মালিক বা যোগাযোগ ব্যক্তি) <span className="text-red-500">*</span>
+                মহাজনের নাম (মালিক বা যোগাযোগ ব্যক্তি) <span className="text-danger">*</span>
               </label>
               <input
                 id={`${formId}-name`}

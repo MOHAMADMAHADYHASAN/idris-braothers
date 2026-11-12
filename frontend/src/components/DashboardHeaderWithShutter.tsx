@@ -27,7 +27,7 @@ export function DashboardHeaderWithShutter() {
       />
 
       {/* Unified Max-W-7XL Header (Zero Floating Overlap) */}
-      <header className="bg-surface-card border-b border-border-default sticky top-0 z-30 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
+      <header className="surface-glass-header border-b border-border-default/80 sticky top-0 z-30 shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-lg bg-brand-deep text-white flex items-center justify-center shrink-0 shadow-[0_1px_2px_rgba(30,74,122,0.18)]">

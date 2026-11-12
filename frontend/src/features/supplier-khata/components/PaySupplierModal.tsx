@@ -90,7 +90,7 @@ export function PaySupplierModal() {
   };
 
   return (
-    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-backdrop-frosted">
       <motion.div
         {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
@@ -236,7 +236,7 @@ export function PaySupplierModal() {
               {/* পরিশোধের পরিমাণ ইনপুট */}
               <div>
                 <label htmlFor={`${formId}-amount`} className="block text-xs font-semibold text-ink-body mb-1">
-                  নগদ পরিশোধের পরিমাণ (টাকা) <span className="text-red-500">*</span>
+                  নগদ পরিশোধের পরিমাণ (টাকা) <span className="text-danger">*</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-secondary text-base font-bold">

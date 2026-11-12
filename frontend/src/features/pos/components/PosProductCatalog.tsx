@@ -281,7 +281,7 @@ export function PosProductCatalog() {
         {reverseModalTarget && (
           <div
             {...reverseBackdropProps}
-            className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 modal-backdrop-frosted flex items-center justify-center p-4"
           >
             <motion.form
               {...reverseDialogProps}

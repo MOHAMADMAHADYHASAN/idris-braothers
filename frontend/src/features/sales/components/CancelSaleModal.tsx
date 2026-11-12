@@ -33,7 +33,7 @@ export function CancelSaleModal() {
   };
 
   return (
-    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-backdrop-frosted">
       <motion.div
         {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
@@ -71,7 +71,7 @@ export function CancelSaleModal() {
         <form onSubmit={handleSubmit}>
           <div className="p-4 space-y-3">
             {/* ওয়ার্নিং ব্যানার */}
-            <div className="p-3 bg-wholesale-bg rounded-md border border-wholesale-border text-amber-950 text-xs space-y-1">
+            <div className="p-3 bg-wholesale-bg rounded-md border border-wholesale-border text-wholesale-text text-xs space-y-1">
               <span className="font-bold block">সতর্কবার্তা:</span>
               <ul className="list-disc list-inside space-y-0.5 text-xs text-wholesale-text">
                 <li>বিক্রিত পণ্যের স্টক স্বয়ংক্রিয়ভাবে ইনভেন্টরিতে ফেরত যোগ হবে।</li>

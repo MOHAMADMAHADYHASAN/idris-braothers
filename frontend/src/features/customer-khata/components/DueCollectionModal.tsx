@@ -94,7 +94,7 @@ export function DueCollectionModal() {
   };
 
   return (
-    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop-frosted">
       <motion.div
         {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
@@ -224,7 +224,7 @@ export function DueCollectionModal() {
               {/* জমার পরিমাণ ইনপুট */}
               <div>
                 <label htmlFor={`${formId}-amount`} className="block text-xs font-medium text-ink-body mb-1">
-                  নগদ জমার পরিমাণ (টাকা) <span className="text-rose-500">*</span>
+                  নগদ জমার পরিমাণ (টাকা) <span className="text-danger">*</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-secondary text-base font-bold">

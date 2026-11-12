@@ -7,6 +7,15 @@ import { ProductVariant } from '../product.types';
 import { useProductStore } from '../useProductStore';
 import { formatCurrency, formatWeight } from '@/lib/decimal';
 import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
+import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
+
+const WASTAGE_REASON_OPTIONS: SelectOption[] = [
+  { value: 'শুকিয়ে ওজন হ্রাস', label: 'শুকিয়ে ওজন হ্রাস (গরমের প্রভাব)' },
+  { value: 'প্যাকেট ফেটে নষ্ট হওয়া', label: 'প্যাকেট ফেটে বা গলে নষ্ট হওয়া' },
+  { value: 'ইঁদুরে খাওয়া বা পড়ে যাওয়া', label: 'ইঁদুরে খাওয়া বা পড়ে যাওয়া' },
+  { value: 'মেয়াদোত্তীর্ণ বা ড্যামেজ', label: 'মেয়াদোত্তীর্ণ বা ড্যামেজ মাল' },
+  { value: 'অন্যান্য কারণ', label: 'অন্যান্য কারণ' },
+];
 
 interface RecordWastageModalProps {
   isOpen: boolean;
@@ -58,7 +67,7 @@ export function RecordWastageModal({ isOpen, onClose, variant, productName }: Re
   const remainingStock = Math.max(0, variant.stockQuantity - parsedQty);
 
   return (
-    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center modal-backdrop-frosted p-4">
       <motion.div
         {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
@@ -134,18 +143,14 @@ export function RecordWastageModal({ isOpen, onClose, variant, productName }: Re
             <label htmlFor={`${formId}-reason`} className="block text-xs font-semibold text-ink-body mb-1">
               ঘাটতির কারণ *
             </label>
-            <select
+            <CustomSelect
               id={`${formId}-reason`}
+              options={WASTAGE_REASON_OPTIONS}
               value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="w-full px-2.5 py-2 text-xs border border-border-strong rounded-lg bg-surface-card text-ink-primary focus:outline-hidden focus:ring-1 focus:ring-brand-deep focus:border-brand-deep"
-            >
-              <option value="শুকিয়ে ওজন হ্রাস">শুকিয়ে ওজন হ্রাস (গরমের প্রভাব)</option>
-              <option value="প্যাকেট ফেটে নষ্ট হওয়া">প্যাকেট ফেটে বা গলে নষ্ট হওয়া</option>
-              <option value="ইঁদুরে খাওয়া বা পড়ে যাওয়া">ইঁদুরে খাওয়া বা পড়ে যাওয়া</option>
-              <option value="মেয়াদোত্তীর্ণ বা ড্যামেজ">মেয়াদোত্তীর্ণ বা ড্যামেজ মাল</option>
-              <option value="অন্যান্য কারণ">অন্যান্য কারণ</option>
-            </select>
+              onChange={setReason}
+              className="w-full"
+              buttonClassName="w-full h-10"
+            />
           </div>
 
           <div>

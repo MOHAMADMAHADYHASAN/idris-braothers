@@ -65,7 +65,7 @@ export default function PosPage() {
   return (
     <div className="h-[100dvh] w-screen overflow-hidden flex flex-col bg-surface-canvas text-ink-primary select-none">
       {/* 1. Sticky Top Navigation Bar */}
-      <header className="px-3 sm:px-4 py-2 bg-surface-card border-b border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.02)] shrink-0 flex items-center justify-between gap-3 z-30">
+      <header className="px-3 sm:px-4 py-2 surface-glass-header border-b border-border-default/80 shadow-[0_1px_2px_rgba(15,23,42,0.02)] shrink-0 flex items-center justify-between gap-3 z-30">
         <div className="flex items-center gap-2.5">
           <Link
             href="/"

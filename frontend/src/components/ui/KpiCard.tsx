@@ -31,7 +31,7 @@ export function KpiCard({
   return (
     <div
       onClick={() => setShowExact(!showExact)}
-      className="bg-surface-card rounded-xl border border-border-default p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between cursor-pointer select-none active:scale-[0.98] transition-[border-color,transform] duration-150 hover:border-brand-light"
+      className="bg-surface-card rounded-xl border border-border-default p-4 surface-card-crisp flex flex-col justify-between cursor-pointer select-none active:scale-[0.98] transition-[border-color,box-shadow,transform] duration-150 hover:border-brand-light hover:shadow-sm"
       title={hint || 'ক্লিক করে সম্পূর্ণ বা সংক্ষিপ্ত হিসাব দেখুন'}
     >
       <div className="flex items-center justify-between gap-2">

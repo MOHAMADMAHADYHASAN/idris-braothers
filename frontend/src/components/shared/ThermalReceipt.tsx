@@ -43,7 +43,7 @@ export function ThermalReceipt({
   return (
     <div
       {...backdropProps}
-      className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+      className="fixed inset-0 z-50 modal-backdrop-frosted flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
     >
       <motion.div
         {...dialogProps}

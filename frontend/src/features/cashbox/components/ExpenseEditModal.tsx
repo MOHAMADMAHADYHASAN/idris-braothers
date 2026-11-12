@@ -6,6 +6,16 @@ import { motion } from 'motion/react';
 import { useCashboxStore } from '../useCashboxStore';
 import { ExpenseCategory } from '../cashbox.types';
 import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
+import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
+
+const EXPENSE_CATEGORY_OPTIONS: SelectOption<ExpenseCategory>[] = [
+  { value: 'LABOR_KULI', label: 'কুলি ও লেবার খরচ' },
+  { value: 'TRANSPORT_VAN', label: 'ভ্যান ও ট্রাক ভাড়া' },
+  { value: 'TEA_SNACKS', label: 'চা-নাস্তা ও আপ্যায়ন' },
+  { value: 'ELECTRICITY_UTILITY', label: 'বিদ্যুৎ ও ইউটিলিটি' },
+  { value: 'SHOP_MAINTENANCE', label: 'দোকান সরঞ্জাম' },
+  { value: 'OTHER', label: 'বিবিধ খরচ' },
+];
 
 export function ExpenseEditModal() {
   const { editingExpense, isEditModalOpen, closeEditModal, updateExpense } =
@@ -62,7 +72,7 @@ export function ExpenseEditModal() {
   };
 
   return (
-    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 modal-backdrop-frosted">
       <motion.div
         {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
@@ -106,19 +116,14 @@ export function ExpenseEditModal() {
               <label htmlFor={`${formId}-cat`} className="block text-xs font-semibold text-ink-body mb-1">
                 খরচের খাত ও ক্যাটাগরি
               </label>
-              <select
+              <CustomSelect<ExpenseCategory>
                 id={`${formId}-cat`}
+                options={EXPENSE_CATEGORY_OPTIONS}
                 value={category}
-                onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
-                className="w-full px-3 py-2 bg-surface-card border border-border-strong rounded-lg text-xs sm:text-sm text-ink-primary focus:outline-none focus:ring-1 focus:ring-brand-deep focus:border-brand-deep"
-              >
-                <option value="LABOR_KULI">কুলি ও লেবার খরচ</option>
-                <option value="TRANSPORT_VAN">ভ্যান ও ট্রাক ভাড়া</option>
-                <option value="TEA_SNACKS">চা-নাস্তা ও আপ্যায়ন</option>
-                <option value="ELECTRICITY_UTILITY">বিদ্যুৎ ও ইউটিলিটি</option>
-                <option value="SHOP_MAINTENANCE">দোকান সরঞ্জাম</option>
-                <option value="OTHER">বিবিধ খরচ</option>
-              </select>
+                onChange={setCategory}
+                className="w-full"
+                buttonClassName="w-full h-10"
+              />
             </div>
 
             <div>

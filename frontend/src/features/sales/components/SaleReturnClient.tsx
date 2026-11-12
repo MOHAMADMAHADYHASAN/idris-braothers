@@ -86,7 +86,7 @@ export function SaleReturnClient({ saleId }: SaleReturnClientProps) {
   if (error || !sale) {
     return (
       <div className="min-h-screen bg-surface-canvas flex flex-col items-center justify-center p-6">
-        <WarningCircle size={40} weight="fill" className="text-rose-500 mb-2" />
+        <WarningCircle size={40} weight="fill" className="text-danger mb-2" />
         <h2 className="text-base font-bold text-ink-primary">{error || 'মেমোটি খুঁজে পাওয়া যায়নি'}</h2>
         <Link
           href="/sales"
@@ -101,7 +101,7 @@ export function SaleReturnClient({ saleId }: SaleReturnClientProps) {
   if (sale.status === 'CANCELLED') {
     return (
       <div className="min-h-screen bg-surface-canvas flex flex-col items-center justify-center p-6">
-        <WarningCircle size={40} weight="fill" className="text-rose-500 mb-2" />
+        <WarningCircle size={40} weight="fill" className="text-danger mb-2" />
         <h2 className="text-base font-bold text-ink-primary">এই মেমোটি ইতোমধ্যে বাতিল করা হয়েছে</h2>
         <p className="text-xs text-ink-secondary mt-1">বাতিলকৃত মেমো থেকে পণ্য ফেরত নেওয়ার সুযোগ নেই।</p>
         <Link
@@ -176,7 +176,7 @@ export function SaleReturnClient({ saleId }: SaleReturnClientProps) {
   return (
     <div className="min-h-screen bg-surface-canvas pb-20 font-sans">
       {/* ১. টপ স্টিকি হেডার */}
-      <header className="sticky top-0 z-40 bg-surface-card border-b border-border-default shadow-2xs">
+      <header className="sticky top-0 z-40 surface-glass-header border-b border-border-default/80 shadow-2xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <Link

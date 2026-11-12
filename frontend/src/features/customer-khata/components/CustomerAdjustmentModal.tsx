@@ -64,7 +64,7 @@ export function CustomerAdjustmentModal() {
   };
 
   return (
-    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop-frosted">
       <motion.div
         {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
@@ -155,7 +155,7 @@ export function CustomerAdjustmentModal() {
             <div>
               <label htmlFor={`${formId}-amount`} className="block text-xs font-medium text-ink-body mb-1">
                 {adjustmentType === 'DISCOUNT' ? 'ছাড়ের পরিমাণ (টাকা)' : 'বৃদ্ধির পরিমাণ (টাকা)'}{' '}
-                <span className="text-rose-500">*</span>
+                <span className="text-danger">*</span>
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-secondary font-bold text-sm">
@@ -178,7 +178,7 @@ export function CustomerAdjustmentModal() {
             {/* কারণ / নোট */}
             <div>
               <label htmlFor={`${formId}-reason`} className="block text-xs font-medium text-ink-body mb-1">
-                সমন্বয়ের কারণ <span className="text-rose-500">*</span>
+                সমন্বয়ের কারণ <span className="text-danger">*</span>
               </label>
               <input
                 id={`${formId}-reason`}

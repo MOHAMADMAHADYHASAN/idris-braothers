@@ -252,7 +252,7 @@ export function DynamicDataTable<T>({
 
                 {/* ড্রপডাউন পপওভার */}
                 {isColumnMenuOpen && (
-                  <div className="absolute right-0 top-full mt-1.5 w-56 bg-surface-card border border-border-default rounded-xl shadow-[0_4px_20px_rgba(15,23,42,0.12)] p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
+                  <div className="absolute right-0 top-full mt-1.5 w-56 surface-glass-popover border border-border-default rounded-xl p-2 z-50 animate-in fade-in zoom-in-95 duration-100">
                     <div className="flex items-center justify-between pb-1.5 mb-1.5 border-b border-border-subtle px-1">
                       <span className="text-xs font-bold text-ink-primary">
                         কলাম প্রদর্শন
@@ -319,7 +319,7 @@ export function DynamicDataTable<T>({
         ) : (
           <table className="w-full text-left border-collapse text-xs">
             {/* স্টিকি হেডার */}
-            <thead className="sticky top-0 bg-surface-subtle z-10 border-b border-border-default text-ink-secondary font-bold text-xs">
+            <thead className="sticky top-0 bg-surface-subtle/90 backdrop-blur-xs z-10 border-b border-border-default text-ink-secondary font-bold text-xs">
               <tr>
                 {/* বাল্ক চেকবক্স কলাম */}
                 {selectable && (

@@ -217,7 +217,7 @@ export function ChallanItemPickerCard() {
 
           {/* ড্রপডাউন সার্চ রেজাল্ট */}
           {searchResults.length > 0 && !selectedProduct && (
-            <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-surface-card border border-border-default rounded-xl shadow-xl overflow-hidden max-h-64 divide-y divide-border-subtle animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute top-full left-0 right-0 mt-1 z-50 surface-glass-popover border border-border-default rounded-xl overflow-hidden max-h-64 divide-y divide-border-subtle animate-in fade-in zoom-in-95 duration-100">
               {searchResults.map((product) => {
                 if (product.hasVariants && product.variants.length > 1) {
                   return product.variants.map((v) => (

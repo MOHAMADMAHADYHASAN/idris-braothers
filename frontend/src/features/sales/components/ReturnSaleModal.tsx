@@ -116,7 +116,7 @@ export function ReturnSaleModal() {
   };
 
   return (
-    <div {...backdropProps} className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div {...backdropProps} className="fixed inset-0 z-50 modal-backdrop-frosted flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
       <motion.div
         {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}

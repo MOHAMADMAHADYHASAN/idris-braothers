@@ -217,7 +217,7 @@ function UnifiedDateRangeFilterInner({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 4, scale: 0.98 }}
             transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
-            className="absolute right-0 top-full mt-1.5 w-76 bg-surface-card border border-border-default rounded-xl shadow-[0_4px_20px_rgba(15,23,42,0.12)] p-3.5 z-50 pointer-events-auto"
+            className="absolute right-0 top-full mt-1.5 w-76 surface-glass-popover border border-border-default rounded-xl p-3.5 z-50 pointer-events-auto"
           >
             <div className="flex items-center justify-between pb-2 border-b border-border-subtle">
               <span className="text-xs font-bold text-ink-primary flex items-center gap-1.5">

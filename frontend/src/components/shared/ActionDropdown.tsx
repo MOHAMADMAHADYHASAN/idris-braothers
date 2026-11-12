@@ -136,7 +136,7 @@ export function ActionDropdown({
               zIndex: 99999,
             }}
             onClick={(e) => e.stopPropagation()}
-            className="bg-surface-card rounded-xl border border-border-default shadow-[0_8px_24px_-4px_rgba(15,23,42,0.14)] p-1.5 text-xs font-sans animate-in fade-in zoom-in-95 duration-100"
+            className="surface-glass-popover rounded-xl border border-border-default p-1.5 text-xs font-sans animate-in fade-in zoom-in-95 duration-100"
           >
             {items.map((item, idx) => (
               <button

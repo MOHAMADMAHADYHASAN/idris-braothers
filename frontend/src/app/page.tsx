@@ -195,7 +195,7 @@ export default async function DashboardPage() {
       </main>
 
       {/* ৩. মোবাইল বটম নেভিগেশন */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-surface-card border-t border-border-default px-2 py-1.5 flex items-center justify-around shadow-[0_-1px_3px_rgba(15,23,42,0.06)]">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 surface-glass-header border-t border-border-default/80 px-2 py-1.5 flex items-center justify-around shadow-[0_-4px_16px_rgba(15,23,42,0.06)]">
         <Link
           href="/"
           className="flex flex-col items-center gap-0.5 text-brand-deep py-1 px-3 cursor-pointer"

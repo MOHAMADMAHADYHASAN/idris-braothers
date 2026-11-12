@@ -55,7 +55,7 @@ function ConfirmDialogHost() {
   return (
     <div
       {...backdropProps}
-      className="fixed inset-0 z-[100] bg-slate-900/50 flex items-center justify-center p-4"
+      className="fixed inset-0 z-[100] modal-backdrop-frosted flex items-center justify-center p-4"
     >
       <div
         {...dialogProps}
@@ -128,7 +128,7 @@ function ToastViewport() {
           <div
             key={item.id}
             role={item.tone === 'error' ? 'alert' : 'status'}
-            className={`pointer-events-auto rounded-xl border shadow-lg px-3.5 py-3 flex items-start gap-2.5 animate-in fade-in zoom-in-95 ${style.wrapper}`}
+            className={`pointer-events-auto rounded-xl border surface-glass-popover px-3.5 py-3 flex items-start gap-2.5 animate-in fade-in zoom-in-95 ${style.wrapper}`}
           >
             <div className="mt-0.5">{style.icon}</div>
             <p className="flex-1 text-xs sm:text-sm font-medium text-ink-primary leading-snug">

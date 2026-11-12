@@ -12,6 +12,7 @@ export interface SelectOption<T = string> {
 }
 
 interface CustomSelectProps<T = string> {
+  id?: string;
   options: SelectOption<T>[];
   value?: T;
   onChange: (value: T) => void;
@@ -30,6 +31,7 @@ interface CustomSelectProps<T = string> {
  * - In-menu keyboard navigation (ArrowDown, ArrowUp, Enter, Escape).
  */
 export function CustomSelect<T = string>({
+  id,
   options,
   value,
   onChange,
@@ -138,6 +140,8 @@ export function CustomSelect<T = string>({
 
     if (e.key === 'Escape') {
       e.preventDefault();
+      e.stopPropagation();
+      e.nativeEvent.stopImmediatePropagation?.();
       setIsOpen(false);
       buttonRef.current?.focus();
     } else if (e.key === 'ArrowDown') {
@@ -162,6 +166,7 @@ export function CustomSelect<T = string>({
     <div className={`relative inline-block ${className}`} onKeyDown={handleKeyDown}>
       {/* Trigger Button */}
       <button
+        id={id}
         ref={buttonRef}
         type="button"
         onClick={toggleDropdown}
@@ -198,7 +203,7 @@ export function CustomSelect<T = string>({
               width: `${dropdownPosition.width}px`,
               zIndex: 99999,
             }}
-            className="bg-surface-card border border-border-default rounded-lg shadow-[0_4px_20px_rgba(15,23,42,0.12)] overflow-hidden flex flex-col max-h-60 animate-in fade-in-0 zoom-in-95 duration-100"
+            className="surface-glass-popover border border-border-default rounded-lg overflow-hidden flex flex-col max-h-60 animate-in fade-in-0 zoom-in-95 duration-100"
           >
             {/* Optional search header */}
             {(enableSearch || options.length > 6) && (

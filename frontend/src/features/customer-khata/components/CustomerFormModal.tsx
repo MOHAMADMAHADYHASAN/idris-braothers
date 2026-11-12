@@ -83,7 +83,7 @@ export function CustomerFormModal() {
   };
 
   return (
-    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop-frosted">
       <motion.div
         {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
@@ -130,7 +130,7 @@ export function CustomerFormModal() {
             {/* নাম */}
             <div>
               <label htmlFor={`${formId}-name`} className="block text-xs font-medium text-ink-body mb-1">
-                গ্রাহকের নাম <span className="text-rose-500">*</span>
+                গ্রাহকের নাম <span className="text-danger">*</span>
               </label>
               <input
                 id={`${formId}-name`}

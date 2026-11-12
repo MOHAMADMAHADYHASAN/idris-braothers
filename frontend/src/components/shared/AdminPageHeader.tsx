@@ -32,7 +32,7 @@ export function AdminPageHeader({
 }: AdminPageHeaderProps) {
   return (
     <header
-      className={`sticky top-0 z-30 bg-surface-card border-b border-border-default px-4 py-2.5 md:static md:px-0 md:py-0 md:border-0 md:bg-transparent ${className}`}
+      className={`sticky top-0 z-30 surface-glass-header border-b border-border-default/80 px-4 py-2.5 md:static md:px-0 md:py-0 md:border-0 md:bg-transparent ${className}`}
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
         {/* Left: Back button + Icon + Title + Live Status Badge */}

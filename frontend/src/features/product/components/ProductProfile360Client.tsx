@@ -33,6 +33,7 @@ import { Product, ProductVariant, StockWastage } from '../product.types';
 import { productService } from '../product.service';
 import { QuickPriceModal } from './QuickPriceModal';
 import { RecordWastageModal } from './RecordWastageModal';
+import { CustomSelect } from '@/components/shared/CustomSelect';
 
 interface ProductProfile360ClientProps {
   productId: string;
@@ -148,7 +149,7 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
   return (
     <div className="min-h-screen bg-surface-canvas pb-20 font-sans print:bg-white print:p-0 print:pb-0">
       {/* ১. টপ স্টিকি হেডার */}
-      <header className="sticky top-0 z-40 bg-surface-card border-b border-border-default shadow-2xs print:hidden">
+      <header className="sticky top-0 z-40 surface-glass-header border-b border-border-default/80 shadow-2xs print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <Link
@@ -613,18 +614,17 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                   <label htmlFor={variantSelectId} className="block text-xs font-bold text-ink-body mb-1">
                     ভ্যারিয়েন্ট নির্ধারণ করুন
                   </label>
-                  <select
+                  <CustomSelect
                     id={variantSelectId}
+                    options={product.variants.map((v) => ({
+                      value: v.id,
+                      label: `${v.variantName} (স্টক: ${formatWeight(v.stockQuantity, v.baseUnitName)})`,
+                    }))}
                     value={selectedVariantId}
-                    onChange={(e) => setSelectedVariantId(e.target.value)}
-                    className="w-full px-2.5 py-2 rounded-lg border border-border-strong text-xs font-semibold bg-surface-card text-ink-primary"
-                  >
-                    {product.variants.map((v) => (
-                      <option key={v.id} value={v.id}>
-                        {v.variantName} (স্টক: {formatWeight(v.stockQuantity, v.baseUnitName)})
-                      </option>
-                    ))}
-                  </select>
+                    onChange={setSelectedVariantId}
+                    className="w-full"
+                    buttonClassName="w-full h-10"
+                  />
                 </div>
               )}
 

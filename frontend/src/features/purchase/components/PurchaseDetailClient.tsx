@@ -73,7 +73,7 @@ export function PurchaseDetailClient({ purchaseId }: PurchaseDetailClientProps) 
   return (
     <div className="min-h-screen bg-surface-canvas pb-20 font-sans print:bg-white print:pb-0">
       {/* ১. টপ স্টিকি হেডার */}
-      <header className="sticky top-0 z-40 bg-surface-card border-b border-border-default shadow-2xs print:hidden">
+      <header className="sticky top-0 z-40 surface-glass-header border-b border-border-default/80 shadow-2xs print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link

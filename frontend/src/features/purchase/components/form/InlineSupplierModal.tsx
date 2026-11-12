@@ -54,7 +54,7 @@ export function InlineSupplierModal({
   };
 
   return (
-    <div {...backdropProps} className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4">
+    <div {...backdropProps} className="fixed inset-0 z-[100] flex items-center justify-center modal-backdrop-frosted p-4">
       <div
         {...dialogProps}
         className="bg-surface-card rounded-xl shadow-2xl border border-border-default w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150 focus:outline-hidden"

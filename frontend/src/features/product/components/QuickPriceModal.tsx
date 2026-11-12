@@ -93,7 +93,7 @@ export function QuickPriceModal({ isOpen, onClose, variant, productName }: Quick
   };
 
   return (
-    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center modal-backdrop-frosted p-4">
       <motion.div
         {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}

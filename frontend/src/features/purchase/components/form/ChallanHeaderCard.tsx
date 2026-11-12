@@ -113,7 +113,7 @@ export function ChallanHeaderCard() {
               </button>
 
               {isDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-surface-card border border-border-default rounded-xl shadow-xl overflow-hidden max-h-64 flex flex-col animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute top-full left-0 right-0 mt-1 z-50 surface-glass-popover border border-border-default rounded-xl overflow-hidden max-h-64 flex flex-col animate-in fade-in zoom-in-95 duration-100">
                   <div className="p-2 border-b border-border-subtle bg-surface-subtle">
                     <input
                       type="text"

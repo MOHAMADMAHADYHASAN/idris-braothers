@@ -175,7 +175,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
   if (!customer) {
     return (
       <div className="min-h-screen bg-surface-canvas flex flex-col items-center justify-center p-6">
-        <WarningCircle size={40} weight="fill" className="text-rose-500 mb-2" />
+        <WarningCircle size={40} weight="fill" className="text-danger mb-2" />
         <h2 className="text-base font-bold text-ink-primary">কাস্টমারটি খুঁজে পাওয়া যায়নি</h2>
         <Link
           href="/khata/customers"
@@ -198,7 +198,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
   return (
     <div className="min-h-screen bg-surface-canvas pb-20 font-sans print:bg-white print:pb-0">
       {/* ১. টপ স্টিকি হেডার (প্রিন্টে লুকানো থাকবে) */}
-      <header className="sticky top-0 z-40 bg-surface-card border-b border-border-default shadow-2xs print:hidden">
+      <header className="sticky top-0 z-40 surface-glass-header border-b border-border-default/80 shadow-2xs print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <Link
@@ -512,7 +512,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                 <div>
                   <div className="flex justify-between items-center mb-1">
                     <label htmlFor={payAmountId} className="text-xs font-semibold text-ink-body">
-                      জমার পরিমাণ (৳) <span className="text-rose-500">*</span>
+                      জমার পরিমাণ (৳) <span className="text-danger">*</span>
                     </label>
                     {customer.currentDue > 0 && (
                       <button
