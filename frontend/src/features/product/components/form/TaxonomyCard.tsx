@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { Folders, Plus } from '@phosphor-icons/react';
 import { Category, Brand } from '../../product.types';
 import { InlineTaxonomyModal } from './InlineTaxonomyModal';
@@ -27,6 +27,7 @@ export function TaxonomyCard({
   onCreateBrand,
 }: TaxonomyCardProps) {
   const [modalType, setModalType] = useState<'category' | 'brand' | null>(null);
+  const formId = useId();
 
   const handleCreateTaxonomy = async (data: { name: string; banglaName?: string }) => {
     if (modalType === 'category') {
@@ -58,7 +59,7 @@ export function TaxonomyCard({
         <div className="p-5 space-y-4">
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold text-ink-body">
+              <label htmlFor={`${formId}-category`} className="text-xs font-semibold text-ink-body">
                 ক্যাটাগরি
               </label>
               <button
@@ -71,6 +72,7 @@ export function TaxonomyCard({
               </button>
             </div>
             <select
+              id={`${formId}-category`}
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
               className="w-full px-3 py-2.5 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep text-xs sm:text-sm text-ink-primary bg-surface-card"
@@ -86,7 +88,7 @@ export function TaxonomyCard({
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="text-xs font-semibold text-ink-body">
+              <label htmlFor={`${formId}-brand`} className="text-xs font-semibold text-ink-body">
                 কোম্পানি / ব্র্যান্ড
               </label>
               <button
@@ -99,6 +101,7 @@ export function TaxonomyCard({
               </button>
             </div>
             <select
+              id={`${formId}-brand`}
               value={brandId}
               onChange={(e) => setBrandId(e.target.value)}
               className="w-full px-3 py-2.5 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep text-xs sm:text-sm text-ink-primary bg-surface-card"

@@ -131,6 +131,7 @@ export function ChallanItemMatrixCard() {
                         onClick={() => removeItem(idx)}
                         className="p-1.5 rounded text-ink-secondary hover:text-due-text hover:bg-due-bg transition-colors cursor-pointer"
                         title="আইটেমটি চালানের তালিকা থেকে বাদ দিন"
+                        aria-label={`${item.productName || 'পণ্য'} চালানের তালিকা থেকে বাদ দিন`}
                       >
                         <Trash size={14} weight="bold" />
                       </button>

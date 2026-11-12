@@ -27,15 +27,17 @@ export default function PosPage() {
       if (e.key === 'F2') {
         e.preventDefault();
         setMobileTab('catalog');
-        const searchInput = document.getElementById('pos-search-input');
-        searchInput?.focus();
+        window.requestAnimationFrame(() => {
+          document.getElementById('pos-search-input')?.focus();
+        });
       }
 
       if (e.key === 'F4') {
         e.preventDefault();
         setMobileTab('settlement');
-        const paidInput = document.getElementById('pos-paid-amount-input');
-        paidInput?.focus();
+        window.requestAnimationFrame(() => {
+          document.getElementById('pos-paid-amount-input')?.focus();
+        });
       }
     };
 
@@ -69,6 +71,7 @@ export default function PosPage() {
             href="/"
             className="p-1.5 rounded-lg text-ink-secondary hover:text-brand-deep hover:bg-brand-soft transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
             title="ড্যাশবোর্ডে ফিরুন"
+            aria-label="ড্যাশবোর্ডে ফিরুন"
           >
             <ArrowLeft size={18} weight="bold" />
           </Link>
@@ -155,36 +158,29 @@ export default function PosPage() {
         />
       </div>
 
-      {/* 2. Main Workspace (Desktop Split vs Mobile Segmented) */}
+      {/* 2. Main Workspace (Single DOM tree — responsive split on md+, tab-switched on mobile) */}
       <main className="flex-1 overflow-hidden p-2 sm:p-2.5">
-        {/* Desktop 2-Column Grid (Left: 60% Catalog, Right: 40% Cart & Checkout) */}
-        <div className="hidden md:grid md:grid-cols-12 gap-2.5 h-full">
-          <div className="md:col-span-7 lg:col-span-8 h-full overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-2.5 h-full">
+          <div
+            className={`${
+              mobileTab === 'catalog' ? 'block' : 'hidden'
+            } md:block md:col-span-7 lg:col-span-8 h-full overflow-hidden`}
+          >
             <PosProductCatalog />
           </div>
 
-          <div className="md:col-span-5 lg:col-span-4 h-full flex flex-col gap-2.5 overflow-y-auto">
-            <div className="flex-1 min-h-[200px] overflow-hidden">
+          <div
+            className={`${
+              mobileTab === 'settlement' ? 'flex' : 'hidden'
+            } md:flex md:col-span-5 lg:col-span-4 h-full flex-col gap-2.5 overflow-y-auto pb-4 md:pb-0`}
+          >
+            <div className="md:flex-1 md:min-h-[200px] md:overflow-hidden">
               <PosCartTable />
             </div>
             <div className="shrink-0">
               <PosSettlementPanel onSaleSuccess={handleSaleSuccess} />
             </div>
           </div>
-        </div>
-
-        {/* Mobile Single-Column Switched View */}
-        <div className="md:hidden h-full overflow-hidden">
-          {mobileTab === 'catalog' ? (
-            <div className="h-full">
-              <PosProductCatalog />
-            </div>
-          ) : (
-            <div className="h-full flex flex-col gap-2.5 overflow-y-auto pb-4">
-              <PosCartTable />
-              <PosSettlementPanel onSaleSuccess={handleSaleSuccess} />
-            </div>
-          )}
         </div>
       </main>
 

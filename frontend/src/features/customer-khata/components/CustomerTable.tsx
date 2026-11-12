@@ -37,21 +37,21 @@ export function CustomerTable() {
         disableToggle: true,
         renderCell: (c) => (
           <div>
-            <div className="font-semibold text-slate-900 text-xs sm:text-sm">
+            <div className="font-semibold text-ink-primary text-xs sm:text-sm">
               {c.name}
             </div>
             {c.phone ? (
-              <div className="flex items-center gap-1 text-xs text-slate-600 font-mono tabular-nums tracking-tight mt-0.5">
-                <Phone size={12} weight="bold" className="text-slate-500" />
+              <div className="flex items-center gap-1 text-xs text-ink-secondary font-mono tabular-nums tracking-tight mt-0.5">
+                <Phone size={12} weight="bold" className="text-ink-secondary" />
                 <span>{toBanglaDigits(c.phone)}</span>
               </div>
             ) : (
-              <span className="text-xs text-slate-600 italic">মোবাইল নেই</span>
+              <span className="text-xs text-ink-secondary italic">মোবাইল নেই</span>
             )}
           </div>
         ),
         renderFooterCell: () => (
-          <span className="text-xs font-bold text-slate-700">
+          <span className="text-xs font-bold text-ink-body">
             পৃষ্ঠার মোট:
           </span>
         ),
@@ -72,12 +72,12 @@ export function CustomerTable() {
         header: 'ঠিকানা / এলাকা',
         renderCell: (c) =>
           c.address ? (
-            <div className="flex items-center gap-1 text-slate-700 text-xs">
-              <MapPin size={12} weight="bold" className="text-slate-500 shrink-0" />
+            <div className="flex items-center gap-1 text-ink-body text-xs">
+              <MapPin size={12} weight="bold" className="text-ink-secondary shrink-0" />
               <span className="truncate max-w-[200px]">{c.address}</span>
             </div>
           ) : (
-            <span className="text-slate-500">-</span>
+            <span className="text-ink-secondary">-</span>
           ),
       },
       {
@@ -85,7 +85,7 @@ export function CustomerTable() {
         header: 'বর্তমান বকেয়া (৳)',
         headerClassName: 'text-right',
         cellClassName: 'text-right',
-        footerClassName: 'text-right font-mono tabular-nums tracking-tight font-black text-rose-700',
+        footerClassName: 'text-right font-mono tabular-nums tracking-tight font-black text-due-text',
         renderCell: (c) => {
           const isDue = c.currentDue > 0;
           const isAdvance = c.currentDue < 0;
@@ -93,10 +93,10 @@ export function CustomerTable() {
           if (isDue) {
             return (
               <div className="inline-block text-right">
-                <span className="font-mono tabular-nums tracking-tight font-black text-rose-700 text-xs sm:text-sm">
+                <span className="font-mono tabular-nums tracking-tight font-black text-due-text text-xs sm:text-sm">
                   {formatCurrency(c.currentDue)}
                 </span>
-                <span className="block text-xs text-rose-700 font-semibold">
+                <span className="block text-xs text-due-text font-semibold">
                   বকেয়া বাকি
                 </span>
               </div>
@@ -106,10 +106,10 @@ export function CustomerTable() {
           if (isAdvance) {
             return (
               <div className="inline-block text-right">
-                <span className="font-mono tabular-nums tracking-tight font-black text-emerald-700 text-xs sm:text-sm">
+                <span className="font-mono tabular-nums tracking-tight font-black text-cash-text text-xs sm:text-sm">
                   {formatCurrency(Math.abs(c.currentDue))}
                 </span>
-                <span className="block text-xs text-emerald-700 font-semibold">
+                <span className="block text-xs text-cash-text font-semibold">
                   অগ্রিম জমা
                 </span>
               </div>
@@ -128,7 +128,7 @@ export function CustomerTable() {
             0
           );
           return (
-            <span className="text-rose-700 font-mono font-black text-xs sm:text-sm">
+            <span className="text-due-text font-mono font-black text-xs sm:text-sm">
               {formatCurrency(totalDue)}
             </span>
           );
@@ -174,8 +174,9 @@ export function CustomerTable() {
                 e.stopPropagation();
                 openModal('adjustment', c);
               }}
-              className="p-1.5 rounded-md border border-slate-200 bg-white hover:bg-brand-soft/60 hover:border-brand-light text-slate-600 hover:text-brand-deep transition-[background-color,color] duration-150 active:scale-[0.96] cursor-pointer shadow-2xs"
+              className="p-1.5 rounded-md border border-border-default bg-surface-card hover:bg-brand-soft/60 hover:border-brand-light text-ink-secondary hover:text-brand-deep transition-[background-color,color] duration-150 active:scale-[0.96] cursor-pointer shadow-2xs"
               title="হিসাব সমন্বয় / ছাড় দিন"
+              aria-label={`${c.name} হিসাব সমন্বয় বা ছাড়`}
             >
               <SlidersHorizontal size={14} weight="bold" />
             </button>
@@ -187,8 +188,9 @@ export function CustomerTable() {
                 e.stopPropagation();
                 openModal('edit', c);
               }}
-              className="p-1.5 rounded-md border border-slate-200 bg-white hover:bg-brand-soft/60 hover:border-brand-light text-slate-600 hover:text-brand-deep transition-[background-color,color] duration-150 active:scale-[0.96] cursor-pointer shadow-2xs"
+              className="p-1.5 rounded-md border border-border-default bg-surface-card hover:bg-brand-soft/60 hover:border-brand-light text-ink-secondary hover:text-brand-deep transition-[background-color,color] duration-150 active:scale-[0.96] cursor-pointer shadow-2xs"
               title="কাস্টমার তথ্য এডিট করুন"
+              aria-label={`${c.name} তথ্য এডিট করুন`}
             >
               <PencilSimple size={14} weight="bold" />
             </button>

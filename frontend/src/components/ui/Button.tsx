@@ -24,7 +24,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   danger:
     'bg-danger hover:bg-danger-hover text-white border border-danger shadow-[0_1px_2px_rgba(220,38,38,0.18)]',
   outlineDanger:
-    'bg-due-bg hover:bg-red-100 text-due-text border border-due-border',
+    'bg-due-bg hover:bg-due-border/40 text-due-text border border-due-border',
   ghost:
     'bg-transparent hover:bg-surface-subtle text-ink-secondary hover:text-ink-primary border border-transparent',
 };

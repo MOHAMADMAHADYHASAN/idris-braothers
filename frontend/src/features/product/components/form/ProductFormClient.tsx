@@ -3,16 +3,16 @@
 import React, { useState, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useProductStore } from '../../useProductStore';
-import { Product, CreateProductDTO, UpdateProductDTO, CreateVariantDTO } from '../../product.types';
+import { Product, CreateProductDTO, UpdateProductDTO, CreateVariantDTO, FormUnitItem } from '../../product.types';
 import { ProductStickyHeader } from './ProductStickyHeader';
 import { BasicInfoCard } from './BasicInfoCard';
 import { TaxonomyCard } from './TaxonomyCard';
 import { InventorySettingsCard, ProductCodeCard } from './InventorySettingsCard';
 import { PricingMarginCard } from './PricingMarginCard';
-import { FormUnitItem } from './PackagingUnitsCard';
 import { VariantsStockMatrixCard, FormVariantItem } from './VariantsStockMatrixCard';
 import { WarningCircle, Spinner } from '@phosphor-icons/react';
 import { generateRandom6Digits } from '@/lib/skuGenerator';
+import { confirmAction } from '@/lib/feedback';
 
 interface ProductFormClientProps {
   productId?: string;
@@ -157,9 +157,15 @@ export function ProductFormClient({ productId, initialProduct }: ProductFormClie
 
   const isEditMode = Boolean(loadedProduct || initialProduct);
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     if (isDirty) {
-      if (!confirm('আপনার করা পরিবর্তনগুলো সংরক্ষিত হবে না। আপনি কি সত্যিই পণ্য তালিকায় ফিরে যেতে চান?')) {
+      const ok = await confirmAction({
+        title: 'পরিবর্তন সংরক্ষণ করা হয়নি',
+        message: 'আপনার করা পরিবর্তনগুলো সংরক্ষিত হবে না। আপনি কি সত্যিই পণ্য তালিকায় ফিরে যেতে চান?',
+        confirmLabel: 'হ্যাঁ, ফিরে যান',
+        tone: 'warning',
+      });
+      if (!ok) {
         return;
       }
     }
@@ -415,17 +421,17 @@ export function ProductFormClient({ productId, initialProduct }: ProductFormClie
 
   if (isLoadingProduct) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-surface-canvas flex items-center justify-center p-6">
         <div className="flex flex-col items-center gap-2">
-          <Spinner size={32} weight="bold" className="animate-spin text-slate-700" />
-          <p className="text-xs font-semibold text-slate-600">পণ্যের তথ্য লোড হচ্ছে...</p>
+          <Spinner size={32} weight="bold" className="animate-spin text-ink-body" />
+          <p className="text-xs font-semibold text-ink-secondary">পণ্যের তথ্য লোড হচ্ছে...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/70 pb-20 font-sans">
+    <div className="min-h-screen bg-surface-canvas pb-20 font-sans">
       {/* ১. টপ স্টিকি অ্যাকশন বার */}
       <ProductStickyHeader
         isEditMode={isEditMode}
@@ -440,8 +446,8 @@ export function ProductFormClient({ productId, initialProduct }: ProductFormClie
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* এরর ব্যানার */}
         {error && (
-          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-start gap-3 shadow-2xs animate-in fade-in duration-150">
-            <WarningCircle size={18} weight="fill" className="text-rose-600 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-xl bg-due-bg border border-due-border text-due-text flex items-start gap-3 shadow-2xs animate-in fade-in duration-150">
+            <WarningCircle size={18} weight="fill" className="text-due-text shrink-0 mt-0.5" />
             <div>
               <div className="font-bold text-xs sm:text-sm">একটি সমস্যা হয়েছে:</div>
               <div className="text-xs mt-0.5">{error}</div>

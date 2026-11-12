@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { X, Coins, FloppyDisk, ArrowRight, Percent } from '@phosphor-icons/react';
+import React, { useState, useEffect, useId } from 'react';
+import { motion } from 'motion/react';
+import { X, Coins, FloppyDisk } from '@phosphor-icons/react';
 import { ProductVariant } from '../product.types';
 import { useProductStore } from '../useProductStore';
 import { formatCurrency, formatPercent } from '@/lib/decimal';
+import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
 
 interface QuickPriceModalProps {
   isOpen: boolean;
@@ -51,6 +52,11 @@ export function QuickPriceModal({ isOpen, onClose, variant, productName }: Quick
   const [retailPrice, setRetailPrice] = useState<string>('');
   const [wholesalePrice, setWholesalePrice] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const formId = useId();
+  const { titleId, dialogProps, backdropProps } = useDialogAccessibility(
+    Boolean(isOpen && variant),
+    onClose
+  );
 
   useEffect(() => {
     if (variant) {
@@ -87,13 +93,14 @@ export function QuickPriceModal({ isOpen, onClose, variant, productName }: Quick
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
       <motion.div
+        {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 4, scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
-        className="bg-surface-card rounded-xl shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1)] border border-border-default max-w-md w-full overflow-hidden"
+        className="bg-surface-card rounded-xl shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1)] border border-border-default max-w-md w-full overflow-hidden focus:outline-hidden"
       >
         <div className="px-4 py-3.5 border-b border-border-subtle flex items-center justify-between bg-surface-subtle/70">
           <div className="flex items-center gap-2.5">
@@ -101,7 +108,7 @@ export function QuickPriceModal({ isOpen, onClose, variant, productName }: Quick
               <Coins size={17} weight="bold" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-ink-primary leading-tight">বাজারদর ও বিক্রয়মূল্য পরিবর্তন</h3>
+              <h3 id={titleId} className="text-sm font-bold text-ink-primary leading-tight">বাজারদর ও বিক্রয়মূল্য পরিবর্তন</h3>
               <p className="text-xs text-ink-secondary truncate max-w-[240px]">
                 {productName} {variant.variantName !== 'Default' ? `(${variant.variantName})` : ''}
               </p>
@@ -110,6 +117,7 @@ export function QuickPriceModal({ isOpen, onClose, variant, productName }: Quick
           <button
             type="button"
             onClick={onClose}
+            aria-label="বন্ধ করুন"
             className="p-1.5 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-colors cursor-pointer"
           >
             <X size={16} weight="bold" />
@@ -124,12 +132,13 @@ export function QuickPriceModal({ isOpen, onClose, variant, productName }: Quick
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-ink-body mb-1">
+            <label htmlFor={`${formId}-purchase`} className="block text-xs font-semibold text-ink-body mb-1">
               বর্তমান ক্রয়মূল্য / {variant.baseUnitName} *
             </label>
             <div className="relative">
               <span className="absolute left-3 top-2 text-ink-secondary text-xs font-semibold">৳</span>
               <input
+                id={`${formId}-purchase`}
                 type="number"
                 step="0.01"
                 required
@@ -142,12 +151,13 @@ export function QuickPriceModal({ isOpen, onClose, variant, productName }: Quick
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-ink-body mb-1">
+              <label htmlFor={`${formId}-retail`} className="block text-xs font-semibold text-ink-body mb-1">
                 খুচরা দর / {variant.baseUnitName} *
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-2 text-ink-secondary text-xs font-semibold">৳</span>
                 <input
+                  id={`${formId}-retail`}
                   type="number"
                   step="0.01"
                   required
@@ -160,12 +170,13 @@ export function QuickPriceModal({ isOpen, onClose, variant, productName }: Quick
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-ink-body mb-1">
+              <label htmlFor={`${formId}-wholesale`} className="block text-xs font-semibold text-ink-body mb-1">
                 পাইকারি দর / {variant.baseUnitName} *
               </label>
               <div className="relative">
                 <span className="absolute left-3 top-2 text-ink-secondary text-xs font-semibold">৳</span>
                 <input
+                  id={`${formId}-wholesale`}
                   type="number"
                   step="0.01"
                   required

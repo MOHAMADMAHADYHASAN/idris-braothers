@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { motion } from 'motion/react';
 import { X, SlidersHorizontal, WarningCircle, CheckCircle } from '@phosphor-icons/react';
 import { formatCurrency } from '@/lib/decimal';
 import { buttonClasses } from '@/components/ui/Button';
 import { useCustomerKhataStore } from '../useCustomerKhataStore';
+import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
 
 export function CustomerAdjustmentModal() {
   const { activeModal, selectedCustomer, closeModal, submitAdjustment } =
@@ -16,6 +17,11 @@ export function CustomerAdjustmentModal() {
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formId = useId();
+  const { titleId, dialogProps, backdropProps } = useDialogAccessibility(
+    Boolean(activeModal === 'adjustment' && selectedCustomer),
+    closeModal
+  );
 
   if (activeModal !== 'adjustment' || !selectedCustomer) return null;
 
@@ -58,29 +64,31 @@ export function CustomerAdjustmentModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40">
       <motion.div
+        {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 4, scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
-        className="bg-white w-full max-w-md rounded-lg shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1),0_8px_10px_-6px_rgba(15,23,42,0.05)] border border-slate-200/90 overflow-hidden"
+        className="bg-surface-card w-full max-w-md rounded-lg shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1),0_8px_10px_-6px_rgba(15,23,42,0.05)] border border-border-default overflow-hidden focus:outline-hidden"
       >
         {/* হেডার */}
-        <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+        <div className="px-4 py-3 border-b border-border-subtle flex items-center justify-between bg-surface-subtle">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center shrink-0">
               <SlidersHorizontal size={17} weight="bold" />
             </div>
             <div>
-              <h3 className="font-semibold text-slate-900 text-xs sm:text-sm leading-tight">হিসাব সমন্বয় ও ছাড়</h3>
-              <p className="text-xs text-slate-600">গ্রাহক: {selectedCustomer.name}</p>
+              <h3 id={titleId} className="font-semibold text-ink-primary text-xs sm:text-sm leading-tight">হিসাব সমন্বয় ও ছাড়</h3>
+              <p className="text-xs text-ink-secondary">গ্রাহক: {selectedCustomer.name}</p>
             </div>
           </div>
           <button
             type="button"
             onClick={closeModal}
-            className="p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-[background-color,color] duration-150 cursor-pointer"
+            aria-label="বন্ধ করুন"
+            className="p-1.5 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-border-default transition-[background-color,color] duration-150 cursor-pointer"
           >
             <X size={16} weight="bold" />
           </button>
@@ -90,22 +98,22 @@ export function CustomerAdjustmentModal() {
         <form onSubmit={handleSubmit}>
           <div className="p-4 space-y-3.5">
             {error && (
-              <div className="p-2.5 rounded-md bg-rose-50 border border-rose-200/80 text-rose-700 text-xs flex items-center gap-2">
+              <div className="p-2.5 rounded-md bg-due-bg border border-due-border text-due-text text-xs flex items-center gap-2">
                 <WarningCircle size={15} weight="bold" className="shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             {/* বর্তমান বকেয়া ও নতুন সম্ভাব্য বকেয়া */}
-            <div className="bg-slate-50/70 p-3 rounded-lg border border-slate-200/80 grid grid-cols-2 gap-2 text-center">
-              <div className="border-r border-slate-200 pr-2">
-                <span className="text-xs text-slate-600 font-medium block">বর্তমান বকেয়া</span>
-                <span className="text-base font-black font-mono tabular-nums tracking-tight text-rose-700">
+            <div className="bg-surface-subtle p-3 rounded-lg border border-border-default grid grid-cols-2 gap-2 text-center">
+              <div className="border-r border-border-default pr-2">
+                <span className="text-xs text-ink-secondary font-medium block">বর্তমান বকেয়া</span>
+                <span className="text-base font-black font-mono tabular-nums tracking-tight text-due-text">
                   {formatCurrency(currentDue)}
                 </span>
               </div>
               <div className="pl-2">
-                <span className="text-xs text-slate-600 font-medium block">সমন্বয়ের পর বকেয়া</span>
+                <span className="text-xs text-ink-secondary font-medium block">সমন্বয়ের পর বকেয়া</span>
                 <span className="text-base font-black font-mono tabular-nums tracking-tight text-brand-deep">
                   {formatCurrency(newDue)}
                 </span>
@@ -114,7 +122,7 @@ export function CustomerAdjustmentModal() {
 
             {/* সমন্বয়ের ধরন (ছাড় বনাম বৃদ্ধি) */}
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">
+              <label className="block text-xs font-medium text-ink-body mb-1">
                 সমন্বয়ের ধরন নির্বাচন করুন
               </label>
               <div className="grid grid-cols-2 gap-2">
@@ -124,7 +132,7 @@ export function CustomerAdjustmentModal() {
                   className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ${
                     adjustmentType === 'DISCOUNT'
                       ? 'border-brand-deep bg-brand-deep text-white shadow-2xs'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                      : 'border-border-default bg-surface-card text-ink-body hover:bg-surface-subtle'
                   }`}
                 >
                   <span>বাকি ছাড় / মাফ (-)</span>
@@ -135,7 +143,7 @@ export function CustomerAdjustmentModal() {
                   className={`py-2 px-3 rounded-lg border text-xs font-semibold transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ${
                     adjustmentType === 'ADD_DUE'
                       ? 'border-brand-deep bg-brand-deep text-white shadow-2xs'
-                      : 'border-slate-200 bg-white text-slate-700 hover:bg-slate-50'
+                      : 'border-border-default bg-surface-card text-ink-body hover:bg-surface-subtle'
                   }`}
                 >
                   <span>বাকি বৃদ্ধি (+)</span>
@@ -145,15 +153,16 @@ export function CustomerAdjustmentModal() {
 
             {/* টাকার পরিমাণ */}
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">
+              <label htmlFor={`${formId}-amount`} className="block text-xs font-medium text-ink-body mb-1">
                 {adjustmentType === 'DISCOUNT' ? 'ছাড়ের পরিমাণ (টাকা)' : 'বৃদ্ধির পরিমাণ (টাকা)'}{' '}
                 <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 font-bold text-sm">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-secondary font-bold text-sm">
                   ৳
                 </span>
                 <input
+                  id={`${formId}-amount`}
                   type="number"
                   step="any"
                   autoFocus
@@ -161,29 +170,30 @@ export function CustomerAdjustmentModal() {
                   value={amountStr}
                   onChange={(e) => setAmountStr(e.target.value)}
                   placeholder="০.০০"
-                  className="w-full pl-7 pr-3 py-1.5 bg-white border border-slate-200 rounded-md text-sm font-bold font-mono tabular-nums tracking-tight text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
+                  className="w-full pl-7 pr-3 py-1.5 bg-surface-card border border-border-default rounded-md text-sm font-bold font-mono tabular-nums tracking-tight text-ink-primary placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
                 />
               </div>
             </div>
 
             {/* কারণ / নোট */}
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">
+              <label htmlFor={`${formId}-reason`} className="block text-xs font-medium text-ink-body mb-1">
                 সমন্বয়ের কারণ <span className="text-rose-500">*</span>
               </label>
               <input
+                id={`${formId}-reason`}
                 type="text"
                 required
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="সমন্বয়ের কারণ"
-                className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
+                className="w-full px-2.5 py-1.5 bg-surface-card border border-border-default rounded-md text-xs text-ink-primary placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
               />
             </div>
           </div>
 
           {/* ফুটার */}
-          <div className="px-4 py-3 bg-slate-50/70 border-t border-slate-100 flex items-center justify-end gap-2">
+          <div className="px-4 py-3 bg-surface-subtle border-t border-border-subtle flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={closeModal}

@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useId } from 'react';
 import { Tag, Package, Stack } from '@phosphor-icons/react';
 
 interface BasicInfoCardProps {
@@ -26,6 +26,7 @@ export function BasicInfoCard({
   setHasVariants,
   isEditMode,
 }: BasicInfoCardProps) {
+  const formId = useId();
   return (
     <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden">
       {/* কার্ড হেডার */}
@@ -44,10 +45,11 @@ export function BasicInfoCard({
       <div className="p-5 space-y-4">
         {/* পণ্যের নাম */}
         <div>
-          <label className="block text-xs font-semibold text-ink-body mb-1">
+          <label htmlFor={`${formId}-name`} className="block text-xs font-semibold text-ink-body mb-1">
             পণ্যের নাম <span className="text-danger">*</span>
           </label>
           <input
+            id={`${formId}-name`}
             type="text"
             required
             value={name}
@@ -59,10 +61,11 @@ export function BasicInfoCard({
 
         {/* বাংলা নাম */}
         <div>
-          <label className="block text-xs font-semibold text-ink-body mb-1">
+          <label htmlFor={`${formId}-bangla`} className="block text-xs font-semibold text-ink-body mb-1">
             বাংলা নাম (মেমো ও চালানের মুদ্রণ ফরম্যাট)
           </label>
           <input
+            id={`${formId}-bangla`}
             type="text"
             value={banglaName}
             onChange={(e) => setBanglaName(e.target.value)}
@@ -73,9 +76,9 @@ export function BasicInfoCard({
 
         {/* পণ্যের ধরণ নির্বাচন */}
         <div className="pt-1">
-          <label className="block text-xs font-semibold text-ink-body mb-2">
+          <span className="block text-xs font-semibold text-ink-body mb-2">
             পণ্যের ধরণ নির্বাচন করুন <span className="text-danger">*</span>
-          </label>
+          </span>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               type="button"
@@ -129,10 +132,11 @@ export function BasicInfoCard({
 
         {/* বিবরণ */}
         <div>
-          <label className="block text-xs font-semibold text-ink-body mb-1">
+          <label htmlFor={`${formId}-desc`} className="block text-xs font-semibold text-ink-body mb-1">
             বিবরণ বা অভ্যন্তরীণ নোট (ঐচ্ছিক)
           </label>
           <textarea
+            id={`${formId}-desc`}
             rows={2}
             value={description}
             onChange={(e) => setDescription(e.target.value)}

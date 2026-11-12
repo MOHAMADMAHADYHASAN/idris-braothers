@@ -94,6 +94,7 @@ export function ProductFilterBar() {
               onClick={handleClearSearch}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-secondary hover:text-ink-primary p-0.5 rounded cursor-pointer"
               title="সার্চ মুছুন"
+              aria-label="অনুসন্ধান মুছুন"
             >
               <X size={14} weight="bold" />
             </button>
@@ -155,6 +156,7 @@ export function ProductFilterBar() {
             disabled={isLoading}
             className="h-9 px-2.5 rounded-lg border border-border-strong bg-surface-card hover:bg-surface-subtle active:scale-[0.98] text-ink-secondary hover:text-ink-primary transition-[background-color,border-color,transform] duration-150 disabled:opacity-50 cursor-pointer"
             title="তালিকা রিফ্রেশ করুন"
+            aria-label="পণ্য তালিকা রিফ্রেশ করুন"
           >
             <ArrowsClockwise size={14} weight="bold" className={isLoading ? 'animate-spin' : ''} />
           </button>

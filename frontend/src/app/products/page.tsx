@@ -10,13 +10,13 @@ import { ProductMobileCard } from '@/features/product/components/ProductMobileCa
 import { ProductKpiSummary } from '@/features/product/components/ProductKpiSummary';
 import { ProductFilterBar } from '@/features/product/components/ProductFilterBar';
 import { QuickPriceModal } from '@/features/product/components/QuickPriceModal';
-import { AddUnitModal } from '@/features/product/components/AddUnitModal';
 import { RecordWastageModal } from '@/features/product/components/RecordWastageModal';
 import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { AdminPagination } from '@/components/shared/AdminPagination';
 import { Badge } from '@/components/ui/Badge';
 import { buttonClasses } from '@/components/ui/Button';
 import { Product, ProductVariant } from '@/features/product/product.types';
+import { confirmAction, toast } from '@/lib/feedback';
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -30,13 +30,8 @@ export default function ProductsPage() {
     deleteVariant,
   } = useProductStore();
 
-  // Quick Action Modals state (Price, Unit, Wastage)
+  // Quick Action Modals state (Price, Wastage)
   const [priceModalData, setPriceModalData] = useState<{
-    variant: ProductVariant;
-    productName: string;
-  } | null>(null);
-
-  const [unitModalData, setUnitModalData] = useState<{
     variant: ProductVariant;
     productName: string;
   } | null>(null);
@@ -56,18 +51,25 @@ export default function ProductsPage() {
   };
 
   const handleDeleteVariant = async (variantId: string, variantName: string) => {
-    if (!confirm(`আপনি কি নিশ্চিত যে "${variantName}" ভ্যারিয়েন্টটি মুছতে চান?`)) {
+    const ok = await confirmAction({
+      title: 'ভ্যারিয়েন্ট মুছে ফেলুন',
+      message: `আপনি কি নিশ্চিত যে "${variantName}" ভ্যারিয়েন্টটি মুছতে চান?`,
+      confirmLabel: 'হ্যাঁ, মুছুন',
+    });
+    if (!ok) {
       return;
     }
     try {
       const res = await deleteVariant(variantId);
       if (res?.deactivated) {
-        alert(
+        toast.info(
           `ঐতিহাসিক বিক্রয় বা পারচেজ রেকর্ড থাকার কারণে "${variantName}" ভ্যারিয়েন্টটি স্থায়ীভাবে মুছে না ফেলে নিষ্ক্রিয় (Deactivated) করা হয়েছে।`
         );
+      } else {
+        toast.success(`"${variantName}" ভ্যারিয়েন্টটি মুছে ফেলা হয়েছে।`);
       }
     } catch (err: any) {
-      alert(err.message || 'ভ্যারিয়েন্ট মুছতে সমস্যা হয়েছে');
+      toast.error(err.message || 'ভ্যারিয়েন্ট মুছতে সমস্যা হয়েছে');
     }
   };
 
@@ -127,7 +129,6 @@ export default function ProductsPage() {
             isLoading={isLoading}
             onEditProduct={handleEditProduct}
             onOpenPriceModal={(v, name) => setPriceModalData({ variant: v, productName: name })}
-            onOpenUnitModal={(v, name) => setUnitModalData({ variant: v, productName: name })}
             onOpenWastageModal={(v, name) => setWastageModalData({ variant: v, productName: name })}
           />
         </div>
@@ -151,7 +152,6 @@ export default function ProductsPage() {
                 product={product}
                 onEditProduct={handleEditProduct}
                 onOpenPriceModal={(v, name) => setPriceModalData({ variant: v, productName: name })}
-                onOpenUnitModal={(v, name) => setUnitModalData({ variant: v, productName: name })}
                 onOpenWastageModal={(v, name) => setWastageModalData({ variant: v, productName: name })}
                 onDeleteVariant={handleDeleteVariant}
               />
@@ -161,7 +161,7 @@ export default function ProductsPage() {
 
         {/* ৫. পেজিনেশন বার */}
         {pagination && pagination.totalPages > 1 && (
-          <div className="bg-white rounded-lg border border-slate-200/90 p-2 shadow-2xs">
+          <div className="bg-surface-card rounded-lg border border-border-default p-2 shadow-2xs">
             <AdminPagination
               currentPage={pagination.page}
               totalPages={pagination.totalPages}
@@ -181,14 +181,6 @@ export default function ProductsPage() {
         onClose={() => setPriceModalData(null)}
         variant={priceModalData?.variant || null}
         productName={priceModalData?.productName || ''}
-      />
-
-      {/* নতুন বস্তা/কার্টন রূপান্তর ইউনিট মডাল */}
-      <AddUnitModal
-        isOpen={Boolean(unitModalData)}
-        onClose={() => setUnitModalData(null)}
-        variant={unitModalData?.variant || null}
-        productName={unitModalData?.productName || ''}
       />
 
       {/* অপচয় ও শুকিয়ে যাওয়া ঘাটতি এন্ট্রি মডাল */}

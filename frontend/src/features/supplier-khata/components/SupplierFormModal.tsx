@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import { X, PencilSimple, WarningCircle, CheckCircle, Buildings } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import { buttonClasses } from '@/components/ui/Button';
 import { useSupplierKhataStore } from '../useSupplierKhataStore';
+import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
 
 export function SupplierFormModal() {
   const {
@@ -25,6 +26,11 @@ export function SupplierFormModal() {
   const [openingPayableStr, setOpeningPayableStr] = useState('0');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formId = useId();
+  const { titleId, dialogProps, backdropProps } = useDialogAccessibility(
+    Boolean(isCreate || isEdit),
+    closeModal
+  );
 
   useEffect(() => {
     if (isEdit && selectedSupplier) {
@@ -81,26 +87,27 @@ export function SupplierFormModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50">
       <motion.div
+        {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 4, scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
-        className="bg-white w-full max-w-md rounded-lg shadow-xl border border-slate-200/90 overflow-hidden"
+        className="bg-surface-card w-full max-w-md rounded-lg shadow-xl border border-border-default overflow-hidden focus:outline-hidden"
       >
         {/* হেডার */}
-        <div className="px-4 py-3 border-b border-slate-200/90 flex items-center justify-between bg-slate-50/80">
+        <div className="px-4 py-3 border-b border-border-default flex items-center justify-between bg-surface-subtle">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center">
               {isEdit ? <PencilSimple size={16} weight="bold" /> : <Buildings size={16} weight="bold" />}
             </div>
             <div>
-              <h3 className="font-bold text-slate-900 text-xs sm:text-sm">
+              <h3 id={titleId} className="font-bold text-ink-primary text-xs sm:text-sm">
                 {isEdit ? 'মহাজন তথ্য সম্পাদনা' : 'নতুন মহাজন ও আড়ত খাতা তৈরি'}
               </h3>
               {isEdit && (selectedSupplier?.companyName || selectedSupplier?.name) && (
-                <p className="text-xs text-slate-600">
+                <p className="text-xs text-ink-secondary">
                   {selectedSupplier?.companyName || selectedSupplier?.name}
                 </p>
               )}
@@ -109,7 +116,8 @@ export function SupplierFormModal() {
           <button
             type="button"
             onClick={closeModal}
-            className="p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-200 transition-[background-color,color] duration-150 cursor-pointer"
+            aria-label="বন্ধ করুন"
+            className="p-1.5 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-border-default transition-[background-color,color] duration-150 cursor-pointer"
           >
             <X size={16} weight="bold" />
           </button>
@@ -119,7 +127,7 @@ export function SupplierFormModal() {
         <form onSubmit={handleSubmit}>
           <div className="p-4 space-y-3">
             {error && (
-              <div className="p-2.5 rounded-md bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+              <div className="p-2.5 rounded-md bg-due-bg border border-due-border text-due-text text-xs flex items-center gap-2">
                 <WarningCircle size={15} weight="bold" className="shrink-0" />
                 <span>{error}</span>
               </div>
@@ -127,79 +135,84 @@ export function SupplierFormModal() {
 
             {/* গদি / প্রতিষ্ঠানের নাম */}
             <div>
-              <label className="block text-xs font-medium text-slate-700 mb-1">
+              <label htmlFor={`${formId}-company`} className="block text-xs font-medium text-ink-body mb-1">
                 গদি / প্রতিষ্ঠানের নাম
               </label>
               <input
+                id={`${formId}-company`}
                 type="text"
                 autoFocus
                 value={companyName}
                 onChange={(e) => setCompanyName(e.target.value)}
                 placeholder="প্রতিষ্ঠানের নাম"
-                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
+                className="w-full px-3 py-1.5 bg-surface-card border border-border-default rounded-md text-xs sm:text-sm text-ink-primary placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
               />
             </div>
 
             {/* মহাজনের নাম (ব্যক্তি) */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label htmlFor={`${formId}-name`} className="block text-xs font-semibold text-ink-body mb-1">
                 মহাজনের নাম (মালিক বা যোগাযোগ ব্যক্তি) <span className="text-red-500">*</span>
               </label>
               <input
+                id={`${formId}-name`}
                 type="text"
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="মহাজনের নাম"
-                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
+                className="w-full px-3 py-1.5 bg-surface-card border border-border-default rounded-md text-xs sm:text-sm text-ink-primary placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
               />
             </div>
 
             {/* মোবাইল নম্বর */}
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">
+              <label htmlFor={`${formId}-phone`} className="block text-xs font-medium text-ink-secondary mb-1">
                 মোবাইল নম্বর (ঐচ্ছিক)
               </label>
               <input
+                id={`${formId}-phone`}
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="০১XXXXXXXXX"
-                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm font-mono tabular-nums text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
+                className="w-full px-3 py-1.5 bg-surface-card border border-border-default rounded-md text-xs sm:text-sm font-mono tabular-nums text-ink-primary placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
               />
             </div>
 
             {/* মোকাম / ঠিকানা */}
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1">
+              <label htmlFor={`${formId}-address`} className="block text-xs font-medium text-ink-secondary mb-1">
                 মোকাম / আড়তের এলাকা
               </label>
               <input
+                id={`${formId}-address`}
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="মোকাম / এলাকা"
-                className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
+                className="w-full px-3 py-1.5 bg-surface-card border border-border-default rounded-md text-xs sm:text-sm text-ink-primary placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
               />
             </div>
 
             {/* প্রারম্ভিক দেনা (শুধুমাত্র নতুন তৈরির সময়) */}
             {isCreate && (
               <div className="pt-1">
-                <label className="block text-xs font-medium text-slate-600 mb-1">
+                <label htmlFor={`${formId}-opening-payable`} className="block text-xs font-medium text-ink-secondary mb-1">
                   সফটওয়্যার চালুর পূর্বের বকেয়া দেনা (টাকা)
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 font-bold text-xs">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-secondary font-bold text-xs">
                     ৳
                   </span>
                   <input
+                    id={`${formId}-opening-payable`}
                     type="number"
                     step="any"
                     value={openingPayableStr}
                     onChange={(e) => setOpeningPayableStr(e.target.value)}
                     placeholder="০"
-                    className="w-full pl-7 pr-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm font-mono tabular-nums text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
+                    className="w-full pl-7 pr-3 py-1.5 bg-surface-card border border-border-default rounded-md text-xs sm:text-sm font-mono tabular-nums text-ink-primary placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
                   />
                 </div>
               </div>
@@ -207,7 +220,7 @@ export function SupplierFormModal() {
           </div>
 
           {/* ফুটার */}
-          <div className="px-4 py-2.5 bg-slate-50/80 border-t border-slate-200/90 flex items-center justify-end gap-2">
+          <div className="px-4 py-2.5 bg-surface-subtle border-t border-border-default flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={closeModal}

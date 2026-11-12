@@ -29,13 +29,13 @@ export function SupplierFilterBar() {
   }, [localSearch, search, setSearch]);
 
   return (
-    <div className="bg-white p-3 rounded-lg border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.02)] space-y-2.5">
+    <div className="bg-surface-card p-3 rounded-lg border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.02)] space-y-2.5">
       <div className="flex flex-col sm:flex-row gap-2.5 items-stretch sm:items-center justify-between">
         {/* সার্চ ইনপুট */}
         <div className="relative flex-1">
           <MagnifyingGlass
             size={16}
-            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-500"
+            className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-secondary"
             weight="bold"
           />
           <input
@@ -43,7 +43,7 @@ export function SupplierFilterBar() {
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
             placeholder="নাম, গদি, ফোন বা মোকাম খুঁজুন..."
-            className="w-full pl-8 pr-8 py-1.5 bg-slate-50 border border-slate-200 rounded-md text-xs sm:text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep focus:bg-white transition-[background-color,border-color,box-shadow]"
+            className="w-full pl-8 pr-8 py-1.5 bg-surface-subtle border border-border-default rounded-md text-xs sm:text-sm text-ink-primary placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep focus:bg-surface-card transition-[background-color,border-color,box-shadow]"
           />
           {localSearch && (
             <button
@@ -52,7 +52,8 @@ export function SupplierFilterBar() {
                 setLocalSearch('');
                 setSearch('');
               }}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-800 p-0.5 cursor-pointer"
+              aria-label="অনুসন্ধান মুছুন"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-secondary hover:text-ink-primary p-0.5 cursor-pointer"
             >
               <X size={14} weight="bold" />
             </button>
@@ -77,8 +78,8 @@ export function SupplierFilterBar() {
       </div>
 
       {/* ফিল্টার পিলস (Payable Filter) */}
-      <div className="flex items-center gap-1.5 pt-2 border-t border-slate-100 text-xs overflow-x-auto scrollbar-none">
-        <span className="text-slate-600 mr-0.5 flex items-center gap-1 text-xs font-medium shrink-0">
+      <div className="flex items-center gap-1.5 pt-2 border-t border-border-subtle text-xs overflow-x-auto scrollbar-none">
+        <span className="text-ink-secondary mr-0.5 flex items-center gap-1 text-xs font-medium shrink-0">
           <Funnel size={13} weight="bold" />
           <span>দেনা ফিল্টার:</span>
         </span>
@@ -95,7 +96,7 @@ export function SupplierFilterBar() {
             className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-[background-color,color] duration-150 active:scale-[0.98] whitespace-nowrap cursor-pointer ${
               payableFilter === tab.id
                 ? 'bg-brand-deep text-white shadow-xs'
-                : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/80'
+                : 'bg-surface-subtle text-ink-body hover:bg-surface-subtle border border-border-default'
             }`}
           >
             {tab.label}

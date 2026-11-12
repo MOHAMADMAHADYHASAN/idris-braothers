@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { salesService } from './sales.service';
+import { toast } from '@/lib/feedback';
 import {
   SaleListItem,
   SaleDetail,
@@ -265,8 +266,9 @@ export const useSalesStore = create<SalesState>((set, get) => ({
       await salesService.cancelSale(saleToCancel.id, reason);
       closeCancelModal();
       await fetchSales();
+      toast.success('বিক্রয় মেমো সফলভাবে বাতিল করা হয়েছে');
     } catch (err: any) {
-      alert(err.message || 'মেমো বাতিল করতে সমস্যা হয়েছে');
+      toast.error(err.message || 'মেমো বাতিল করতে সমস্যা হয়েছে');
     } finally {
       set({ isSubmittingCancel: false });
     }
@@ -278,7 +280,7 @@ export const useSalesStore = create<SalesState>((set, get) => ({
       const sale = await salesService.getSaleById(saleId);
       set({ saleToReturn: sale, isLoadingReturnSale: false });
     } catch (err: any) {
-      alert(err.message || 'মেমোর বিবরণ লোড করা যায়নি');
+      toast.error(err.message || 'মেমোর বিবরণ লোড করা যায়নি');
       set({ isReturnModalOpen: false, isLoadingReturnSale: false });
     }
   },
@@ -296,8 +298,9 @@ export const useSalesStore = create<SalesState>((set, get) => ({
       await salesService.returnSale(saleToReturn.id, payload);
       closeReturnModal();
       await fetchSales();
+      toast.success('পণ্য ফেরত ও স্টক সমন্বয় সম্পন্ন হয়েছে');
     } catch (err: any) {
-      alert(err.message || 'পণ্য ফেরত সম্পন্ন করতে সমস্যা হয়েছে');
+      toast.error(err.message || 'পণ্য ফেরত সম্পন্ন করতে সমস্যা হয়েছে');
     } finally {
       set({ isSubmittingReturn: false });
     }

@@ -21,13 +21,14 @@ export function PurchaseStickyHeader({
   onReset,
 }: PurchaseStickyHeaderProps) {
   return (
-    <header className="sticky top-0 z-40 bg-surface-card/95 backdrop-blur-md border-b border-border-default shadow-2xs">
+    <header className="sticky top-0 z-40 bg-surface-card border-b border-border-default shadow-2xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href="/purchases"
             className="p-2 rounded-lg text-ink-secondary hover:text-brand-deep hover:bg-brand-soft transition-colors cursor-pointer border border-border-default shadow-2xs"
             title="চালান তালিকায় ফিরে যান"
+            aria-label="চালান তালিকায় ফিরে যান"
           >
             <ArrowLeft size={16} weight="bold" />
           </Link>

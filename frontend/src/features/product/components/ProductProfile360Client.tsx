@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useId, useRef } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -32,7 +32,6 @@ import { generateCode128Bars } from '@/lib/barcode';
 import { Product, ProductVariant, StockWastage } from '../product.types';
 import { productService } from '../product.service';
 import { QuickPriceModal } from './QuickPriceModal';
-import { AddUnitModal } from './AddUnitModal';
 import { RecordWastageModal } from './RecordWastageModal';
 
 interface ProductProfile360ClientProps {
@@ -40,6 +39,9 @@ interface ProductProfile360ClientProps {
 }
 
 export function ProductProfile360Client({ productId }: ProductProfile360ClientProps) {
+  const barcodeFormId = useId();
+  const variantSelectId = `${barcodeFormId}-variant`;
+  const stickerCountId = `${barcodeFormId}-count`;
   const [product, setProduct] = useState<Product | null>(null);
   const [wastages, setWastages] = useState<StockWastage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -47,7 +49,6 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
 
   // Quick Action Modals State
   const [activeVariantForPrice, setActiveVariantForPrice] = useState<ProductVariant | null>(null);
-  const [activeVariantForUnit, setActiveVariantForUnit] = useState<ProductVariant | null>(null);
   const [activeVariantForWastage, setActiveVariantForWastage] = useState<ProductVariant | null>(null);
 
   // Barcode Sticker Generator State
@@ -147,13 +148,14 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
   return (
     <div className="min-h-screen bg-surface-canvas pb-20 font-sans print:bg-white print:p-0 print:pb-0">
       {/* ১. টপ স্টিকি হেডার */}
-      <header className="sticky top-0 z-40 bg-surface-card/95 backdrop-blur-md border-b border-border-default shadow-2xs print:hidden">
+      <header className="sticky top-0 z-40 bg-surface-card border-b border-border-default shadow-2xs print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/products"
               className="p-2 rounded-lg text-ink-secondary hover:text-brand-deep hover:bg-brand-soft border border-border-default transition-colors shrink-0"
               title="পণ্য তালিকায় ফিরে যান"
+              aria-label="পণ্য তালিকায় ফিরে যান"
             >
               <ArrowLeft size={16} weight="bold" />
             </Link>
@@ -237,7 +239,7 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                 {product.banglaName || product.name}
               </div>
               {selectedVariant?.variantName && selectedVariant.variantName !== 'Default' && (
-                <div className="text-[10px] text-slate-700 leading-tight">
+                <div className="text-[10px] text-ink-body leading-tight">
                   সাইজ: {selectedVariant.variantName}
                 </div>
               )}
@@ -372,7 +374,7 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
               <div className="p-4 border-b border-border-subtle flex items-center justify-between flex-wrap gap-2">
                 <h3 className="text-sm font-bold text-ink-primary flex items-center gap-1.5">
                   <Storefront size={16} weight="bold" className="text-brand-deep" />
-                  ভ্যারিয়েন্ট, মূল্য ও প্যাকেজিং রূপান্তর ম্যাট্রিক্স
+                  ভ্যারিয়েন্ট ও দর-স্টক ম্যাট্রিক্স
                 </h3>
               </div>
 
@@ -408,7 +410,7 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                                 {v.variantName === 'Default' ? 'সাধারণ (মূল পণ্য)' : v.variantName}
                               </div>
                               <span className="text-xs text-ink-secondary font-mono">
-                                একক: {v.baseUnitName}
+                                একক: {v.baseUnitName} • {v.allowDecimalQty ? 'দশমিক ওজন' : 'পূর্ণসংখ্যা পিস'}
                               </span>
                             </td>
 
@@ -466,63 +468,22 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                                   onClick={() => setActiveVariantForPrice(v)}
                                   className="p-1.5 rounded border border-border-default hover:bg-surface-subtle text-ink-secondary hover:text-brand-deep transition-colors cursor-pointer"
                                   title="দর পরিবর্তন"
+                                  aria-label={`${v.variantName} দর পরিবর্তন`}
                                 >
                                   <Coins size={14} weight="bold" />
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setActiveVariantForUnit(v)}
-                                  className="p-1.5 rounded border border-border-default hover:bg-surface-subtle text-ink-secondary hover:text-brand-deep transition-colors cursor-pointer"
-                                  title="কার্টন/বস্তা ইউনিট যোগ"
-                                >
-                                  <Package size={14} weight="bold" />
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => setActiveVariantForWastage(v)}
                                   className="p-1.5 rounded border border-border-default hover:bg-due-bg text-ink-secondary hover:text-due-text transition-colors cursor-pointer"
                                   title="ওয়েস্টেজ এন্ট্রি"
+                                  aria-label={`${v.variantName} ওয়েস্টেজ এন্ট্রি`}
                                 >
                                   <WarningCircle size={14} weight="bold" />
                                 </button>
                               </div>
                             </td>
                           </tr>
-
-                          {/* প্যাকেজিং ইউনিট সাব-রো */}
-                          {v.units && v.units.length > 0 && (
-                            <tr className="bg-surface-subtle/40">
-                              <td colSpan={8} className="py-2 px-4 border-b border-border-subtle">
-                                <div className="flex items-center gap-2 flex-wrap text-xs">
-                                  <span className="text-ink-secondary font-semibold flex items-center gap-1">
-                                    <Package size={13} weight="bold" className="text-ink-secondary" />
-                                    প্যাকেজিং ইউনিটসমূহ:
-                                  </span>
-                                  {v.units.map((u) => (
-                                    <div
-                                      key={u.id}
-                                      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-card border border-border-default font-mono shadow-2xs"
-                                    >
-                                      <span className="font-bold text-ink-primary">{u.unitName}</span>
-                                      <span className="text-ink-secondary text-xs">
-                                        (= {formatNumber(u.conversionFactor)} {v.baseUnitName})
-                                      </span>
-                                      {u.wholesalePrice && (
-                                        <span className="text-wholesale-text font-bold">
-                                          পাইকারি {formatCurrency(u.wholesalePrice)}
-                                        </span>
-                                      )}
-                                      {u.retailPrice && (
-                                        <span className="text-ink-primary font-bold">
-                                          খুচরা {formatCurrency(u.retailPrice)}
-                                        </span>
-                                      )}
-                                    </div>
-                                  ))}
-                                </div>
-                              </td>
-                            </tr>
-                          )}
                         </React.Fragment>
                       );
                     })}
@@ -541,7 +502,7 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                 <button
                   type="button"
                   onClick={() => setActiveVariantForWastage(product.variants[0])}
-                  className="px-3 py-1.5 rounded-lg bg-due-bg text-due-text border border-due-border text-xs font-semibold hover:bg-red-100 flex items-center gap-1 transition-colors cursor-pointer"
+                  className="px-3 py-1.5 rounded-lg bg-due-bg text-due-text border border-due-border text-xs font-semibold hover:bg-due-bg flex items-center gap-1 transition-colors cursor-pointer"
                 >
                   <Plus size={13} weight="bold" />
                   <span>ঘাটতি এন্ট্রি করুন</span>
@@ -649,10 +610,11 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
 
               {product.variants.length > 1 && (
                 <div>
-                  <label className="block text-xs font-bold text-ink-body mb-1">
+                  <label htmlFor={variantSelectId} className="block text-xs font-bold text-ink-body mb-1">
                     ভ্যারিয়েন্ট নির্ধারণ করুন
                   </label>
                   <select
+                    id={variantSelectId}
                     value={selectedVariantId}
                     onChange={(e) => setSelectedVariantId(e.target.value)}
                     className="w-full px-2.5 py-2 rounded-lg border border-border-strong text-xs font-semibold bg-surface-card text-ink-primary"
@@ -709,7 +671,7 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
 
               <div>
                 <div className="flex justify-between items-center mb-1.5">
-                  <label className="text-xs font-bold text-ink-body">স্টিকার কপি সংখ্যা</label>
+                  <label htmlFor={stickerCountId} className="text-xs font-bold text-ink-body">স্টিকার কপি সংখ্যা</label>
                   <span className="font-mono text-xs font-black text-brand-deep">
                     {formatNumber(stickerCount)} কপি
                   </span>
@@ -730,6 +692,7 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                     </button>
                   ))}
                   <input
+                    id={stickerCountId}
                     type="number"
                     min="1"
                     max="500"
@@ -818,16 +781,6 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
           loadProductData();
         }}
         variant={activeVariantForPrice}
-        productName={product.name}
-      />
-
-      <AddUnitModal
-        isOpen={Boolean(activeVariantForUnit)}
-        onClose={() => {
-          setActiveVariantForUnit(null);
-          loadProductData();
-        }}
-        variant={activeVariantForUnit}
         productName={product.name}
       />
 

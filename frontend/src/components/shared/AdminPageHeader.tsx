@@ -32,7 +32,7 @@ export function AdminPageHeader({
 }: AdminPageHeaderProps) {
   return (
     <header
-      className={`sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-4 py-2.5 md:static md:px-0 md:py-0 md:border-0 md:bg-transparent ${className}`}
+      className={`sticky top-0 z-30 bg-surface-card border-b border-border-default px-4 py-2.5 md:static md:px-0 md:py-0 md:border-0 md:bg-transparent ${className}`}
     >
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-3">
         {/* Left: Back button + Icon + Title + Live Status Badge */}
@@ -40,8 +40,9 @@ export function AdminPageHeader({
           {backHref && (
             <Link
               href={backHref}
-              className="p-1.5 rounded-md text-slate-600 hover:text-brand-deep hover:bg-brand-soft/60 transition-[background-color,color,transform] duration-150 active:scale-[0.98] shrink-0"
+              className="p-1.5 rounded-md text-ink-secondary hover:text-brand-deep hover:bg-brand-soft/60 transition-[background-color,color,transform] duration-150 active:scale-[0.98] shrink-0"
               title={backTitle}
+              aria-label={backTitle}
             >
               <ArrowLeft size={16} weight="bold" />
             </Link>

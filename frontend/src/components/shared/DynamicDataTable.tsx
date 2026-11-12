@@ -230,6 +230,9 @@ export function DynamicDataTable<T>({
                 <button
                   type="button"
                   onClick={() => setIsColumnMenuOpen(!isColumnMenuOpen)}
+                  aria-expanded={isColumnMenuOpen}
+                  aria-haspopup="true"
+                  aria-label="টেবিল কলাম প্রদর্শন নিয়ন্ত্রণ করুন"
                   className={`h-8 px-2.5 rounded-lg border text-xs font-semibold flex items-center gap-1.5 transition-[background-color,border-color,transform] duration-150 active:scale-[0.98] cursor-pointer shadow-2xs ${
                     hiddenKeys.size > 0
                       ? 'bg-brand-deep border-brand-deep text-white'
@@ -316,7 +319,7 @@ export function DynamicDataTable<T>({
         ) : (
           <table className="w-full text-left border-collapse text-xs">
             {/* স্টিকি হেডার */}
-            <thead className="sticky top-0 bg-surface-subtle/95 backdrop-blur-xs z-10 border-b border-border-default text-ink-secondary font-bold text-xs">
+            <thead className="sticky top-0 bg-surface-subtle z-10 border-b border-border-default text-ink-secondary font-bold text-xs">
               <tr>
                 {/* বাল্ক চেকবক্স কলাম */}
                 {selectable && (
@@ -394,7 +397,7 @@ export function DynamicDataTable<T>({
 
                     {/* এক্সপ্যান্ডেবল সাব-রো (যদি থাকে) */}
                     {renderExpandedRow && isExpanded && (
-                      <tr className="bg-slate-50/60 border-b border-slate-200/80">
+                      <tr className="bg-surface-subtle border-b border-border-default">
                         <td
                           colSpan={visibleColumns.length + (selectable ? 1 : 0)}
                           className="p-3"

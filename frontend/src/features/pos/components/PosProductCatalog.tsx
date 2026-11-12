@@ -14,6 +14,7 @@ import { Product, ProductVariant } from '@/features/product/product.types';
 import { useProductStore } from '@/features/product/useProductStore';
 import { usePosStore } from '../usePosStore';
 import { formatCurrency, formatNumber, formatWeight } from '@/lib/decimal';
+import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
 
 export function PosProductCatalog() {
   const { products, categories: storeCategories, isLoading, fetchProducts, fetchCategories } = useProductStore();
@@ -24,6 +25,9 @@ export function PosProductCatalog() {
   const [selectedVariantByProduct, setSelectedVariantByProduct] = useState<Record<string, string>>({});
   const [reverseModalTarget, setReverseModalTarget] = useState<{ product: Product; variant?: ProductVariant } | null>(null);
   const [customAmount, setCustomAmount] = useState<string>('20');
+
+  const { titleId: reverseTitleId, dialogProps: reverseDialogProps, backdropProps: reverseBackdropProps } =
+    useDialogAccessibility<HTMLFormElement>(Boolean(reverseModalTarget), () => setReverseModalTarget(null));
 
   useEffect(() => {
     fetchProducts({ page: 1, limit: 100 });
@@ -87,6 +91,7 @@ export function PosProductCatalog() {
           <input
             id="pos-search-input"
             type="text"
+            aria-label="পণ্য খুঁজুন (নাম, বারকোড বা SKU)"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="পণ্য খুঁজুন (নাম, বারকোড বা SKU) [F2]"
@@ -274,14 +279,18 @@ export function PosProductCatalog() {
       {/* Reverse Price Modal */}
       <AnimatePresence>
         {reverseModalTarget && (
-          <div className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4">
+          <div
+            {...reverseBackdropProps}
+            className="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4"
+          >
             <motion.form
+              {...reverseDialogProps}
               initial={{ opacity: 0, y: 6, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 4, scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
               onSubmit={handleReverseSubmit}
-              className="bg-surface-card rounded-xl max-w-sm w-full p-4 shadow-xl border border-border-default space-y-3.5 relative"
+              className="bg-surface-card rounded-xl max-w-sm w-full p-4 shadow-xl border border-border-default space-y-3.5 relative focus:outline-hidden"
             >
               {(() => {
                 const targetProduct = reverseModalTarget.product;
@@ -309,7 +318,7 @@ export function PosProductCatalog() {
                           <Lightning size={13} weight="fill" />
                           টাকার অংকে বিক্রি
                         </span>
-                        <h3 className="text-sm font-bold text-ink-primary mt-0.5">
+                        <h3 id={reverseTitleId} className="text-sm font-bold text-ink-primary mt-0.5">
                           {targetProduct.banglaName || targetProduct.name}
                           {variantSuffix}
                         </h3>
@@ -320,14 +329,15 @@ export function PosProductCatalog() {
                       <button
                         type="button"
                         onClick={() => setReverseModalTarget(null)}
-                        className="p-1 rounded text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-colors cursor-pointer"
+                        aria-label="বন্ধ করুন"
+                        className="w-10 h-10 -mr-1.5 -mt-1.5 flex items-center justify-center rounded-lg text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-colors cursor-pointer"
                       >
                         <X size={16} weight="bold" />
                       </button>
                     </div>
 
                     <div>
-                      <label className="block text-xs font-semibold text-ink-body mb-1">
+                      <label htmlFor="pos-reverse-amount-input" className="block text-xs font-semibold text-ink-body mb-1">
                         কাস্টমার কত টাকার নিতে চান?
                       </label>
                       <div className="relative">
@@ -335,6 +345,7 @@ export function PosProductCatalog() {
                           ৳
                         </span>
                         <input
+                          id="pos-reverse-amount-input"
                           type="number"
                           autoFocus
                           required

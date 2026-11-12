@@ -10,7 +10,7 @@ import {
   Sparkle,
   ArrowsClockwise,
 } from '@phosphor-icons/react';
-import { FormUnitItem } from './PackagingUnitsCard';
+import { FormUnitItem } from '../../product.types';
 import {
   extractBaseProductCode,
   generateProductVariantSkus,
@@ -18,6 +18,7 @@ import {
   generateSingleVariantSku,
 } from '@/lib/skuGenerator';
 import { formatNumber } from '@/lib/decimal';
+import { toast } from '@/lib/feedback';
 
 export interface FormVariantItem {
   id?: string;
@@ -117,7 +118,7 @@ export function VariantsStockMatrixCard({
   const handleAddPreset = (sizeName: string) => {
     // ডুপ্লিকেট নাম রোধ
     if (variants.some((v) => v.variantName.toLowerCase() === sizeName.toLowerCase())) {
-      alert(`"${sizeName}" ভ্যারিয়েন্টটি ইতিমধ্যে তালিকায় আছে!`);
+      toast.warning(`"${sizeName}" ভ্যারিয়েন্টটি ইতিমধ্যে তালিকায় আছে!`);
       return;
     }
 
@@ -187,14 +188,26 @@ export function VariantsStockMatrixCard({
     );
   };
 
-  // রো ফিল্ড আপডেট
+  // রো ফিল্ড আপডেট (একক পরিবর্তনে দশমিক/পিস মোড স্বয়ংক্রিয় সমন্বয়)
   const handleUpdateVariant = (
     index: number,
     field: keyof FormVariantItem,
     value: any
   ) => {
     setVariants((prev) =>
-      prev.map((item, idx) => (idx === index ? { ...item, [field]: value } : item))
+      prev.map((item, idx) => {
+        if (idx !== index) return item;
+        const updated: FormVariantItem = { ...item, [field]: value };
+        if (field === 'baseUnitName' && typeof value === 'string') {
+          const normalized = value.trim().toLowerCase();
+          if (['কেজি', 'গ্রাম', 'লিটার', 'kg', 'g', 'l', 'ltr'].includes(normalized)) {
+            updated.allowDecimalQty = true;
+          } else if (['প্যাকেট', 'পিস', 'বোতল', 'পাতা', 'ডজন', 'pcs', 'pack', 'packet'].includes(normalized)) {
+            updated.allowDecimalQty = false;
+          }
+        }
+        return updated;
+      })
     );
   };
 
@@ -202,7 +215,7 @@ export function VariantsStockMatrixCard({
   const handleRemoveVariant = (index: number) => {
     const target = variants[index];
     if (target?.hasSalesHistory) {
-      alert(
+      toast.warning(
         `"${target.variantName}" ভ্যারিয়েন্টটির অতীতের বিক্রয় বা পারচেজ রেকর্ড রয়েছে। লেজার সামঞ্জস্য রক্ষার জন্য এটি স্থায়ীভাবে ডিলিট করা যাবে না।`
       );
       return;
@@ -219,7 +232,7 @@ export function VariantsStockMatrixCard({
       !bulkRetail &&
       !bulkStock
     ) {
-      alert('বাল্ক বারে অন্তত একটি মান (দর বা স্টক) লিখুন!');
+      toast.warning('বাল্ক বারে অন্তত একটি মান (দর বা স্টক) লিখুন!');
       return;
     }
 
@@ -381,9 +394,9 @@ export function VariantsStockMatrixCard({
                 <th className="py-2.5 px-3 text-center w-10">মুছুন</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200/70">
+            <tbody className="divide-y divide-border-default">
               {variants.map((v, idx) => (
-                <tr key={idx} className="hover:bg-slate-50/50 transition-colors">
+                <tr key={idx} className="hover:bg-surface-subtle transition-colors">
                   {/* ১. সাইজের নাম */}
                   <td className="py-2.5 px-3 w-[150px]">
                     <input
@@ -392,7 +405,8 @@ export function VariantsStockMatrixCard({
                       value={v.variantName}
                       onChange={(e) => handleUpdateVariant(idx, 'variantName', e.target.value)}
                       placeholder="সাইজ / ওজন"
-                      className="w-full px-2.5 py-1.5 rounded border border-slate-300 focus:outline-none focus:ring-1 focus:ring-slate-900 font-semibold text-xs text-slate-900 bg-white"
+                      aria-label={`ভ্যারিয়েন্ট ${idx + 1} সাইজ বা ওজন`}
+                      className="w-full px-2.5 py-1.5 rounded border border-border-strong focus:outline-none focus:ring-1 focus:ring-brand-deep font-semibold text-xs text-ink-primary bg-surface-card"
                     />
                   </td>
 
@@ -404,6 +418,7 @@ export function VariantsStockMatrixCard({
                         value={v.sku}
                         onChange={(e) => handleUpdateVariant(idx, 'sku', e.target.value)}
                         placeholder="অটো / কাস্টম"
+                        aria-label={`ভ্যারিয়েন্ট ${idx + 1} SKU`}
                         className="w-full pl-2 pr-7 py-1.5 rounded border border-border-strong focus:outline-none focus:ring-1 focus:ring-brand-deep font-mono text-xs text-ink-body bg-surface-card"
                       />
                       <button
@@ -411,6 +426,7 @@ export function VariantsStockMatrixCard({
                         onClick={() => handleRegenerateRowSku(idx)}
                         className="absolute right-1.5 p-1 rounded text-ink-secondary hover:text-brand-deep hover:bg-brand-soft transition-colors cursor-pointer"
                         title="এই ভ্যারিয়েন্টের SKU রিজেনারেট করুন"
+                        aria-label={`ভ্যারিয়েন্ট ${idx + 1} SKU রিজেনারেট করুন`}
                       >
                         <ArrowsClockwise size={12} weight="bold" />
                       </button>
@@ -424,6 +440,7 @@ export function VariantsStockMatrixCard({
                       value={v.barcode}
                       onChange={(e) => handleUpdateVariant(idx, 'barcode', e.target.value)}
                       placeholder="বারকোড"
+                      aria-label={`ভ্যারিয়েন্ট ${idx + 1} বারকোড`}
                       className="w-full px-2 py-1.5 rounded border border-border-strong focus:outline-none focus:ring-1 focus:ring-brand-deep font-mono text-xs text-ink-body bg-surface-card"
                     />
                   </td>
@@ -437,6 +454,7 @@ export function VariantsStockMatrixCard({
                         onChange={(e) => handleUpdateVariant(idx, 'baseUnitName', e.target.value)}
                         className="w-16 px-1.5 py-1 rounded border border-border-strong text-center font-medium text-xs bg-surface-card text-ink-primary"
                         title="মূল একক"
+                        aria-label={`ভ্যারিয়েন্ট ${idx + 1} মূল একক`}
                       />
                       <button
                         type="button"
@@ -464,6 +482,7 @@ export function VariantsStockMatrixCard({
                         placeholder="মজুত"
                         className="w-16 px-1.5 py-1.5 rounded border border-border-strong font-mono text-xs text-right bg-surface-card text-ink-primary font-bold"
                         title="বর্তমান মজুত"
+                        aria-label={`ভ্যারিয়েন্ট ${idx + 1} বর্তমান মজুত`}
                       />
                       <span className="text-ink-secondary font-mono">/</span>
                       <input
@@ -474,6 +493,7 @@ export function VariantsStockMatrixCard({
                         placeholder="অ্যালার্ট"
                         className="w-12 px-1.5 py-1.5 rounded border border-border-strong font-mono text-xs text-right bg-surface-card text-ink-secondary"
                         title="লো-স্টক অ্যালার্ট সীমা"
+                        aria-label={`ভ্যারিয়েন্ট ${idx + 1} লো-স্টক অ্যালার্ট সীমা`}
                       />
                     </div>
                   </td>
@@ -488,7 +508,8 @@ export function VariantsStockMatrixCard({
                       value={v.currentPurchasePrice}
                       onChange={(e) => handleUpdateVariant(idx, 'currentPurchasePrice', e.target.value)}
                       placeholder="0.00"
-                      className="w-full px-2 py-1.5 rounded border border-slate-300 font-mono text-xs text-right bg-white text-slate-900 font-bold"
+                      aria-label={`ভ্যারিয়েন্ট ${idx + 1} ক্রয়দর`}
+                      className="w-full px-2 py-1.5 rounded border border-border-strong font-mono text-xs text-right bg-surface-card text-ink-primary font-bold"
                     />
                   </td>
 
@@ -502,7 +523,8 @@ export function VariantsStockMatrixCard({
                       value={v.wholesalePrice}
                       onChange={(e) => handleUpdateVariant(idx, 'wholesalePrice', e.target.value)}
                       placeholder="0.00"
-                      className="w-full px-2 py-1.5 rounded border border-slate-300 font-mono text-xs text-right bg-white text-slate-900 font-bold"
+                      aria-label={`ভ্যারিয়েন্ট ${idx + 1} পাইকারি দর`}
+                      className="w-full px-2 py-1.5 rounded border border-border-strong font-mono text-xs text-right bg-surface-card text-ink-primary font-bold"
                     />
                   </td>
 
@@ -516,7 +538,8 @@ export function VariantsStockMatrixCard({
                       value={v.retailPrice}
                       onChange={(e) => handleUpdateVariant(idx, 'retailPrice', e.target.value)}
                       placeholder="0.00"
-                      className="w-full px-2 py-1.5 rounded border border-slate-300 font-mono text-xs text-right bg-white text-slate-900 font-bold"
+                      aria-label={`ভ্যারিয়েন্ট ${idx + 1} খুচরা দর`}
+                      className="w-full px-2 py-1.5 rounded border border-border-strong font-mono text-xs text-right bg-surface-card text-ink-primary font-bold"
                     />
                   </td>
 
@@ -535,6 +558,11 @@ export function VariantsStockMatrixCard({
                         v.hasSalesHistory
                           ? 'এই ভ্যারিয়েন্টে বিক্রয় রেকর্ড আছে, মোছা যাবে না'
                           : 'ভ্যারিয়েন্ট মুছে ফেলুন'
+                      }
+                      aria-label={
+                        v.hasSalesHistory
+                          ? `ভ্যারিয়েন্ট ${idx + 1} মুছা যাবে না, বিক্রয় রেকর্ড আছে`
+                          : `ভ্যারিয়েন্ট ${idx + 1} মুছে ফেলুন`
                       }
                     >
                       <Trash size={14} weight="bold" />

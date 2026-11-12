@@ -19,7 +19,6 @@ interface ProductMobileCardProps {
   product: Product;
   onEditProduct: (product: Product) => void;
   onOpenPriceModal: (variant: ProductVariant, productName: string) => void;
-  onOpenUnitModal: (variant: ProductVariant, productName: string) => void;
   onOpenWastageModal: (variant: ProductVariant, productName: string) => void;
   onDeleteVariant: (variantId: string, variantName: string) => void;
 }
@@ -121,25 +120,22 @@ export function ProductMobileCard({
         <div className="grid grid-cols-2 gap-2">
           <div>
             <span className="text-xs font-semibold text-ink-secondary block">
-              রূপান্তর একক
+              একক ও ধরন
             </span>
-            {primaryVariant?.units && primaryVariant.units.length > 0 ? (
-              <div className="mt-1 flex flex-wrap gap-1">
-                {primaryVariant.units.map((u) => (
-                  <span
-                    key={u.id}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs bg-surface-subtle text-ink-body font-medium border border-border-default"
-                  >
-                    <span>{u.unitName}</span>
-                    <span className="text-ink-secondary font-mono">
-                      (= {formatNumber(u.conversionFactor)} {primaryVariant.baseUnitName})
-                    </span>
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <span className="text-ink-secondary text-xs">একক ইউনিট</span>
-            )}
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              <span className="text-xs font-semibold text-ink-primary">
+                {primaryVariant?.baseUnitName || product.baseUnitName || 'কেজি'}
+              </span>
+              <span
+                className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold border ${
+                  primaryVariant?.allowDecimalQty !== false
+                    ? 'bg-brand-soft text-brand-deep border-brand-light'
+                    : 'bg-wholesale-bg text-wholesale-text border-wholesale-border/60'
+                }`}
+              >
+                {primaryVariant?.allowDecimalQty !== false ? 'দশমিক ওজন' : 'পূর্ণসংখ্যা'}
+              </span>
+            </div>
           </div>
 
           <div className="text-right">
@@ -226,6 +222,7 @@ export function ProductMobileCard({
                         onClick={() => onDeleteVariant(v.id, v.variantName)}
                         className="p-1 rounded text-due-text hover:bg-due-bg ml-auto cursor-pointer"
                         title="ভ্যারিয়েন্ট মুছুন"
+                        aria-label={`${v.variantName} ভ্যারিয়েন্ট মুছুন`}
                       >
                         <Trash size={13} weight="bold" />
                       </button>

@@ -122,8 +122,8 @@ export default function PurchasesPage() {
         {/* ৪. মোবাইল কার্ড স্ট্রিম */}
         <div className="block md:hidden space-y-2.5">
           {purchases.length === 0 ? (
-            <div className="bg-white rounded-xl border border-slate-200/90 p-8 text-center text-slate-500">
-              <Truck size={32} weight="bold" className="mx-auto mb-2 text-slate-300" />
+            <div className="bg-surface-card rounded-xl border border-border-default p-8 text-center text-ink-secondary">
+              <Truck size={32} weight="bold" className="mx-auto mb-2 text-border-strong" />
               <p className="text-xs font-semibold">কোনো পূর্ববর্তী চালান পাওয়া যায়নি</p>
             </div>
           ) : (
@@ -136,7 +136,7 @@ export default function PurchasesPage() {
               ))}
 
               {meta.totalPages > 1 && (
-                <div className="bg-white rounded-xl border border-slate-200/90 p-2 shadow-2xs">
+                <div className="bg-surface-card rounded-xl border border-border-default p-2 shadow-2xs">
                   <AdminPagination
                     currentPage={meta.page}
                     totalPages={meta.totalPages}

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Noto_Sans_Bengali, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import { AppProviders } from '@/components/shared/AppProviders';
 
 const notoSansBengali = Noto_Sans_Bengali({
   weight: ['400', '500', '600', '700', '800'],
@@ -36,7 +37,7 @@ export default function RootLayout({
         suppressHydrationWarning
         className="min-h-full flex flex-col bg-surface-canvas text-ink-primary"
       >
-        {children}
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

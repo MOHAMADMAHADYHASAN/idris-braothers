@@ -1,22 +1,16 @@
 import { ErrorRequestHandler } from 'express';
-import { ZodError } from 'zod';
 import { AppError } from './AppError';
 
 export const globalErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
   let statusCode = err.statusCode || 500;
   let message = err.message || 'Internal Server Error';
 
-  // 1. Custom Operational Errors (AppError)
+  // 1. Custom Operational Errors (including 422 Request Validation errors from AppError)
   if (err instanceof AppError) {
     statusCode = err.statusCode;
     message = err.message;
   }
-  // 2. Zod Request Validation Errors
-  else if (err instanceof ZodError) {
-    statusCode = 422;
-    message = err.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join(', ');
-  }
-  // 3. Prisma Database Errors
+  // 2. Prisma Database Errors
   else if (err.name === 'PrismaClientKnownRequestError') {
     if (err.code === 'P2002') {
       statusCode = 409;

@@ -24,7 +24,7 @@ export function SalesFilterBar() {
   );
 
   return (
-    <div className="bg-white rounded-lg border border-slate-200/90 p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-2.5">
+    <div className="bg-surface-card rounded-lg border border-border-default p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-2.5">
       {/* রো ১: সার্চ ইনপুট ও গ্লোবাল ইউনিফাইড ডেট ফিল্টার */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
         {/* সার্চ ইনপুট */}
@@ -32,14 +32,14 @@ export function SalesFilterBar() {
           <MagnifyingGlass
             size={15}
             weight="bold"
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-secondary"
           />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="মেমো নং, নাম বা ফোন..."
-            className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-900 placeholder:text-slate-500 focus:outline-hidden focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
+            className="w-full pl-8 pr-3 py-1.5 bg-surface-card border border-border-default rounded-md text-xs sm:text-sm text-ink-primary placeholder:text-ink-muted focus:outline-hidden focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
           />
         </div>
 
@@ -53,10 +53,10 @@ export function SalesFilterBar() {
       </div>
 
       {/* রো ২: টাইপ ও স্ট্যাটাস ফিল্টার */}
-      <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-slate-100 text-xs">
+      <div className="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-border-subtle text-xs">
         {/* খুচরা বনাম পাইকারি */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-slate-600 text-xs font-medium mr-0.5 flex items-center gap-1">
+          <span className="text-ink-secondary text-xs font-medium mr-0.5 flex items-center gap-1">
             <Funnel size={13} weight="bold" />
             <span>ধরন:</span>
           </span>
@@ -72,9 +72,9 @@ export function SalesFilterBar() {
               className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ${
                 saleType === t.id
                   ? t.id === 'WHOLESALE'
-                    ? 'bg-amber-600 text-white shadow-xs'
+                    ? 'bg-wholesale-solid text-white shadow-xs'
                     : 'bg-brand-deep text-white shadow-xs'
-                  : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/80'
+                  : 'bg-surface-subtle text-ink-body hover:bg-surface-subtle border border-border-default'
               }`}
             >
               {t.label}
@@ -84,7 +84,7 @@ export function SalesFilterBar() {
 
         {/* স্ট্যাটাস ফিল্টার */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-slate-600 text-xs font-medium mr-0.5">স্ট্যাটাস:</span>
+          <span className="text-ink-secondary text-xs font-medium mr-0.5">স্ট্যাটাস:</span>
           {[
             { id: undefined, label: 'সব' },
             { id: 'COMPLETED' as SaleStatus, label: 'সম্পন্ন মেমো' },
@@ -97,11 +97,11 @@ export function SalesFilterBar() {
               className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ${
                 status === s.id
                   ? s.id === 'CANCELLED'
-                    ? 'bg-rose-600 text-white shadow-xs'
+                    ? 'bg-danger text-white shadow-xs'
                     : s.id === 'COMPLETED'
-                      ? 'bg-emerald-700 text-white shadow-xs'
+                      ? 'bg-success text-white shadow-xs'
                       : 'bg-brand-deep text-white shadow-xs'
-                  : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200/80'
+                  : 'bg-surface-subtle text-ink-body hover:bg-surface-subtle border border-border-default'
               }`}
             >
               {s.label}

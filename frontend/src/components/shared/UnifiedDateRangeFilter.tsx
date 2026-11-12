@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useId, useRef } from 'react';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'motion/react';
 import { CalendarBlank, X, Check, ArrowRight } from '@phosphor-icons/react';
@@ -31,6 +31,9 @@ function UnifiedDateRangeFilterInner({
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const dateFilterId = useId();
+  const startDateId = `${dateFilterId}-start`;
+  const endDateId = `${dateFilterId}-end`;
 
   // 1. Resolve current active state from URL search params (or default)
   const urlFilter = searchParams?.get('filter') || defaultFilter;
@@ -224,6 +227,7 @@ function UnifiedDateRangeFilterInner({
               <button
                 type="button"
                 onClick={() => setShowPicker(false)}
+                aria-label="তারিখ পিকার বন্ধ করুন"
                 className="p-1 rounded text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-colors cursor-pointer"
               >
                 <X size={14} weight="bold" />
@@ -232,10 +236,11 @@ function UnifiedDateRangeFilterInner({
 
             <form onSubmit={handleApplyCustom} className="space-y-2.5 py-3 text-xs">
               <div>
-                <label className="text-xs font-semibold text-ink-secondary block mb-1">
+                <label htmlFor={startDateId} className="text-xs font-semibold text-ink-secondary block mb-1">
                   শুরুর তারিখ
                 </label>
                 <input
+                  id={startDateId}
                   type="date"
                   value={startInput}
                   onChange={(e) => setStartInput(e.target.value)}
@@ -244,10 +249,11 @@ function UnifiedDateRangeFilterInner({
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-ink-secondary block mb-1">
+                <label htmlFor={endDateId} className="text-xs font-semibold text-ink-secondary block mb-1">
                   শেষের তারিখ
                 </label>
                 <input
+                  id={endDateId}
                   type="date"
                   value={endInput}
                   onChange={(e) => setEndInput(e.target.value)}
@@ -284,7 +290,7 @@ export function UnifiedDateRangeFilter(props: Props) {
   return (
     <React.Suspense
       fallback={
-        <div className={`h-8 bg-slate-100 rounded-md border border-slate-200/80 animate-pulse w-48 ${props.className || ''}`} />
+        <div className={`h-8 bg-surface-subtle rounded-md border border-border-default animate-pulse w-48 ${props.className || ''}`} />
       }
     >
       <UnifiedDateRangeFilterInner {...props} />

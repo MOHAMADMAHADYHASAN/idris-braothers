@@ -11,7 +11,7 @@
 > **যেকোনো নতুন পরিবর্তন, ফিচার যোগ, রিফ্যাক্টরিং বা আর্কিটেকচারাল সিদ্ধান্ত বাস্তবায়নের সাথে সাথেই সংশ্লিষ্ট `AGENTS.md`-তে তাৎক্ষণিকভাবে নোট (record) করতে হবে। কোনো কোড পরিবর্তন ডকুমেন্টেশন ছাড়া অসম্পূর্ণ হিসেবে গণ্য হবে।**
 
 > **🛑 STRICT BROWSER & TESTING DIRECTIVE — NO PLAYWRIGHT / BROWSER TESTING WITHOUT EXPLICIT USER REQUEST:**
-> **ইউজারের সুস্পষ্ট ও প্রত্যক্ষ নির্দেশ ("Playwright দিয়ে চেক করো" / "browser test করো") ছাড়া কোনো অবস্থাতেই Playwright, Playwright MCP, বা হেডলেস ব্রাউজার E2E টেস্টিং স্বয়ংক্রিয়ভাবে রান করা যাবে না। স্বাভাবিক কোড পরিবর্তনের পর শুধুমাত্র `npx tsc --noEmit` এবং `npm run build` দিয়ে যাচাই করতে হবে।**
+> **আমি (ইউজার) সরাসরি না বলা পর্যন্ত কোনো অবস্থাতেই Playwright, Playwright MCP, হেডলেস ব্রাউজার, বা `verify_*.js` ব্রাউজার E2E স্ক্রিপ্ট স্বয়ংক্রিয়ভাবে রান করা যাবে না—কোনো কোড ফিক্স বা ডাটাবেজ পরিবর্তনের পরেও নিজ উদ্যোগে চালানো নিষিদ্ধ। শুধুমাত্র ইউজার স্পষ্টভাবে Playwright চালাতে বললে তবেই চালানো যাবে। স্বাভাবিক কোড পরিবর্তনের পর কেবল `npx tsc --noEmit` এবং `npm run build` দিয়ে যাচাই করতে হবে।** (আরও দেখুন: [`.agents/rules/no-playwright-without-permission.md`](.agents/rules/no-playwright-without-permission.md))
 
 ---
 

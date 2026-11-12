@@ -38,19 +38,19 @@ export function SupplierTable() {
         disableToggle: true,
         renderCell: (s) => (
           <div>
-            <div className="font-semibold text-slate-900 text-xs flex items-center gap-1.5">
+            <div className="font-semibold text-ink-primary text-xs flex items-center gap-1.5">
               <Buildings size={14} weight="bold" className="text-brand-deep shrink-0" />
               <span>{s.companyName || s.name}</span>
             </div>
             {s.companyName && (
-              <span className="text-xs text-slate-600 block pl-5 mt-0.5">
+              <span className="text-xs text-ink-secondary block pl-5 mt-0.5">
                 মহাজন: {s.name}
               </span>
             )}
           </div>
         ),
         renderFooterCell: () => (
-          <span className="text-xs font-bold text-slate-700">
+          <span className="text-xs font-bold text-ink-body">
             পৃষ্ঠার মোট দেনা:
           </span>
         ),
@@ -60,26 +60,26 @@ export function SupplierTable() {
         header: 'মোকাম / আড়ত এলাকা',
         renderCell: (s) =>
           s.address ? (
-            <div className="flex items-center gap-1 text-slate-700 text-xs">
-              <MapPin size={12} weight="bold" className="text-slate-500 shrink-0" />
+            <div className="flex items-center gap-1 text-ink-body text-xs">
+              <MapPin size={12} weight="bold" className="text-ink-secondary shrink-0" />
               <span className="truncate max-w-[200px]">{s.address}</span>
             </div>
           ) : (
-            <span className="text-slate-500">-</span>
+            <span className="text-ink-secondary">-</span>
           ),
       },
       {
         key: 'phone',
         header: 'মোবাইল',
-        cellClassName: 'font-mono tabular-nums text-xs text-slate-700',
+        cellClassName: 'font-mono tabular-nums text-xs text-ink-body',
         renderCell: (s) =>
           s.phone ? (
             <div className="flex items-center gap-1">
-              <Phone size={12} weight="bold" className="text-slate-500" />
+              <Phone size={12} weight="bold" className="text-ink-secondary" />
               <span>{toBanglaDigits(s.phone)}</span>
             </div>
           ) : (
-            <span className="text-xs text-slate-600 italic font-sans">মোবাইল নেই</span>
+            <span className="text-xs text-ink-secondary italic font-sans">মোবাইল নেই</span>
           ),
       },
       {
@@ -87,7 +87,7 @@ export function SupplierTable() {
         header: 'দোকানের বর্তমান দেনা (৳)',
         headerClassName: 'text-right',
         cellClassName: 'text-right',
-        footerClassName: 'text-right font-mono tabular-nums tracking-tight font-black text-amber-800 text-xs sm:text-sm',
+        footerClassName: 'text-right font-mono tabular-nums tracking-tight font-black text-wholesale-text text-xs sm:text-sm',
         renderCell: (s) => {
           const isPayable = s.currentPayable > 0;
           const isAdvance = s.currentPayable < 0;
@@ -95,10 +95,10 @@ export function SupplierTable() {
           if (isPayable) {
             return (
               <div className="inline-block text-right">
-                <span className="font-mono tabular-nums tracking-tight font-black text-amber-800 text-xs sm:text-sm">
+                <span className="font-mono tabular-nums tracking-tight font-black text-wholesale-text text-xs sm:text-sm">
                   {formatCurrency(s.currentPayable)}
                 </span>
-                <span className="block text-xs text-amber-800 font-semibold">
+                <span className="block text-xs text-wholesale-text font-semibold">
                   দোকানের দেনা
                 </span>
               </div>
@@ -108,10 +108,10 @@ export function SupplierTable() {
           if (isAdvance) {
             return (
               <div className="inline-block text-right">
-                <span className="font-mono tabular-nums tracking-tight font-black text-emerald-700 text-xs sm:text-sm">
+                <span className="font-mono tabular-nums tracking-tight font-black text-cash-text text-xs sm:text-sm">
                   {formatCurrency(Math.abs(s.currentPayable))}
                 </span>
-                <span className="block text-xs text-emerald-700 font-semibold">
+                <span className="block text-xs text-cash-text font-semibold">
                   অগ্রিম দেওয়া
                 </span>
               </div>
@@ -130,7 +130,7 @@ export function SupplierTable() {
             0
           );
           return (
-            <span className="text-amber-800 font-mono font-black text-xs sm:text-sm">
+            <span className="text-wholesale-text font-mono font-black text-xs sm:text-sm">
               {formatCurrency(totalPayable)}
             </span>
           );
@@ -176,8 +176,9 @@ export function SupplierTable() {
                 e.stopPropagation();
                 openModal('adjustment', s);
               }}
-              className="p-1.5 rounded-md border border-slate-200/90 hover:bg-brand-soft/60 hover:border-brand-light active:scale-[0.98] text-slate-600 hover:text-brand-deep transition-[background-color,border-color,transform] duration-150 cursor-pointer shadow-2xs"
+              className="p-1.5 rounded-md border border-border-default hover:bg-brand-soft/60 hover:border-brand-light active:scale-[0.98] text-ink-secondary hover:text-brand-deep transition-[background-color,border-color,transform] duration-150 cursor-pointer shadow-2xs"
               title="শুকতি / কমিশন / ছাড় সমন্বয়"
+              aria-label={`${s.name} শুকতি বা কমিশন সমন্বয়`}
             >
               <SlidersHorizontal size={14} weight="bold" />
             </button>
@@ -189,8 +190,9 @@ export function SupplierTable() {
                 e.stopPropagation();
                 openModal('edit', s);
               }}
-              className="p-1.5 rounded-md border border-slate-200/90 hover:bg-brand-soft/60 hover:border-brand-light active:scale-[0.98] text-slate-600 hover:text-brand-deep transition-[background-color,border-color,transform] duration-150 cursor-pointer shadow-2xs"
+              className="p-1.5 rounded-md border border-border-default hover:bg-brand-soft/60 hover:border-brand-light active:scale-[0.98] text-ink-secondary hover:text-brand-deep transition-[background-color,border-color,transform] duration-150 cursor-pointer shadow-2xs"
               title="মহাজনের তথ্য এডিট করুন"
+              aria-label={`${s.name} তথ্য এডিট করুন`}
             >
               <PencilSimple size={14} weight="bold" />
             </button>

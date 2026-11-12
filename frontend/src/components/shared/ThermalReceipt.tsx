@@ -6,6 +6,7 @@ import { Printer, X, DownloadSimple, Copy, Check } from '@phosphor-icons/react';
 import { ThermalReceiptData } from '@/features/pos/pos.types';
 import { formatCurrency, formatNumber, toBanglaDigits } from '@/lib/decimal';
 import { downloadEscPosFile, generateEscPosCommands } from '@/lib/escpos';
+import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
 
 interface ThermalReceiptProps {
   data: ThermalReceiptData;
@@ -20,6 +21,7 @@ export function ThermalReceipt({
 }: ThermalReceiptProps) {
   const [paperWidth, setPaperWidth] = useState<'58mm' | '80mm'>(initialPaperWidth);
   const [copied, setCopied] = useState(false);
+  const { titleId, dialogProps, backdropProps } = useDialogAccessibility(true, onClose);
 
   const handlePrint = () => {
     window.print();
@@ -39,13 +41,17 @@ export function ThermalReceipt({
   const is58mm = paperWidth === '58mm';
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div
+      {...backdropProps}
+      className="fixed inset-0 z-50 bg-slate-900/50 flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+    >
       <motion.div
+        {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 4, scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
-        className="bg-white rounded-lg border border-slate-200/90 shadow-[0_4px_20px_rgba(15,23,42,0.12)] max-w-md w-full overflow-hidden flex flex-col max-h-[95vh]"
+        className="bg-white rounded-lg border border-slate-200/90 shadow-[0_4px_20px_rgba(15,23,42,0.12)] max-w-md w-full overflow-hidden flex flex-col max-h-[95vh] focus:outline-hidden"
       >
         {/* Modal Top Actions (Hidden on Print) */}
         <div className="p-3 bg-surface-subtle border-b border-border-default flex items-center justify-between gap-2 no-print shrink-0">
@@ -83,6 +89,7 @@ export function ThermalReceipt({
               onClick={handleCopyRawEscPos}
               className="p-1.5 rounded-md border border-border-strong text-ink-body hover:text-ink-primary hover:bg-surface-subtle transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
               title="ESC/POS টেক্সট কপি করুন"
+              aria-label="ESC/POS টেক্সট কপি করুন"
             >
               {copied ? (
                 <Check size={14} weight="bold" className="text-success" />
@@ -96,6 +103,7 @@ export function ThermalReceipt({
               onClick={handleDownloadPrn}
               className="p-1.5 rounded-md border border-border-strong text-ink-body hover:text-ink-primary hover:bg-surface-subtle transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
               title="ESC/POS বাইনারি ডাউনলোড (.prn)"
+              aria-label="ESC/POS বাইনারি ডাউনলোড করুন"
             >
               <DownloadSimple size={14} weight="bold" />
             </button>
@@ -112,6 +120,7 @@ export function ThermalReceipt({
             <button
               type="button"
               onClick={onClose}
+              aria-label="রসিদ বন্ধ করুন"
               className="p-1.5 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer"
             >
               <X size={16} weight="bold" />
@@ -129,7 +138,7 @@ export function ThermalReceipt({
           >
             {/* Header: Store Identity */}
             <div className="text-center pb-2 border-b border-dashed border-black">
-              <h2 className="text-base font-black tracking-tight">
+              <h2 id={titleId} className="text-base font-black tracking-tight">
                 {data.storeInfo.name}
               </h2>
               <p className="text-[11px] font-medium">{data.storeInfo.tagline}</p>

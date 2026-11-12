@@ -219,6 +219,7 @@ export function CustomSelect<T = string>({
                   <button
                     type="button"
                     onClick={() => setSearch('')}
+                    aria-label="অনুসন্ধান মুছুন"
                     className="p-0.5 text-ink-secondary hover:text-ink-primary cursor-pointer"
                   >
                     <X size={12} weight="bold" />

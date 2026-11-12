@@ -12,7 +12,7 @@
 > **ইউজারের সুস্পষ্ট ও প্রত্যক্ষ অনুমতি ছাড়া কোনো প্রকার Git কমান্ড (`git add`, `git commit`, `git push`, `git checkout`, `git reset`, `git stash`, ইত্যাদি) রান করা সম্পূর্ণ নিষিদ্ধ। সমস্ত গিট অপারেশন শুধুমাত্র ইউজার নিজে পরিচালনা করবেন অথবা ইউজারের সুস্পষ্ট লিখিত নির্দেশে চালানো যাবে।**
 
 > **🛑 STRICT BROWSER & TESTING DIRECTIVE — NO PLAYWRIGHT / BROWSER TESTING WITHOUT EXPLICIT USER REQUEST:**
-> **ইউজারের সুস্পষ্ট ও প্রত্যক্ষ নির্দেশ ছাড়া কোনো অবস্থাতেই Playwright, Playwright MCP, বা হেডলেস ব্রাউজার E2E টেস্টিং স্বয়ংক্রিয়ভাবে রান করা যাবে না।**
+> **ইউজার সরাসরি না বলা পর্যন্ত কোনো অবস্থাতেই Playwright, Playwright MCP, হেডলেস ব্রাউজার, বা ব্রাউজার E2E টেস্টিং স্বয়ংক্রিয়ভাবে রান করা যাবে না—কোড বা ডাটাবেজ পরিবর্তনের পরেও নিজ থেকে চালানো নিষিদ্ধ।** (আরও দেখুন: [`../.agents/rules/no-playwright-without-permission.md`](../.agents/rules/no-playwright-without-permission.md))
 
 ---
 
@@ -58,7 +58,7 @@ The backend follows a strict Clean 4-Tier Layered Architecture:
 Request ──► Routes ──► Controllers ──► Services ──► Repositories (BaseRepository) ──► PostgreSQL (Prisma)
               │              │             │                     │
               ▼              ▼             ▼                     ▼
-          Zod Schema     HTTP Status    Business Logic      Atomic Transactions
+          Plain TS       HTTP Status    Business Logic      Atomic Transactions
           Validation     Formatting    & Decimal Math      (prisma.$transaction)
 ```
 
@@ -67,6 +67,7 @@ Request ──► Routes ──► Controllers ──► Services ──► Repo
 - **Services (`src/features/*/service.ts`):** Pure business logic, decimal calculations, and transaction orchestration (`prisma.$transaction`).
 - **Repositories (`src/features/*/repository.ts`):** Data access layer extending `BaseRepository`. Accepts optional `tx` to support both standalone queries and atomic multi-step transactions.
 - **Common Utilities (`src/common/utils/`):**
+  - `validators.ts`: Zero-dependency Plain TypeScript request body validators (`ValidationContext`, `parseString`, `parseNumber`, `parseUuid`, `parseArray`, etc.) throwing `AppError(..., 422)`.
   - `pagination.ts`: Standard `getPagination` & `buildPaginationMeta`.
   - `dateUtils.ts`: Precise day start/end boundaries (`00:00:00.000` to `23:59:59.999`).
   - `codeGenerator.ts`: Daily date-sequenced codes (`INV-YYMMDD-XXXX`, `PUR-YYMMDD-XXXX`).
@@ -228,7 +229,7 @@ interface ApiErrorResponse {
 - **Helmet:** Active security headers.
 - **CORS:** Configurable via `CORS_ORIGIN` (defaults to `*` or `http://localhost:3000`).
 - **Rate Limiting:** Protects backend with window limit (`RATE_LIMIT_MAX=2000` per 15 minutes in `.env` / `.env.example` / `env.ts` to support concurrent POS + Admin terminals on local WiFi).
-- **Zod Validation:** All incoming request bodies and query params are strictly validated; invalid inputs return `400 Bad Request` with an explanatory array of field errors.
+- **Plain TypeScript Validation (Zero External Dependency):** All incoming request bodies across the 22 mutated routes are validated and whitelisted through `src/common/utils/validators.ts` + feature `*.validation.ts` parsers (`parseCreateSale`, `parseCreateProduct`, etc.) without Zod; invalid inputs throw `AppError(..., 422)` with descriptive field messages.
 
 ---
 

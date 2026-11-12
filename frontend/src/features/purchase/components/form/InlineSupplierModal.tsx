@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
-import { X, Plus, Buildings, Spinner } from '@phosphor-icons/react';
+import React, { useState, useId } from 'react';
+import { X, Buildings, Spinner } from '@phosphor-icons/react';
 import { supplierKhataService } from '@/features/supplier-khata/supplierKhata.service';
 import { Supplier } from '@/features/supplier-khata/supplierKhata.types';
+import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
 
 interface InlineSupplierModalProps {
   isOpen: boolean;
@@ -22,6 +23,8 @@ export function InlineSupplierModal({
   const [address, setAddress] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formId = useId();
+  const { titleId, dialogProps, backdropProps } = useDialogAccessibility(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -51,9 +54,10 @@ export function InlineSupplierModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4">
+    <div {...backdropProps} className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4">
       <div
-        className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        {...dialogProps}
+        className="bg-surface-card rounded-xl shadow-2xl border border-border-default w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150 focus:outline-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-5 py-3.5 bg-surface-subtle border-b border-border-default flex items-center justify-between">
@@ -61,12 +65,13 @@ export function InlineSupplierModal({
             <span className="p-1.5 rounded-lg bg-brand-soft text-brand-deep">
               <Buildings size={16} weight="bold" />
             </span>
-            <h3 className="font-bold text-ink-primary text-sm">নতুন মহাজন ও আড়তদার যোগ</h3>
+            <h3 id={titleId} className="font-bold text-ink-primary text-sm">নতুন মহাজন ও আড়তদার যোগ</h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle cursor-pointer"
+            aria-label="বন্ধ করুন"
+            className="p-1.5 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle cursor-pointer"
           >
             <X size={16} weight="bold" />
           </button>
@@ -80,10 +85,11 @@ export function InlineSupplierModal({
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-ink-body mb-1">
+            <label htmlFor={`${formId}-name`} className="block text-xs font-semibold text-ink-body mb-1">
               মহাজন বা ব্যক্তির নাম <span className="text-danger">*</span>
             </label>
             <input
+              id={`${formId}-name`}
               type="text"
               required
               value={name}
@@ -95,10 +101,11 @@ export function InlineSupplierModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-ink-body mb-1">
+            <label htmlFor={`${formId}-company`} className="block text-xs font-semibold text-ink-body mb-1">
               কোম্পানি ও মোকামের গদির নাম
             </label>
             <input
+              id={`${formId}-company`}
               type="text"
               value={companyName}
               onChange={(e) => setCompanyName(e.target.value)}
@@ -109,10 +116,11 @@ export function InlineSupplierModal({
 
           <div className="grid grid-cols-2 gap-2.5">
             <div>
-              <label className="block text-xs font-semibold text-ink-body mb-1">
+              <label htmlFor={`${formId}-phone`} className="block text-xs font-semibold text-ink-body mb-1">
                 মোবাইল নম্বর
               </label>
               <input
+                id={`${formId}-phone`}
                 type="text"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
@@ -121,10 +129,11 @@ export function InlineSupplierModal({
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-ink-body mb-1">
+              <label htmlFor={`${formId}-address`} className="block text-xs font-semibold text-ink-body mb-1">
                 মোকাম ও ঠিকানা
               </label>
               <input
+                id={`${formId}-address`}
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}

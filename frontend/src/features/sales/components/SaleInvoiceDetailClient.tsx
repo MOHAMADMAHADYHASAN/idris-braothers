@@ -73,10 +73,10 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+      <div className="min-h-screen bg-surface-canvas flex items-center justify-center p-6">
         <div className="flex flex-col items-center gap-2">
-          <Spinner size={32} weight="bold" className="animate-spin text-slate-700" />
-          <p className="text-xs font-semibold text-slate-600">মেমো বিস্তারিত লোড হচ্ছে...</p>
+          <Spinner size={32} weight="bold" className="animate-spin text-ink-body" />
+          <p className="text-xs font-semibold text-ink-secondary">মেমো বিস্তারিত লোড হচ্ছে...</p>
         </div>
       </div>
     );
@@ -84,9 +84,9 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
 
   if (error || !sale) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-surface-canvas flex flex-col items-center justify-center p-6">
         <WarningCircle size={40} weight="fill" className="text-rose-500 mb-2" />
-        <h2 className="text-base font-bold text-slate-900">{error || 'মেমোটি খুঁজে পাওয়া যায়নি'}</h2>
+        <h2 className="text-base font-bold text-ink-primary">{error || 'মেমোটি খুঁজে পাওয়া যায়নি'}</h2>
         <Link
           href="/sales"
           className={buttonClasses({ variant: 'primary', size: 'sm', className: 'mt-4' })}
@@ -101,22 +101,23 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
   const isFullPaid = Number(sale.dueAmount) <= 0;
 
   return (
-    <div className="min-h-screen bg-slate-50/70 pb-20 font-sans print:bg-white print:p-0 print:pb-0">
+    <div className="min-h-screen bg-surface-canvas pb-20 font-sans print:bg-white print:p-0 print:pb-0">
       {/* ১. টপ স্টিকি হেডার (প্রিন্টে লুকানো থাকবে) */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs print:hidden">
+      <header className="sticky top-0 z-40 bg-surface-card border-b border-border-default shadow-2xs print:hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/sales"
-              className="p-2 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 border border-slate-200 transition-colors shrink-0"
+              className="p-2 rounded-lg text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle border border-border-default transition-colors shrink-0"
               title="বিক্রয় তালিকায় ফিরে যান"
+              aria-label="বিক্রয় তালিকায় ফিরে যান"
             >
               <ArrowLeft size={16} weight="bold" />
             </Link>
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight font-mono tabular-nums">
+                <h1 className="text-base sm:text-lg font-bold text-ink-primary tracking-tight font-mono tabular-nums">
                   #{toBanglaDigits(sale.invoiceNumber)}
                 </h1>
                 <Badge variant={sale.saleType === 'WHOLESALE' ? 'wholesale' : 'neutral'}>
@@ -124,7 +125,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                 </Badge>
                 <Badge
                   variant={isCancelled ? 'due' : isFullPaid ? 'cash' : 'wholesale'}
-                  className={isCancelled ? 'bg-rose-50 text-rose-700 border-rose-200' : undefined}
+                  className={isCancelled ? 'bg-due-bg text-due-text border-due-border' : undefined}
                 >
                   {isCancelled
                     ? 'বাতিলকৃত মেমো'
@@ -133,7 +134,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                       : `বাকি: ${formatCurrency(sale.dueAmount)}`}
                 </Badge>
               </div>
-              <p className="text-xs text-slate-600 flex items-center gap-1.5 mt-0.5 font-mono tabular-nums">
+              <p className="text-xs text-ink-secondary flex items-center gap-1.5 mt-0.5 font-mono tabular-nums">
                 <Clock size={12} weight="bold" />
                 <span>
                   {formatDateBn(sale.createdAt, {
@@ -152,7 +153,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
             {!isCancelled && (
               <Link
                 href={`/sales/${sale.id}/return`}
-                className="px-3 py-1.5 h-9 rounded-lg border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs"
+                className="px-3 py-1.5 h-9 rounded-lg border border-wholesale-border bg-wholesale-bg hover:bg-wholesale-bg text-wholesale-text text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs"
                 title="এই মেমোর পণ্য ফেরত ও রিফান্ড প্রসেস করুন"
               >
                 <ArrowCounterClockwise size={14} weight="bold" />
@@ -188,21 +189,21 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
       </header>
 
       {/* ২. প্রিন্ট হেডার ও রসিদ ভিউ */}
-      <div className="hidden print:block p-6 max-w-4xl mx-auto border-b border-slate-300 pb-4 mb-4">
+      <div className="hidden print:block p-6 max-w-4xl mx-auto border-b border-border-strong pb-4 mb-4">
         <div className="flex justify-between items-start">
           <div>
-            <h2 className="text-xl font-bold text-slate-900">মেসার্স ইদ্রিস ব্রাদার্স</h2>
-            <p className="text-xs text-slate-600">মরিচপট্টি, বড় বাজার, ফেনী</p>
-            <p className="text-xs text-slate-600">বিক্রয় ইনভয়েস ও মেমো</p>
+            <h2 className="text-xl font-bold text-ink-primary">মেসার্স ইদ্রিস ব্রাদার্স</h2>
+            <p className="text-xs text-ink-secondary">মরিচপট্টি, বড় বাজার, ফেনী</p>
+            <p className="text-xs text-ink-secondary">বিক্রয় ইনভয়েস ও মেমো</p>
           </div>
           <div className="text-right">
-            <h3 className="text-base font-bold text-slate-900 font-mono tabular-nums">
+            <h3 className="text-base font-bold text-ink-primary font-mono tabular-nums">
               #{toBanglaDigits(sale.invoiceNumber)}
             </h3>
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-ink-secondary">
               তারিখ: {formatDateBn(sale.createdAt)}
             </p>
-            <p className="text-xs text-slate-600">
+            <p className="text-xs text-ink-secondary">
               ধরন: {sale.saleType === 'WHOLESALE' ? 'পাইকারি' : 'খুচরা'}
             </p>
           </div>
@@ -213,11 +214,11 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 print:p-0 print:max-w-none">
         {/* যদি মেমো বাতিল থাকে তাহলে ওয়ার্নিং ব্যানার */}
         {isCancelled && (
-          <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-3 text-rose-900 print:border">
-            <XCircle size={20} weight="fill" className="text-rose-600 shrink-0 mt-0.5" />
+          <div className="p-4 bg-due-bg border border-due-border rounded-xl flex items-start gap-3 text-due-text print:border">
+            <XCircle size={20} weight="fill" className="text-due-text shrink-0 mt-0.5" />
             <div>
               <h4 className="font-bold text-xs sm:text-sm">এই মেমোটি বাতিল করা হয়েছে</h4>
-              <p className="text-xs text-rose-800 mt-0.5">
+              <p className="text-xs text-due-text mt-0.5">
                 এই বিক্রয়ের পণ্যসমূহ স্বয়ংক্রিয়ভাবে ইনভেন্টরিতে ফিরিয়ে নেওয়া হয়েছে এবং ক্যাশ ও কাস্টমার লেজার ব্যালেন্স সমন্বয় করা হয়েছে।
               </p>
             </div>
@@ -227,21 +228,21 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           {/* বাঁয়ে: মেমোর আইটেম বিস্তারিত তালিকা (৮ কলাম / ~৭০%) */}
           <div className="lg:col-span-8 space-y-4 print:w-full">
-            <div className="bg-white rounded-xl border border-slate-200/90 shadow-2xs overflow-hidden print:border print:shadow-none">
-              <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+            <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden print:border print:shadow-none">
+              <div className="p-4 border-b border-border-subtle flex items-center justify-between">
+                <span className="text-xs font-bold text-ink-primary flex items-center gap-1.5">
                   <Receipt size={16} weight="bold" className="text-brand-deep" />
                   বিক্রিত পণ্যের বিবরণ ({formatNumber(sale.items?.length || 0)} টি আইটেম)
                 </span>
-                <span className="text-xs text-slate-600 font-mono tabular-nums">
-                  উপমোট: <strong className="text-slate-900">{formatCurrency(sale.subTotal)}</strong>
+                <span className="text-xs text-ink-secondary font-mono tabular-nums">
+                  উপমোট: <strong className="text-ink-primary">{formatCurrency(sale.subTotal)}</strong>
                 </span>
               </div>
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-slate-50/80 border-b border-slate-200/90 text-slate-700 font-bold text-xs">
+                    <tr className="bg-surface-subtle border-b border-border-default text-ink-body font-bold text-xs">
                       <th className="py-2.5 px-3 text-center w-10">#</th>
                       <th className="py-2.5 px-3">পণ্যের নাম ও বিবরণ</th>
                       <th className="py-2.5 px-3 text-center">ইউনিট</th>
@@ -250,7 +251,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                       <th className="py-2.5 px-3 text-right">মোট মূল্য (৳)</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-border-subtle">
                     {sale.items?.map((item, idx) => {
                       const prodName =
                         item.variant?.product?.banglaName ||
@@ -262,12 +263,12 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                           : null;
 
                       return (
-                        <tr key={item.id || idx} className="hover:bg-slate-50/60 transition-colors">
-                          <td className="py-2.5 px-3 text-center font-mono text-slate-600">
+                        <tr key={item.id || idx} className="hover:bg-surface-subtle transition-colors">
+                          <td className="py-2.5 px-3 text-center font-mono text-ink-secondary">
                             {formatNumber(idx + 1)}
                           </td>
                           <td className="py-2.5 px-3">
-                            <div className="font-bold text-slate-900 text-xs sm:text-sm">
+                            <div className="font-bold text-ink-primary text-xs sm:text-sm">
                               {prodName}
                             </div>
                             <div className="flex items-center gap-1.5 mt-0.5">
@@ -277,7 +278,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                                 </Badge>
                               )}
                               {item.variant?.baseUnitName && (
-                                <span className="text-xs text-slate-600 font-mono">
+                                <span className="text-xs text-ink-secondary font-mono">
                                   বেস ইউনিট: {item.variant.baseUnitName}
                                 </span>
                               )}
@@ -288,25 +289,25 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                               {item.unitName}
                             </Badge>
                           </td>
-                          <td className="py-2.5 px-3 text-right font-mono tabular-nums font-bold text-slate-800 text-xs sm:text-sm">
+                          <td className="py-2.5 px-3 text-right font-mono tabular-nums font-bold text-ink-primary text-xs sm:text-sm">
                             {formatNumber(item.quantity)}
                           </td>
-                          <td className="py-2.5 px-3 text-right font-mono tabular-nums font-medium text-slate-700">
+                          <td className="py-2.5 px-3 text-right font-mono tabular-nums font-medium text-ink-body">
                             {formatCurrency(item.unitPrice)}
                           </td>
-                          <td className="py-2.5 px-3 text-right font-mono tabular-nums font-black text-slate-900 text-xs sm:text-sm">
+                          <td className="py-2.5 px-3 text-right font-mono tabular-nums font-black text-ink-primary text-xs sm:text-sm">
                             {formatCurrency(item.subTotal)}
                           </td>
                         </tr>
                       );
                     })}
                   </tbody>
-                  <tfoot className="bg-slate-50/90 border-t border-slate-200/90 font-bold text-slate-800 text-xs">
+                  <tfoot className="bg-surface-subtle border-t border-border-default font-bold text-ink-primary text-xs">
                     <tr>
                       <td colSpan={3} className="py-2.5 px-3 text-right">
                         সর্বমোট আইটেম মূল্য:
                       </td>
-                      <td className="py-2.5 px-3 text-right font-mono tabular-nums font-black text-slate-800">
+                      <td className="py-2.5 px-3 text-right font-mono tabular-nums font-black text-ink-primary">
                         {formatNumber(sale.items?.reduce((sum, i) => sum + (Number(i.quantity) || 0), 0) || 0)}
                       </td>
                       <td className="py-2.5 px-3 text-right">-</td>
@@ -321,11 +322,11 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
 
             {/* নোট / বিবরণ */}
             {sale.note && (
-              <div className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs">
-                <span className="text-slate-600 text-xs font-bold block mb-1">
+              <div className="bg-surface-card rounded-xl border border-border-default p-4 shadow-2xs">
+                <span className="text-ink-secondary text-xs font-bold block mb-1">
                   মেমো মন্তব্য / ডেলিভারি নোট
                 </span>
-                <p className="text-xs text-slate-800">{sale.note}</p>
+                <p className="text-xs text-ink-primary">{sale.note}</p>
               </div>
             )}
           </div>
@@ -333,9 +334,9 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
           {/* ডানে: কাস্টমার ও আর্থিক সারসংক্ষেপ (৪ কলাম / ~৩০% - Sticky) */}
           <div className="lg:col-span-4 space-y-4 print:hidden lg:sticky lg:top-20">
             {/* কার্ড ১: কাস্টমার প্রোফাইল */}
-            <div className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs space-y-3">
-              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-                <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+            <div className="bg-surface-card rounded-xl border border-border-default p-4 shadow-2xs space-y-3">
+              <div className="flex items-center justify-between border-b border-border-subtle pb-2.5">
+                <span className="text-xs font-bold text-ink-body flex items-center gap-1.5">
                   <User size={16} weight="bold" className="text-brand-deep" />
                   কাস্টমার ও ক্রেতা
                 </span>
@@ -346,14 +347,14 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
 
               <div className="space-y-2 text-xs">
                 <div>
-                  <span className="font-bold text-slate-900 text-sm block">
+                  <span className="font-bold text-ink-primary text-sm block">
                     {sale.customer ? sale.customer.name : 'খুচরা সাধারণ ক্রেতা'}
                   </span>
                 </div>
 
                 {sale.customer?.phone && (
                   <div className="flex items-center justify-between">
-                    <span className="text-slate-600 flex items-center gap-1">
+                    <span className="text-ink-secondary flex items-center gap-1">
                       <Phone size={13} weight="bold" /> মোবাইল:
                     </span>
                     <a
@@ -367,10 +368,10 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
 
                 {sale.customer?.address && (
                   <div className="flex items-start justify-between gap-2">
-                    <span className="text-slate-600 flex items-center gap-1 shrink-0">
+                    <span className="text-ink-secondary flex items-center gap-1 shrink-0">
                       <MapPin size={13} weight="bold" /> ঠিকানা:
                     </span>
-                    <span className="text-slate-800 text-right font-medium truncate max-w-[180px]">
+                    <span className="text-ink-primary text-right font-medium truncate max-w-[180px]">
                       {sale.customer.address}
                     </span>
                   </div>
@@ -378,7 +379,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
 
                 {/* কাস্টমার খতিয়ান শর্টকাট */}
                 {sale.customer && (
-                  <div className="pt-2 border-t border-slate-100">
+                  <div className="pt-2 border-t border-border-subtle">
                     <Link
                       href={`/khata/customers/${sale.customer.id}`}
                       className={buttonClasses({ variant: 'secondary', size: 'sm', className: 'w-full gap-1.5' })}
@@ -392,21 +393,21 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
             </div>
 
             {/* কার্ড ২: আর্থিক রিকনসিলিয়েশন সামারি */}
-            <div className="bg-white rounded-xl border border-slate-200/90 p-4 shadow-2xs space-y-3">
-              <span className="text-xs font-bold text-slate-800 border-b border-slate-100 pb-2 block">
+            <div className="bg-surface-card rounded-xl border border-border-default p-4 shadow-2xs space-y-3">
+              <span className="text-xs font-bold text-ink-primary border-b border-border-subtle pb-2 block">
                 আর্থিক রিকনসিলিয়েশন হিসাব
               </span>
 
               <div className="space-y-2 text-xs">
-                <div className="flex justify-between text-slate-700">
+                <div className="flex justify-between text-ink-body">
                   <span>পণ্য উপমোট:</span>
-                  <span className="font-mono tabular-nums font-bold text-slate-900">
+                  <span className="font-mono tabular-nums font-bold text-ink-primary">
                     {formatCurrency(sale.subTotal)}
                   </span>
                 </div>
 
                 {Number(sale.discount) > 0 && (
-                  <div className="flex justify-between text-emerald-800">
+                  <div className="flex justify-between text-cash-text">
                     <span>প্রদত্ত মোট ছাড়:</span>
                     <span className="font-mono tabular-nums font-bold">
                       -{formatCurrency(sale.discount)}
@@ -414,28 +415,28 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                   </div>
                 )}
 
-                <div className="border-t border-slate-200 pt-2 flex justify-between font-bold text-slate-900">
+                <div className="border-t border-border-default pt-2 flex justify-between font-bold text-ink-primary">
                   <span className="text-xs sm:text-sm">সর্বমোট বিল:</span>
                   <span className="font-mono tabular-nums tracking-tight text-sm sm:text-base font-black text-brand-deep">
                     {formatCurrency(sale.grandTotal)}
                   </span>
                 </div>
 
-                <div className="flex justify-between text-emerald-700 font-semibold">
+                <div className="flex justify-between text-cash-text font-semibold">
                   <span>নগদ গ্রহণ:</span>
                   <span className="font-mono tabular-nums font-bold">
                     {formatCurrency(sale.paidAmount)}
                   </span>
                 </div>
 
-                <div className="border-t border-slate-200 pt-2 flex justify-between font-bold">
+                <div className="border-t border-border-default pt-2 flex justify-between font-bold">
                   <span
                     className={
                       Number(sale.dueAmount) > 0
-                        ? 'text-rose-700'
+                        ? 'text-due-text'
                         : Number(sale.dueAmount) < 0
-                        ? 'text-emerald-700'
-                        : 'text-slate-700'
+                        ? 'text-cash-text'
+                        : 'text-ink-body'
                     }
                   >
                     {Number(sale.dueAmount) < 0
@@ -445,10 +446,10 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                   <span
                     className={`font-mono tabular-nums text-sm font-black ${
                       Number(sale.dueAmount) > 0
-                        ? 'text-rose-700'
+                        ? 'text-due-text'
                         : Number(sale.dueAmount) < 0
-                        ? 'text-emerald-700'
-                        : 'text-slate-800'
+                        ? 'text-cash-text'
+                        : 'text-ink-primary'
                     }`}
                   >
                     {formatCurrency(Math.abs(Number(sale.dueAmount)))}
@@ -457,16 +458,16 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
 
                 {/* কাস্টমারের বর্তমান মোট রানিং বাকি */}
                 {receipt?.billing && (
-                  <div className="pt-2.5 border-t border-dashed border-slate-200 space-y-1 text-xs text-slate-600 bg-slate-50 p-2.5 rounded-lg">
+                  <div className="pt-2.5 border-t border-dashed border-border-default space-y-1 text-xs text-ink-secondary bg-surface-subtle p-2.5 rounded-lg">
                     <div className="flex justify-between">
                       <span>পূর্বের বকেয়া:</span>
                       <span className="font-mono tabular-nums font-medium">
                         {formatCurrency(receipt.billing.previousDue || 0)}
                       </span>
                     </div>
-                    <div className="flex justify-between font-bold text-slate-900">
+                    <div className="flex justify-between font-bold text-ink-primary">
                       <span>কাস্টমারের বর্তমান মোট বকেয়া:</span>
-                      <span className="font-mono tabular-nums text-rose-700 font-black">
+                      <span className="font-mono tabular-nums text-due-text font-black">
                         {formatCurrency(receipt.billing.totalCurrentDue || 0)}
                       </span>
                     </div>

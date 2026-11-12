@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useId } from 'react';
 import {
   Coins,
   Truck,
@@ -29,6 +29,7 @@ export function ChallanSettlementCard() {
   const subTotal = getSubTotal();
   const grandTotal = getGrandTotal();
   const dueAmount = getDueAmount();
+  const formId = useId();
 
   const handlePaidChange = (val: string) => {
     setPaidAmount(Number(val) || 0);
@@ -68,7 +69,7 @@ export function ChallanSettlementCard() {
 
         {/* ২. গাড়িভাড়া ও কুলি খরচ (+) */}
         <div>
-          <label className="text-ink-body flex items-center justify-between text-xs font-semibold mb-1">
+          <label htmlFor={`${formId}-transport`} className="text-ink-body flex items-center justify-between text-xs font-semibold mb-1">
             <span className="flex items-center gap-1.5">
               <Truck size={14} weight="bold" className="text-ink-secondary" />
               <span>গাড়িভাড়া ও কুলি খরচ (+):</span>
@@ -77,6 +78,7 @@ export function ChallanSettlementCard() {
           <div className="relative">
             <span className="absolute left-3 top-2 text-ink-secondary font-bold text-xs select-none">৳</span>
             <input
+              id={`${formId}-transport`}
               type="number"
               step="any"
               min="0"
@@ -90,7 +92,7 @@ export function ChallanSettlementCard() {
 
         {/* ৩. মহাজন ছাড় (-) */}
         <div>
-          <label className="text-ink-body flex items-center justify-between text-xs font-semibold mb-1">
+          <label htmlFor={`${formId}-discount`} className="text-ink-body flex items-center justify-between text-xs font-semibold mb-1">
             <span className="flex items-center gap-1.5">
               <Tag size={14} weight="bold" className="text-ink-secondary" />
               <span>মহাজন ছাড় ও কমিশন (-):</span>
@@ -99,6 +101,7 @@ export function ChallanSettlementCard() {
           <div className="relative">
             <span className="absolute left-3 top-2 text-ink-secondary font-bold text-xs select-none">৳</span>
             <input
+              id={`${formId}-discount`}
               type="number"
               step="any"
               min="0"
@@ -125,7 +128,7 @@ export function ChallanSettlementCard() {
         {/* ৫. নগদ পরিশোধ */}
         <div className="space-y-1.5 pt-1">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold text-ink-body flex items-center gap-1.5">
+            <label htmlFor={`${formId}-paid`} className="text-xs font-semibold text-ink-body flex items-center gap-1.5">
               <HandCoins size={14} weight="bold" className="text-success" />
               <span>নগদ পরিশোধের পরিমাণ:</span>
             </label>
@@ -133,7 +136,7 @@ export function ChallanSettlementCard() {
               <button
                 type="button"
                 onClick={handlePayFull}
-                className="px-2 py-0.5 rounded text-xs font-bold bg-cash-bg text-cash-text border border-cash-border hover:bg-emerald-100 cursor-pointer"
+                className="px-2 py-0.5 rounded text-xs font-bold bg-cash-bg text-cash-text border border-cash-border hover:bg-cash-bg cursor-pointer"
                 title="সম্পূর্ণ চালান পরিশোধ"
               >
                 পুরো
@@ -152,6 +155,7 @@ export function ChallanSettlementCard() {
           <div className="relative">
             <span className="absolute left-3 top-2.5 text-ink-secondary font-bold text-xs select-none">৳</span>
             <input
+              id={`${formId}-paid`}
               type="number"
               step="any"
               min="0"

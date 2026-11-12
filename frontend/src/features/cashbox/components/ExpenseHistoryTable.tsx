@@ -12,6 +12,7 @@ import { useCashboxStore } from '../useCashboxStore';
 import { ExpenseCategory, DailyExpense } from '../cashbox.types';
 import { AdminPagination } from '@/components/shared/AdminPagination';
 import { DynamicDataTable, ColumnDef } from '@/components/shared/DynamicDataTable';
+import { confirmAction, toast } from '@/lib/feedback';
 
 function getCategoryBadge(cat: ExpenseCategory): { label: string; badgeClass: string } {
   switch (cat) {
@@ -22,7 +23,7 @@ function getCategoryBadge(cat: ExpenseCategory): { label: string; badgeClass: st
     case 'TEA_SNACKS':
       return { label: 'চা-নাস্তা ও আপ্যায়ন', badgeClass: 'bg-cash-bg text-cash-text border-cash-border' };
     case 'ELECTRICITY_UTILITY':
-      return { label: 'বিদ্যুৎ ও ইউটিলিটি', badgeClass: 'bg-sky-50 text-sky-800 border-sky-200' };
+      return { label: 'বিদ্যুৎ ও ইউটিলিটি', badgeClass: 'bg-brand-soft text-brand-deep border-brand-light' };
     case 'SHOP_MAINTENANCE':
       return { label: 'দোকান সরঞ্জাম', badgeClass: 'bg-surface-subtle text-ink-body border-border-default' };
     case 'OTHER':
@@ -51,11 +52,17 @@ export function ExpenseHistoryTable() {
   }, [fetchExpenses, targetDate, categoryFilter]);
 
   const handleDelete = async (id: string, desc: string) => {
-    if (confirm(`আপনি কি নিশ্চিত যে "${desc}" খরচটি মুছে ফেলতে চান?`)) {
+    const ok = await confirmAction({
+      title: 'খরচের এন্ট্রি মুছে ফেলুন',
+      message: `আপনি কি নিশ্চিত যে "${desc}" খরচটি মুছে ফেলতে চান?`,
+      confirmLabel: 'হ্যাঁ, মুছুন',
+    });
+    if (ok) {
       try {
         await deleteExpense(id);
+        toast.success('খরচের এন্ট্রি মুছে ফেলা হয়েছে');
       } catch {
-        alert('খরচ মুছে ফেলতে সমস্যা হয়েছে');
+        toast.error('খরচ মুছে ফেলতে সমস্যা হয়েছে');
       }
     }
   };
@@ -129,6 +136,7 @@ export function ExpenseHistoryTable() {
               onClick={() => openEditModal(expense)}
               className="p-1.5 rounded-md border border-border-default hover:bg-brand-soft hover:text-brand-deep hover:border-brand-light active:scale-[0.98] text-ink-secondary transition-all cursor-pointer shadow-2xs"
               title="সম্পাদনা করুন"
+              aria-label="খরচের এন্ট্রি সম্পাদনা করুন"
             >
               <PencilSimple size={14} weight="bold" />
             </button>
@@ -137,6 +145,7 @@ export function ExpenseHistoryTable() {
               onClick={() => handleDelete(expense.id, expense.description)}
               className="p-1.5 rounded-md border border-border-default hover:bg-due-bg active:scale-[0.98] text-ink-secondary hover:text-due-text transition-all cursor-pointer shadow-2xs"
               title="মুছে ফেলুন"
+              aria-label="খরচের এন্ট্রি মুছে ফেলুন"
             >
               <Trash size={14} weight="bold" />
             </button>

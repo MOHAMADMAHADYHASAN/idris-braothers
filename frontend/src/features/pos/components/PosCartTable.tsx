@@ -165,7 +165,7 @@ function InlinePriceEditor({
         <button
           type="button"
           onClick={onReset}
-          className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-wholesale-bg text-wholesale-text border border-wholesale-border/50 text-xs font-semibold cursor-pointer hover:bg-amber-100"
+          className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-wholesale-bg text-wholesale-text border border-wholesale-border/50 text-xs font-semibold cursor-pointer hover:bg-wholesale-bg"
           title="মূল দরে ফিরে যান"
         >
           <span>কাস্টম</span>
@@ -282,10 +282,11 @@ export function PosCartTable() {
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-7 h-8 flex items-center justify-center text-ink-body hover:bg-surface-subtle active:bg-border-default transition-colors cursor-pointer border-r border-border-default"
+                        className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center text-ink-body hover:bg-surface-subtle active:bg-border-default transition-colors cursor-pointer border-r border-border-default"
                         title="পরিমাণ কমান"
+                        aria-label="পরিমাণ কমান"
                       >
-                        <Minus size={12} weight="bold" />
+                        <Minus size={13} weight="bold" />
                       </button>
                       <InlineQtyInput
                         value={item.quantity}
@@ -295,10 +296,11 @@ export function PosCartTable() {
                       <button
                         type="button"
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-7 h-8 flex items-center justify-center text-ink-body hover:bg-surface-subtle active:bg-border-default transition-colors cursor-pointer border-l border-border-default"
+                        className="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center text-ink-body hover:bg-surface-subtle active:bg-border-default transition-colors cursor-pointer border-l border-border-default"
                         title="পরিমাণ বাড়ান"
+                        aria-label="পরিমাণ বাড়ান"
                       >
-                        <Plus size={12} weight="bold" />
+                        <Plus size={13} weight="bold" />
                       </button>
                     </div>
                   ) : (

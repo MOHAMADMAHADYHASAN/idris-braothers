@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useId, useRef } from 'react';
 import {
   MagnifyingGlass,
   Plus,
@@ -13,12 +13,16 @@ import {
 } from '@phosphor-icons/react';
 import { productService } from '@/features/product/product.service';
 import { Product, ProductVariant } from '@/features/product/product.types';
-import { formatCurrency, formatNumber, formatWeight } from '@/lib/decimal';
+import { formatCurrency, formatWeight } from '@/lib/decimal';
 import { usePurchaseStore } from '../../usePurchaseStore';
 import { PurchaseItemDTO } from '../../purchase.types';
 
 export function ChallanItemPickerCard() {
   const { addItem } = usePurchaseStore();
+  const baseId = useId();
+  const searchInputId = `${baseId}-search`;
+  const qtyInputId = `${baseId}-qty`;
+  const costInputId = `${baseId}-cost`;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Product[]>([]);
@@ -26,9 +30,7 @@ export function ChallanItemPickerCard() {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
 
-  // Unit & Factor State
-  const [selectedUnitName, setSelectedUnitName] = useState('কেজি');
-  const [conversionFactor, setConversionFactor] = useState(1);
+  // Base unit state (১:১ ক্রয় — কার্টন/বস্তা রূপান্তর ছাড়া)
   const [baseUnitName, setBaseUnitName] = useState('কেজি');
 
   // Quantity & Rate
@@ -77,8 +79,6 @@ export function ChallanItemPickerCard() {
 
     const baseUnit = targetVariant?.baseUnitName || product.baseUnitName || 'কেজি';
     setBaseUnitName(baseUnit);
-    setSelectedUnitName(baseUnit);
-    setConversionFactor(1);
 
     // Current prices as placeholder
     setNewRetailPriceStr(targetVariant?.retailPrice ? String(targetVariant.retailPrice) : '');
@@ -115,7 +115,7 @@ export function ChallanItemPickerCard() {
       return;
     }
 
-    if (selectedVariant && !selectedVariant.allowDecimalQty && conversionFactor === 1 && !Number.isInteger(qty)) {
+    if (selectedVariant && !selectedVariant.allowDecimalQty && !Number.isInteger(qty)) {
       setValidationError(`${baseUnitName} পণ্যের পরিমাণ অবশ্যই পূর্ণসংখ্যা হতে হবে (যেমন: ১, ১২, ২৪)`);
       return;
     }
@@ -133,8 +133,8 @@ export function ChallanItemPickerCard() {
       productName: targetVariant
         ? `${selectedProduct.name} (${targetVariant.variantName})`
         : selectedProduct.name,
-      unitName: selectedUnitName.trim() || baseUnitName,
-      conversionFactor: Number(conversionFactor) || 1,
+      unitName: baseUnitName,
+      conversionFactor: 1,
       quantity: qty,
       unitCost: cost,
       baseUnitName: baseUnitName,
@@ -149,10 +149,6 @@ export function ChallanItemPickerCard() {
   const qty = parseFloat(quantityStr) || 0;
   const cost = parseFloat(unitCostStr) || 0;
   const lineTotal = qty * cost;
-  const totalBaseWeight = qty * conversionFactor;
-
-  // Available units for the selected variant/product
-  const availableUnits = selectedVariant?.units || [];
 
   return (
     <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden">
@@ -188,7 +184,7 @@ export function ChallanItemPickerCard() {
 
         {/* সার্চ বার */}
         <div className="relative">
-          <label className="block text-xs font-semibold text-ink-body mb-1.5">
+          <label htmlFor={searchInputId} className="block text-xs font-semibold text-ink-body mb-1.5">
             পণ্য খুঁজুন (নাম, SKU বা বারকোড স্ক্যান) <span className="text-danger">*</span>
           </label>
           <div className="relative">
@@ -196,6 +192,7 @@ export function ChallanItemPickerCard() {
               <MagnifyingGlass size={16} weight="bold" />
             </span>
             <input
+              id={searchInputId}
               ref={searchInputRef}
               type="text"
               value={searchQuery}
@@ -210,6 +207,7 @@ export function ChallanItemPickerCard() {
               <button
                 type="button"
                 onClick={handleReset}
+                aria-label="পণ্য নির্বাচন বাতিল করুন"
                 className="absolute right-2.5 top-2.5 p-1 text-ink-secondary hover:text-ink-primary rounded cursor-pointer"
               >
                 <X size={14} weight="bold" />
@@ -285,44 +283,14 @@ export function ChallanItemPickerCard() {
               )}
             </div>
 
-            <div className={`grid grid-cols-1 gap-3 ${availableUnits.length > 0 ? 'sm:grid-cols-4' : 'sm:grid-cols-3'}`}>
-              {availableUnits.length > 0 && (
-                <div>
-                  <label className="block text-xs font-semibold text-ink-body mb-1">
-                    ক্রয় একক
-                  </label>
-                  <select
-                    value={selectedUnitName}
-                    onChange={(e) => {
-                      const val = e.target.value;
-                      setSelectedUnitName(val);
-                      if (val === baseUnitName) {
-                        setConversionFactor(1);
-                      } else {
-                        const matched = availableUnits.find((u) => u.unitName === val);
-                        if (matched) {
-                          setConversionFactor(matched.conversionFactor);
-                        }
-                      }
-                    }}
-                    className="w-full px-2.5 py-2 rounded-lg border border-border-strong bg-surface-card font-medium text-xs text-ink-primary focus:outline-none focus:ring-2 focus:ring-brand-deep"
-                  >
-                    <option value={baseUnitName}>{baseUnitName}</option>
-                    {availableUnits.map((u) => (
-                      <option key={u.id} value={u.unitName}>
-                        {u.unitName} ({formatNumber(u.conversionFactor)} {baseUnitName})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div>
-                <label className="block text-xs font-semibold text-ink-body mb-1">
+                <label htmlFor={qtyInputId} className="block text-xs font-semibold text-ink-body mb-1">
                   চালান পরিমাণ <span className="text-danger">*</span>
                 </label>
                 <div className="relative">
                   <input
+                    id={qtyInputId}
                     type="number"
                     step={selectedVariant?.allowDecimalQty === false ? '1' : 'any'}
                     min="0"
@@ -330,26 +298,22 @@ export function ChallanItemPickerCard() {
                     value={quantityStr}
                     onChange={(e) => setQuantityStr(e.target.value)}
                     placeholder="পরিমাণ"
-                    className="w-full pl-3 pr-12 py-2 rounded-lg border border-border-strong bg-surface-card focus:outline-none focus:ring-2 focus:ring-brand-deep font-mono text-xs sm:text-sm font-bold text-ink-primary"
+                    className="w-full pl-3 pr-14 py-2 rounded-lg border border-border-strong bg-surface-card focus:outline-none focus:ring-2 focus:ring-brand-deep font-mono text-xs sm:text-sm font-bold text-ink-primary"
                   />
                   <span className="absolute right-2.5 top-2.5 text-xs text-ink-secondary pointer-events-none">
-                    {selectedUnitName}
+                    {baseUnitName}
                   </span>
                 </div>
-                {conversionFactor > 1 && qty > 0 && (
-                  <p className="text-xs text-brand-deep mt-0.5 font-mono font-semibold">
-                    মোট = {formatNumber(totalBaseWeight)} {baseUnitName}
-                  </p>
-                )}
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-ink-body mb-1">
-                  প্রতি {selectedUnitName}-এর কেনা দর ৳ <span className="text-danger">*</span>
+                <label htmlFor={costInputId} className="block text-xs font-semibold text-ink-body mb-1">
+                  প্রতি {baseUnitName}-এর কেনা দর ৳ <span className="text-danger">*</span>
                 </label>
                 <div className="relative">
                   <span className="absolute left-3 top-2 text-ink-secondary font-bold text-xs select-none">৳</span>
                   <input
+                    id={costInputId}
                     type="number"
                     step="any"
                     min="0"
@@ -385,6 +349,7 @@ export function ChallanItemPickerCard() {
                   onChange={(e) => setNewRetailPriceStr(e.target.value)}
                   className="w-24 px-2.5 py-1.5 rounded-md border border-border-strong font-mono text-xs bg-surface-card text-ink-primary"
                   title="নতুন খুচরা বিক্রয়দর"
+                  aria-label="নতুন খুচরা বিক্রয়দর"
                 />
                 <input
                   type="number"
@@ -394,6 +359,7 @@ export function ChallanItemPickerCard() {
                   onChange={(e) => setNewWholesalePriceStr(e.target.value)}
                   className="w-24 px-2.5 py-1.5 rounded-md border border-border-strong font-mono text-xs bg-surface-card text-ink-primary"
                   title="নতুন পাইকারি বিক্রয়দর"
+                  aria-label="নতুন পাইকারি বিক্রয়দর"
                 />
               </div>
 

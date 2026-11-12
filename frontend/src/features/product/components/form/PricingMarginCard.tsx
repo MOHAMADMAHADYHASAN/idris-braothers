@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useId } from 'react';
 import { Coins, TrendUp, Warning, Percent } from '@phosphor-icons/react';
 import { formatCurrency, formatPercent } from '@/lib/decimal';
 
@@ -23,6 +23,7 @@ export function PricingMarginCard({
   setRetailPrice,
   baseUnitName,
 }: PricingMarginCardProps) {
+  const formId = useId();
   const pPrice = parseFloat(currentPurchasePrice) || 0;
   const wPrice = parseFloat(wholesalePrice) || 0;
   const rPrice = parseFloat(retailPrice) || 0;
@@ -65,12 +66,13 @@ export function PricingMarginCard({
       <div className="p-5 space-y-4">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-ink-body mb-1">
+            <label htmlFor={`${formId}-purchase`} className="block text-xs font-semibold text-ink-body mb-1">
               বর্তমান ক্রয়দর <span className="text-danger">*</span>
             </label>
             <div className="relative">
               <span className="absolute left-3 top-2.5 text-ink-secondary font-bold text-xs select-none">৳</span>
               <input
+                id={`${formId}-purchase`}
                 type="number"
                 step="any"
                 min="0"
@@ -84,12 +86,13 @@ export function PricingMarginCard({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-ink-body mb-1">
+            <label htmlFor={`${formId}-wholesale`} className="block text-xs font-semibold text-ink-body mb-1">
               পাইকারি বিক্রয়দর <span className="text-danger">*</span>
             </label>
             <div className="relative">
               <span className="absolute left-3 top-2.5 text-ink-secondary font-bold text-xs select-none">৳</span>
               <input
+                id={`${formId}-wholesale`}
                 type="number"
                 step="any"
                 min="0"
@@ -103,12 +106,13 @@ export function PricingMarginCard({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-ink-body mb-1">
+            <label htmlFor={`${formId}-retail`} className="block text-xs font-semibold text-ink-body mb-1">
               খুচরা বিক্রয়দর <span className="text-danger">*</span>
             </label>
             <div className="relative">
               <span className="absolute left-3 top-2.5 text-ink-secondary font-bold text-xs select-none">৳</span>
               <input
+                id={`${formId}-retail`}
                 type="number"
                 step="any"
                 min="0"

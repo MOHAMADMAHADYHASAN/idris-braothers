@@ -266,3 +266,12 @@ export interface ProductFilterParams {
   brandId?: string;
   lowStockOnly?: boolean;
 }
+
+export interface FormUnitItem {
+  id?: string;
+  unitName: string;
+  conversionFactor: string;
+  wholesalePrice: string;
+  retailPrice: string;
+  barcode?: string;
+}

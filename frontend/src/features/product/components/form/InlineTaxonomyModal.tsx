@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { X, Plus, Spinner } from '@phosphor-icons/react';
+import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
 
 interface InlineTaxonomyModalProps {
   isOpen: boolean;
@@ -20,6 +21,8 @@ export function InlineTaxonomyModal({
   const [banglaName, setBanglaName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formId = useId();
+  const { titleId, dialogProps, backdropProps } = useDialogAccessibility(isOpen, onClose);
 
   if (!isOpen) return null;
 
@@ -51,9 +54,10 @@ export function InlineTaxonomyModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4">
+    <div {...backdropProps} className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 p-4">
       <div
-        className="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+        {...dialogProps}
+        className="bg-surface-card rounded-xl shadow-2xl border border-border-default w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-150 focus:outline-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-5 py-3.5 bg-surface-subtle border-b border-border-default flex items-center justify-between">
@@ -61,11 +65,12 @@ export function InlineTaxonomyModal({
             <span className="p-1.5 rounded-lg bg-brand-soft text-brand-deep">
               <Plus size={16} weight="bold" />
             </span>
-            <h3 className="font-bold text-ink-primary text-sm">{title}</h3>
+            <h3 id={titleId} className="font-bold text-ink-primary text-sm">{title}</h3>
           </div>
           <button
             type="button"
             onClick={onClose}
+            aria-label="বন্ধ করুন"
             className="p-1.5 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-colors cursor-pointer"
           >
             <X size={16} weight="bold" />
@@ -80,11 +85,12 @@ export function InlineTaxonomyModal({
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-ink-body mb-1">
+            <label htmlFor={`${formId}-name`} className="block text-xs font-semibold text-ink-body mb-1">
               {isCategory ? 'ক্যাটাগরির নাম' : 'ব্র্যান্ডের নাম'}{' '}
               <span className="text-danger">*</span>
             </label>
             <input
+              id={`${formId}-name`}
               type="text"
               required
               value={name}
@@ -96,10 +102,11 @@ export function InlineTaxonomyModal({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-ink-body mb-1">
+            <label htmlFor={`${formId}-bangla`} className="block text-xs font-semibold text-ink-body mb-1">
               বাংলা নাম (ইনভয়েস ও স্লিপের জন্য)
             </label>
             <input
+              id={`${formId}-bangla`}
               type="text"
               value={banglaName}
               onChange={(e) => setBanglaName(e.target.value)}

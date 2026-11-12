@@ -55,6 +55,7 @@ export function BarcodeScanNotification({
             <button
               type="button"
               onClick={onDismiss}
+              aria-label="নোটিফিকেশন বন্ধ করুন"
               className="p-1 rounded text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-[background-color,color] duration-150 active:scale-[0.98] cursor-pointer ml-1"
             >
               <X size={12} weight="bold" />

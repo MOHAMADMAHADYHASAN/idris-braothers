@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import { X, PencilSimple, CheckCircle, WarningCircle } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import { useCashboxStore } from '../useCashboxStore';
 import { ExpenseCategory } from '../cashbox.types';
+import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
 
 export function ExpenseEditModal() {
   const { editingExpense, isEditModalOpen, closeEditModal, updateExpense } =
@@ -16,6 +17,11 @@ export function ExpenseEditModal() {
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formId = useId();
+  const { titleId, dialogProps, backdropProps } = useDialogAccessibility(
+    Boolean(isEditModalOpen && editingExpense),
+    closeEditModal
+  );
 
   useEffect(() => {
     if (editingExpense) {
@@ -56,13 +62,14 @@ export function ExpenseEditModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50">
       <motion.div
+        {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 4, scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
-        className="bg-white w-full max-w-md rounded-lg shadow-xl border border-slate-200/90 overflow-hidden"
+        className="bg-surface-card w-full max-w-md rounded-lg shadow-xl border border-border-default overflow-hidden focus:outline-hidden"
       >
         {/* হেডার */}
         <div className="px-4 py-3 border-b border-border-default flex items-center justify-between bg-surface-subtle">
@@ -71,13 +78,14 @@ export function ExpenseEditModal() {
               <PencilSimple size={16} weight="bold" />
             </div>
             <div>
-              <h3 className="font-bold text-ink-primary text-sm">খরচের বিবরণ সম্পাদনা</h3>
+              <h3 id={titleId} className="font-bold text-ink-primary text-sm">খরচের বিবরণ সম্পাদনা</h3>
               <p className="text-xs text-ink-secondary">ভুল তথ্য সংশোধন করুন</p>
             </div>
           </div>
           <button
             type="button"
             onClick={closeEditModal}
+            aria-label="বন্ধ করুন"
             className="p-1.5 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-colors cursor-pointer"
           >
             <X size={16} weight="bold" />
@@ -95,10 +103,11 @@ export function ExpenseEditModal() {
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-ink-body mb-1">
+              <label htmlFor={`${formId}-cat`} className="block text-xs font-semibold text-ink-body mb-1">
                 খরচের খাত ও ক্যাটাগরি
               </label>
               <select
+                id={`${formId}-cat`}
                 value={category}
                 onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
                 className="w-full px-3 py-2 bg-surface-card border border-border-strong rounded-lg text-xs sm:text-sm text-ink-primary focus:outline-none focus:ring-1 focus:ring-brand-deep focus:border-brand-deep"
@@ -113,7 +122,7 @@ export function ExpenseEditModal() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-ink-body mb-1">
+              <label htmlFor={`${formId}-amount`} className="block text-xs font-semibold text-ink-body mb-1">
                 টাকার পরিমাণ <span className="text-danger">*</span>
               </label>
               <div className="relative">
@@ -121,6 +130,7 @@ export function ExpenseEditModal() {
                   ৳
                 </span>
                 <input
+                  id={`${formId}-amount`}
                   type="number"
                   step="any"
                   required
@@ -132,10 +142,11 @@ export function ExpenseEditModal() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-ink-body mb-1">
+              <label htmlFor={`${formId}-desc`} className="block text-xs font-semibold text-ink-body mb-1">
                 খরচের বিবরণ <span className="text-danger">*</span>
               </label>
               <input
+                id={`${formId}-desc`}
                 type="text"
                 required
                 value={description}
@@ -145,10 +156,11 @@ export function ExpenseEditModal() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-ink-secondary mb-1">
+              <label htmlFor={`${formId}-note`} className="block text-xs font-semibold text-ink-secondary mb-1">
                 মন্তব্য (ঐচ্ছিক)
               </label>
               <input
+                id={`${formId}-note`}
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}

@@ -1,33 +1,97 @@
-import { z } from 'zod';
-import { SaleType, CustomerLedgerType } from '@prisma/client';
+import { SaleType } from '@prisma/client';
+import {
+  PlainObject,
+  ValidationContext,
+  parseBoolean,
+  parseEnum,
+  parseNumber,
+  parseString,
+  runValidator,
+} from '../../common/utils/validators';
 
-export const createCustomerSchema = z.object({
-  name: z.string().min(2, 'Customer name is required'),
-  phone: z.string().optional().nullable(),
-  address: z.string().optional().nullable(),
-  customerType: z.nativeEnum(SaleType).default(SaleType.RETAIL),
-  openingDue: z.number().default(0), // Can be positive (previous debt) or negative (advance deposit)
-});
+const SALE_TYPES = Object.values(SaleType) as readonly SaleType[];
 
-export const updateCustomerSchema = z.object({
-  name: z.string().min(2).optional(),
-  phone: z.string().optional().nullable(),
-  address: z.string().optional().nullable(),
-  customerType: z.nativeEnum(SaleType).optional(),
-  isActive: z.boolean().optional(),
-});
+export interface CreateCustomerInput {
+  name: string;
+  phone?: string | null;
+  address?: string | null;
+  customerType: SaleType;
+  openingDue: number;
+}
 
-export const receivePaymentSchema = z.object({
-  amount: z.number().positive('Payment amount must be greater than 0'),
-  note: z.string().optional(),
-});
+export interface UpdateCustomerInput {
+  name?: string;
+  phone?: string | null;
+  address?: string | null;
+  customerType?: SaleType;
+  isActive?: boolean;
+}
 
-export const adjustBalanceSchema = z.object({
-  amount: z.number(), // positive = add to due, negative = reduce due/waiver
-  reason: z.string().min(2, 'Adjustment reason is required'),
-});
+export interface ReceivePaymentInput {
+  amount: number;
+  note?: string;
+}
 
-export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;
-export type UpdateCustomerInput = z.infer<typeof updateCustomerSchema>;
-export type ReceivePaymentInput = z.infer<typeof receivePaymentSchema>;
-export type AdjustBalanceInput = z.infer<typeof adjustBalanceSchema>;
+export interface AdjustBalanceInput {
+  amount: number;
+  reason: string;
+}
+
+function validateCreateCustomer(obj: PlainObject, ctx: ValidationContext): CreateCustomerInput {
+  return {
+    name: parseString(obj, 'name', ctx, { required: true, min: 2, message: 'Customer name is required' }) as string,
+    phone: parseString(obj, 'phone', ctx, { nullable: true }),
+    address: parseString(obj, 'address', ctx, { nullable: true }),
+    customerType: parseEnum(obj, 'customerType', SALE_TYPES, ctx, { defaultVal: SaleType.RETAIL }) as SaleType,
+    openingDue: parseNumber(obj, 'openingDue', ctx, { defaultVal: 0 }) as number,
+  };
+}
+
+function validateUpdateCustomer(obj: PlainObject, ctx: ValidationContext): UpdateCustomerInput {
+  const result: UpdateCustomerInput = {};
+  const name = parseString(obj, 'name', ctx, { min: 2 });
+  if (name !== undefined && name !== null) result.name = name;
+  const phone = parseString(obj, 'phone', ctx, { nullable: true });
+  if (phone !== undefined) result.phone = phone;
+  const address = parseString(obj, 'address', ctx, { nullable: true });
+  if (address !== undefined) result.address = address;
+  const customerType = parseEnum(obj, 'customerType', SALE_TYPES, ctx);
+  if (customerType !== undefined) result.customerType = customerType;
+  const isActive = parseBoolean(obj, 'isActive', ctx);
+  if (isActive !== undefined) result.isActive = isActive;
+  return result;
+}
+
+function validateReceivePayment(obj: PlainObject, ctx: ValidationContext): ReceivePaymentInput {
+  return {
+    amount: parseNumber(obj, 'amount', ctx, {
+      required: true,
+      positive: true,
+      message: 'Payment amount must be greater than 0',
+    }) as number,
+    note: parseString(obj, 'note', ctx) ?? undefined,
+  };
+}
+
+function validateAdjustBalance(obj: PlainObject, ctx: ValidationContext): AdjustBalanceInput {
+  return {
+    amount: parseNumber(obj, 'amount', ctx, { required: true }) as number,
+    reason: parseString(obj, 'reason', ctx, {
+      required: true,
+      min: 2,
+      message: 'Adjustment reason is required',
+    }) as string,
+  };
+}
+
+export const parseCreateCustomer = (body: unknown): CreateCustomerInput =>
+  runValidator(validateCreateCustomer, body);
+
+export const parseUpdateCustomer = (body: unknown): UpdateCustomerInput =>
+  runValidator(validateUpdateCustomer, body);
+
+export const parseReceivePayment = (body: unknown): ReceivePaymentInput =>
+  runValidator(validateReceivePayment, body);
+
+export const parseAdjustBalance = (body: unknown): AdjustBalanceInput =>
+  runValidator(validateAdjustBalance, body);

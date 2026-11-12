@@ -111,6 +111,9 @@ export function ActionDropdown({
         ref={buttonRef}
         type="button"
         onClick={toggle}
+        aria-label={title}
+        aria-expanded={isOpen}
+        aria-haspopup="menu"
         className={`p-1.5 rounded-md text-ink-secondary hover:text-brand-deep hover:bg-brand-soft transition-colors active:scale-95 cursor-pointer inline-flex items-center justify-center ${
           isOpen ? 'bg-brand-soft text-brand-deep' : ''
         } ${buttonClassName}`}
@@ -124,6 +127,7 @@ export function ActionDropdown({
         createPortal(
           <div
             ref={menuRef}
+            role="menu"
             style={{
               position: 'fixed',
               top: `${position.top}px`,

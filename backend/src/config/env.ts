@@ -1,23 +1,36 @@
 import dotenv from 'dotenv';
-import { z } from 'zod';
 
 dotenv.config();
 
-const envSchema = z.object({
-  PORT: z.string().default('5000').transform((val) => parseInt(val, 10)),
-  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
-  CORS_ORIGIN: z.string().default('*'),
-  RATE_LIMIT_WINDOW_MS: z.string().default('900000').transform((val) => parseInt(val, 10)), // 15 mins
-  RATE_LIMIT_MAX: z.string().default('2000').transform((val) => parseInt(val, 10)), // 2000 requests per 15 mins (multi-terminal POS friendly)
-});
+type NodeEnv = 'development' | 'production' | 'test';
+const VALID_NODE_ENVS: readonly NodeEnv[] = ['development', 'production', 'test'];
 
-const _env = envSchema.safeParse(process.env);
+function parsePositiveInt(raw: string | undefined, fallback: number, name: string): number {
+  const value = parseInt(raw ?? String(fallback), 10);
+  if (Number.isNaN(value) || value <= 0) {
+    console.error(`❌ Invalid environment variable ${name}: expected positive integer, got "${raw}"`);
+    process.exit(1);
+  }
+  return value;
+}
 
-if (!_env.success) {
-  console.error('❌ Invalid environment variables:');
-  console.error(JSON.stringify(_env.error.format(), null, 2));
+const rawNodeEnv = (process.env.NODE_ENV || 'development') as NodeEnv;
+if (!VALID_NODE_ENVS.includes(rawNodeEnv)) {
+  console.error(`❌ Invalid NODE_ENV: "${rawNodeEnv}". Allowed: ${VALID_NODE_ENVS.join(', ')}`);
   process.exit(1);
 }
 
-export const env = _env.data;
+const databaseUrl = process.env.DATABASE_URL?.trim();
+if (!databaseUrl) {
+  console.error('❌ Invalid environment variable: DATABASE_URL is required');
+  process.exit(1);
+}
+
+export const env = {
+  PORT: parsePositiveInt(process.env.PORT, 5000, 'PORT'),
+  NODE_ENV: rawNodeEnv,
+  DATABASE_URL: databaseUrl,
+  CORS_ORIGIN: process.env.CORS_ORIGIN || '*',
+  RATE_LIMIT_WINDOW_MS: parsePositiveInt(process.env.RATE_LIMIT_WINDOW_MS, 900000, 'RATE_LIMIT_WINDOW_MS'),
+  RATE_LIMIT_MAX: parsePositiveInt(process.env.RATE_LIMIT_MAX, 2000, 'RATE_LIMIT_MAX'),
+};

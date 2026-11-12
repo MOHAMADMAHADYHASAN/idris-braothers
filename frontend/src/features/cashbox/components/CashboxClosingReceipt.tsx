@@ -5,6 +5,7 @@ import { X, Printer, Receipt } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import { formatCurrency, formatNumber, formatTimeBn, toBanglaDigits } from '@/lib/decimal';
 import { useCashboxStore } from '../useCashboxStore';
+import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
 
 export function CashboxClosingReceipt() {
   const {
@@ -15,6 +16,11 @@ export function CashboxClosingReceipt() {
     closeClosingReceipt,
     getCalculatedNoteTotal,
   } = useCashboxStore();
+
+  const { titleId, dialogProps, backdropProps } = useDialogAccessibility(
+    Boolean(isClosingReceiptOpen && summary),
+    closeClosingReceipt
+  );
 
   if (!isClosingReceiptOpen || !summary) return null;
 
@@ -28,23 +34,26 @@ export function CashboxClosingReceipt() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50">
       <motion.div
+        {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 4, scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
-        className="bg-surface-card w-full max-w-sm rounded-xl shadow-2xl border border-border-default overflow-hidden flex flex-col max-h-[92vh]"
+        className="bg-surface-card w-full max-w-sm rounded-xl shadow-2xl border border-border-default overflow-hidden flex flex-col max-h-[92vh] focus:outline-hidden"
       >
         {/* টপ কন্ট্রোল বার */}
         <div className="px-3.5 py-2.5 border-b border-border-default flex items-center justify-between bg-surface-subtle shrink-0 no-print">
           <div className="flex items-center gap-1.5 font-bold text-xs text-ink-primary">
             <Receipt size={15} weight="bold" className="text-brand-deep" />
-            <span>থার্মাল ক্যাশ ক্লোজিং স্লিপ</span>
+            <span id={titleId}>থার্মাল ক্যাশ ক্লোজিং স্লিপ</span>
           </div>
           <button
+            type="button"
             onClick={closeClosingReceipt}
-            className="p-1 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-colors cursor-pointer"
+            aria-label="বন্ধ করুন"
+            className="p-1.5 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-colors cursor-pointer"
           >
             <X size={16} weight="bold" />
           </button>

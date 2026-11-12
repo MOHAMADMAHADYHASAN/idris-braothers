@@ -217,6 +217,7 @@ export default async function DashboardPage() {
           href="/pos"
           className="w-12 h-12 -mt-4 rounded-xl bg-brand-deep text-white flex items-center justify-center shadow-md border-2 border-surface-card active:scale-95 transition-transform duration-150 cursor-pointer"
           title="পিওএস টার্মিনাল"
+          aria-label="পিওএস টার্মিনাল খুলুন"
         >
           <ShoppingCart size={20} weight="bold" />
         </Link>

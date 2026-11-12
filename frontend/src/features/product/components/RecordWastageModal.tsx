@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { motion } from 'motion/react';
 import { X, WarningCircle, ArrowDown } from '@phosphor-icons/react';
 import { ProductVariant } from '../product.types';
 import { useProductStore } from '../useProductStore';
-import { formatCurrency, formatNumber, formatWeight } from '@/lib/decimal';
+import { formatCurrency, formatWeight } from '@/lib/decimal';
+import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
 
 interface RecordWastageModalProps {
   isOpen: boolean;
@@ -20,6 +21,11 @@ export function RecordWastageModal({ isOpen, onClose, variant, productName }: Re
   const [reason, setReason] = useState<string>('শুকিয়ে ওজন হ্রাস');
   const [note, setNote] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const formId = useId();
+  const { titleId, dialogProps, backdropProps } = useDialogAccessibility(
+    Boolean(isOpen && variant),
+    onClose
+  );
 
   if (!isOpen || !variant) return null;
 
@@ -52,13 +58,14 @@ export function RecordWastageModal({ isOpen, onClose, variant, productName }: Re
   const remainingStock = Math.max(0, variant.stockQuantity - parsedQty);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 p-4">
       <motion.div
+        {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 4, scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
-        className="bg-surface-card rounded-xl shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1)] border border-border-default max-w-md w-full overflow-hidden"
+        className="bg-surface-card rounded-xl shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1)] border border-border-default max-w-md w-full overflow-hidden focus:outline-hidden"
       >
         <div className="px-4 py-3.5 border-b border-border-subtle flex items-center justify-between bg-surface-subtle/70">
           <div className="flex items-center gap-2.5">
@@ -66,7 +73,7 @@ export function RecordWastageModal({ isOpen, onClose, variant, productName }: Re
               <WarningCircle size={17} weight="bold" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-ink-primary leading-tight">স্টক অপচয় ও ঘাটতি এন্ট্রি</h3>
+              <h3 id={titleId} className="text-sm font-bold text-ink-primary leading-tight">স্টক অপচয় ও ঘাটতি এন্ট্রি</h3>
               <p className="text-xs text-ink-secondary truncate max-w-[240px]">
                 {productName} {variant.variantName !== 'Default' ? `(${variant.variantName})` : ''}
               </p>
@@ -75,6 +82,7 @@ export function RecordWastageModal({ isOpen, onClose, variant, productName }: Re
           <button
             type="button"
             onClick={onClose}
+            aria-label="বন্ধ করুন"
             className="p-1.5 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-colors cursor-pointer"
           >
             <X size={16} weight="bold" />
@@ -96,10 +104,11 @@ export function RecordWastageModal({ isOpen, onClose, variant, productName }: Re
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-ink-body mb-1">
+            <label htmlFor={`${formId}-qty`} className="block text-xs font-semibold text-ink-body mb-1">
               ঘাটতি বা নষ্টের পরিমাণ ({variant.baseUnitName}) *
             </label>
             <input
+              id={`${formId}-qty`}
               type="number"
               step={variant.allowDecimalQty ? '0.0001' : '1'}
               required
@@ -122,10 +131,11 @@ export function RecordWastageModal({ isOpen, onClose, variant, productName }: Re
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-ink-body mb-1">
+            <label htmlFor={`${formId}-reason`} className="block text-xs font-semibold text-ink-body mb-1">
               ঘাটতির কারণ *
             </label>
             <select
+              id={`${formId}-reason`}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               className="w-full px-2.5 py-2 text-xs border border-border-strong rounded-lg bg-surface-card text-ink-primary focus:outline-hidden focus:ring-1 focus:ring-brand-deep focus:border-brand-deep"
@@ -139,10 +149,11 @@ export function RecordWastageModal({ isOpen, onClose, variant, productName }: Re
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-ink-body mb-1">
+            <label htmlFor={`${formId}-note`} className="block text-xs font-semibold text-ink-body mb-1">
               মন্তব্য (ঐচ্ছিক)
             </label>
             <input
+              id={`${formId}-note`}
               type="text"
               placeholder="মন্তব্য / রেফারেন্স"
               value={note}

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import { FileText, CaretDown, Check, Plus, Buildings, CalendarBlank } from '@phosphor-icons/react';
 import { usePurchaseStore } from '../../usePurchaseStore';
 import { supplierKhataService } from '@/features/supplier-khata/supplierKhata.service';
@@ -24,6 +24,7 @@ export function ChallanHeaderCard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoadingSuppliers, setIsLoadingSuppliers] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const formId = useId();
 
   // Load suppliers
   useEffect(() => {
@@ -73,7 +74,7 @@ export function ChallanHeaderCard() {
             {/* ১. মহাজন / আড়তদার সিলেক্টর */}
             <div className="relative">
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold text-ink-body">
+                <label htmlFor={`${formId}-supplier-btn`} className="text-xs font-semibold text-ink-body">
                   মহাজন ও গদি নির্বাচন <span className="text-danger">*</span>
                 </label>
                 <button
@@ -86,9 +87,13 @@ export function ChallanHeaderCard() {
                 </button>
               </div>
 
-              <div
+              <button
+                id={`${formId}-supplier-btn`}
+                type="button"
+                aria-expanded={isDropdownOpen}
+                aria-haspopup="listbox"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="w-full px-3 py-2.5 bg-surface-card border border-border-strong rounded-lg text-xs sm:text-sm text-ink-primary flex items-center justify-between cursor-pointer hover:border-brand-mid transition-all shadow-2xs"
+                className="w-full px-3 py-2.5 bg-surface-card border border-border-strong rounded-lg text-xs sm:text-sm text-ink-primary flex items-center justify-between text-left cursor-pointer hover:border-brand-mid transition-all shadow-2xs"
               >
                 <div className="truncate">
                   {supplierName ? (
@@ -105,13 +110,14 @@ export function ChallanHeaderCard() {
                   )}
                 </div>
                 <CaretDown size={14} weight="bold" className="text-ink-secondary shrink-0" />
-              </div>
+              </button>
 
               {isDropdownOpen && (
                 <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-surface-card border border-border-default rounded-xl shadow-xl overflow-hidden max-h-64 flex flex-col animate-in fade-in zoom-in-95 duration-100">
                   <div className="p-2 border-b border-border-subtle bg-surface-subtle">
                     <input
                       type="text"
+                      aria-label="মহাজন খুঁজুন"
                       autoFocus
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
@@ -160,10 +166,11 @@ export function ChallanHeaderCard() {
 
             {/* ২. মোকাম চালান নম্বর */}
             <div>
-              <label className="block text-xs font-semibold text-ink-body mb-1.5">
+              <label htmlFor={`${formId}-purchase-no`} className="block text-xs font-semibold text-ink-body mb-1.5">
                 মোকাম মেমো ও চালান নম্বর
               </label>
               <input
+                id={`${formId}-purchase-no`}
                 type="text"
                 value={purchaseNumber}
                 onChange={(e) => setPurchaseNumber(e.target.value)}
@@ -175,10 +182,11 @@ export function ChallanHeaderCard() {
 
           {/* চালান নোট */}
           <div>
-            <label className="block text-xs font-semibold text-ink-body mb-1">
+            <label htmlFor={`${formId}-note`} className="block text-xs font-semibold text-ink-body mb-1">
               ড্রাইভার ও গাড়ি সংক্রান্ত নোট (ঐচ্ছিক)
             </label>
             <input
+              id={`${formId}-note`}
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value)}

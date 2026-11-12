@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { X, WarningCircle, CheckCircle, ArrowCounterClockwise } from '@phosphor-icons/react';
 import { motion } from 'motion/react';
 import { formatCurrency, toBanglaDigits } from '@/lib/decimal';
 import { buttonClasses } from '@/components/ui/Button';
 import { useSalesStore } from '../useSalesStore';
+import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
 
 export function CancelSaleModal() {
   const {
@@ -17,6 +18,11 @@ export function CancelSaleModal() {
   } = useSalesStore();
 
   const [reason, setReason] = useState('');
+  const formId = useId();
+  const { titleId, dialogProps, backdropProps } = useDialogAccessibility(
+    Boolean(isCancelModalOpen && saleToCancel),
+    closeCancelModal
+  );
 
   if (!isCancelModalOpen || !saleToCancel) return null;
 
@@ -27,25 +33,26 @@ export function CancelSaleModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50">
       <motion.div
+        {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 4, scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
-        className="bg-white w-full max-w-md rounded-lg shadow-2xl border border-slate-200/90 overflow-hidden"
+        className="bg-surface-card w-full max-w-md rounded-lg shadow-2xl border border-border-default overflow-hidden focus:outline-hidden"
       >
         {/* হেডার */}
-        <div className="px-4 py-3 border-b border-slate-200/90 flex items-center justify-between bg-rose-50/70">
+        <div className="px-4 py-3 border-b border-border-default flex items-center justify-between bg-due-bg">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-md bg-rose-100 text-rose-700 flex items-center justify-center border border-rose-200/80">
+            <div className="w-7 h-7 rounded-md bg-due-bg text-due-text flex items-center justify-center border border-due-border">
               <WarningCircle size={17} weight="bold" />
             </div>
             <div>
-              <h3 className="font-bold text-rose-900 text-xs sm:text-sm">
+              <h3 id={titleId} className="font-bold text-due-text text-xs sm:text-sm">
                 বিক্রয় মেমো বাতিলকরণ
               </h3>
-              <p className="text-xs text-rose-700 font-mono tabular-nums">
+              <p className="text-xs text-due-text font-mono tabular-nums">
                 মেমো #{toBanglaDigits(saleToCancel.invoiceNumber)}
               </p>
             </div>
@@ -53,7 +60,8 @@ export function CancelSaleModal() {
           <button
             type="button"
             onClick={closeCancelModal}
-            className="p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-rose-100/80 transition-colors cursor-pointer"
+            aria-label="বন্ধ করুন"
+            className="p-1.5 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-due-bg transition-colors cursor-pointer"
           >
             <X size={16} weight="bold" />
           </button>
@@ -63,9 +71,9 @@ export function CancelSaleModal() {
         <form onSubmit={handleSubmit}>
           <div className="p-4 space-y-3">
             {/* ওয়ার্নিং ব্যানার */}
-            <div className="p-3 bg-amber-50 rounded-md border border-amber-200 text-amber-950 text-xs space-y-1">
+            <div className="p-3 bg-wholesale-bg rounded-md border border-wholesale-border text-amber-950 text-xs space-y-1">
               <span className="font-bold block">সতর্কবার্তা:</span>
-              <ul className="list-disc list-inside space-y-0.5 text-xs text-amber-900">
+              <ul className="list-disc list-inside space-y-0.5 text-xs text-wholesale-text">
                 <li>বিক্রিত পণ্যের স্টক স্বয়ংক্রিয়ভাবে ইনভেন্টরিতে ফেরত যোগ হবে।</li>
                 {Number(saleToCancel.dueAmount) > 0 && (
                   <li>
@@ -78,28 +86,29 @@ export function CancelSaleModal() {
             </div>
 
             {/* মেমো ইনফো সামারি */}
-            <div className="bg-slate-50 p-2.5 rounded-md border border-slate-200/80 text-xs flex justify-between items-center font-mono tabular-nums">
-              <span className="text-slate-700 font-sans">মোট মেমো মূল্য:</span>
-              <strong className="text-slate-900 text-sm">{formatCurrency(saleToCancel.grandTotal)}</strong>
+            <div className="bg-surface-subtle p-2.5 rounded-md border border-border-default text-xs flex justify-between items-center font-mono tabular-nums">
+              <span className="text-ink-body font-sans">মোট মেমো মূল্য:</span>
+              <strong className="text-ink-primary text-sm">{formatCurrency(saleToCancel.grandTotal)}</strong>
             </div>
 
             {/* বাতিলের কারণ */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <label htmlFor={`${formId}-reason`} className="block text-xs font-semibold text-ink-body mb-1">
                 বাতিলের সুনির্দিষ্ট কারণ (ঐচ্ছিক)
               </label>
               <input
+                id={`${formId}-reason`}
                 type="text"
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="বাতিলের কারণ"
-                className="w-full px-3 py-2 bg-white border border-slate-200 rounded-md text-xs sm:text-sm text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
+                className="w-full px-3 py-2 bg-surface-card border border-border-default rounded-md text-xs sm:text-sm text-ink-primary placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
               />
             </div>
           </div>
 
           {/* ফুটার */}
-          <div className="px-4 py-2.5 bg-slate-50/80 border-t border-slate-200/90 flex items-center justify-end gap-2">
+          <div className="px-4 py-2.5 bg-surface-subtle border-t border-border-default flex items-center justify-end gap-2">
             <button
               type="button"
               onClick={closeCancelModal}

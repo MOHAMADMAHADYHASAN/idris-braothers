@@ -1,34 +1,103 @@
-import { z } from 'zod';
+import {
+  PlainObject,
+  ValidationContext,
+  parseArray,
+  parseBoolean,
+  parseNumber,
+  parseString,
+  parseUuid,
+  runValidator,
+} from '../../common/utils/validators';
 
-export const createPurchaseItemSchema = z
-  .object({
-    variantId: z.string().optional(),
-    productId: z.string().optional(),
-    unitName: z.string().min(1, 'Unit name is required (e.g. ৫০ কেজি বস্তা, কার্টন (২৪ প্যাকেট), কেজি)'),
-    conversionFactor: z.number().positive('Conversion factor must be greater than 0').default(1),
-    quantity: z.number().positive('Quantity must be greater than 0'),
-    unitCost: z.number().positive('Unit cost must be greater than 0'),
-    newRetailPrice: z.number().positive().optional().nullable(),
-    newWholesalePrice: z.number().positive().optional().nullable(),
-    saveUnitForFuture: z.boolean().optional().default(false), // Automatically save this custom carton/unit for future use
-  })
-  .refine(
-    (data) => data.variantId !== undefined || data.productId !== undefined,
-    {
-      message: 'Either variantId or productId must be provided',
-      path: ['variantId'],
-    }
-  );
+export interface CreatePurchaseItemInput {
+  variantId?: string;
+  productId?: string;
+  unitName: string;
+  conversionFactor: number;
+  quantity: number;
+  unitCost: number;
+  newRetailPrice?: number | null;
+  newWholesalePrice?: number | null;
+  saveUnitForFuture: boolean;
+}
 
-export const createPurchaseSchema = z.object({
-  purchaseNumber: z.string().optional().nullable(), // If omitted, will be auto-generated (PUR-YYMMDD-XXXX)
-  supplierId: z.string().uuid('Supplier ID is required'),
-  transportCost: z.number().min(0).default(0), // কুলি / ট্রাক ভাড়া
-  discount: z.number().min(0).default(0),
-  paidAmount: z.number().min(0).default(0),
-  note: z.string().optional().nullable(),
-  items: z.array(createPurchaseItemSchema).min(1, 'Purchase must have at least one item'),
-});
+export interface CreatePurchaseInput {
+  purchaseNumber?: string | null;
+  supplierId: string;
+  transportCost: number;
+  discount: number;
+  paidAmount: number;
+  note?: string | null;
+  items: CreatePurchaseItemInput[];
+}
 
-export type CreatePurchaseItemInput = z.infer<typeof createPurchaseItemSchema>;
-export type CreatePurchaseInput = z.infer<typeof createPurchaseSchema>;
+function validatePurchaseItem(obj: PlainObject, ctx: ValidationContext, prefix: string): CreatePurchaseItemInput {
+  const variantId = parseString(obj, 'variantId', ctx, {}, prefix) ?? undefined;
+  const productId = parseString(obj, 'productId', ctx, {}, prefix) ?? undefined;
+  const unitName = parseString(
+    obj,
+    'unitName',
+    ctx,
+    { required: true, min: 1, message: 'Unit name is required (e.g. ৫০ কেজি বস্তা, কার্টন (২৪ প্যাকেট), কেজি)' },
+    prefix
+  ) as string;
+  const conversionFactor = parseNumber(
+    obj,
+    'conversionFactor',
+    ctx,
+    { positive: true, defaultVal: 1, message: 'Conversion factor must be greater than 0' },
+    prefix
+  ) as number;
+  const quantity = parseNumber(
+    obj,
+    'quantity',
+    ctx,
+    { required: true, positive: true, message: 'Quantity must be greater than 0' },
+    prefix
+  ) as number;
+  const unitCost = parseNumber(
+    obj,
+    'unitCost',
+    ctx,
+    { required: true, positive: true, message: 'Unit cost must be greater than 0' },
+    prefix
+  ) as number;
+  const newRetailPrice = parseNumber(obj, 'newRetailPrice', ctx, { positive: true, nullable: true }, prefix);
+  const newWholesalePrice = parseNumber(obj, 'newWholesalePrice', ctx, { positive: true, nullable: true }, prefix);
+  const saveUnitForFuture = parseBoolean(obj, 'saveUnitForFuture', ctx, { defaultVal: false }, prefix) as boolean;
+
+  if (variantId === undefined && productId === undefined) {
+    ctx.addIssue(`${prefix}.variantId`, 'Either variantId or productId must be provided');
+  }
+
+  return {
+    variantId,
+    productId,
+    unitName,
+    conversionFactor,
+    quantity,
+    unitCost,
+    newRetailPrice,
+    newWholesalePrice,
+    saveUnitForFuture,
+  };
+}
+
+function validateCreatePurchase(obj: PlainObject, ctx: ValidationContext): CreatePurchaseInput {
+  return {
+    purchaseNumber: parseString(obj, 'purchaseNumber', ctx, { nullable: true }),
+    supplierId: parseUuid(obj, 'supplierId', ctx, { required: true, message: 'Supplier ID is required' }) as string,
+    transportCost: parseNumber(obj, 'transportCost', ctx, { min: 0, defaultVal: 0 }) as number,
+    discount: parseNumber(obj, 'discount', ctx, { min: 0, defaultVal: 0 }) as number,
+    paidAmount: parseNumber(obj, 'paidAmount', ctx, { min: 0, defaultVal: 0 }) as number,
+    note: parseString(obj, 'note', ctx, { nullable: true }),
+    items: parseArray(obj, 'items', validatePurchaseItem, ctx, {
+      required: true,
+      minLen: 1,
+      message: 'Purchase must have at least one item',
+    }) as CreatePurchaseItemInput[],
+  };
+}
+
+export const parseCreatePurchase = (body: unknown): CreatePurchaseInput =>
+  runValidator(validateCreatePurchase, body);

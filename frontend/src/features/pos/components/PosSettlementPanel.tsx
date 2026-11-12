@@ -73,7 +73,7 @@ export function PosSettlementPanel({ onSaleSuccess }: PosSettlementPanelProps) {
         {/* 1. Customer Selection */}
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="text-xs font-bold text-ink-body flex items-center gap-1.5">
+            <label htmlFor="pos-customer-search" className="text-xs font-bold text-ink-body flex items-center gap-1.5">
               <User size={14} weight="bold" className="text-brand-deep" />
               <span>কাস্টমার ও খদ্দের</span>
             </label>
@@ -99,6 +99,7 @@ export function PosSettlementPanel({ onSaleSuccess }: PosSettlementPanelProps) {
           ) : (
             <div className="relative">
               <input
+                id="pos-customer-search"
                 type="text"
                 placeholder="কাস্টমার (নাম/ফোন)..."
                 value={customerSearch}
@@ -169,6 +170,7 @@ export function PosSettlementPanel({ onSaleSuccess }: PosSettlementPanelProps) {
               <span className="absolute left-2 top-1/2 -translate-y-1/2 text-ink-secondary text-xs font-mono">৳</span>
               <input
                 type="number"
+                aria-label="বিশেষ ছাড়"
                 min="0"
                 value={discount || ''}
                 onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
@@ -189,7 +191,7 @@ export function PosSettlementPanel({ onSaleSuccess }: PosSettlementPanelProps) {
         {/* 3. Cash Payment Received & Change */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-bold text-ink-body flex items-center gap-1.5">
+            <label htmlFor="pos-paid-amount-input" className="text-xs font-bold text-ink-body flex items-center gap-1.5">
               <Coins size={14} weight="bold" className="text-brand-deep" />
               <span>নগদ গ্রহণ [F4]:</span>
             </label>
@@ -269,6 +271,7 @@ export function PosSettlementPanel({ onSaleSuccess }: PosSettlementPanelProps) {
         <div>
           <input
             type="text"
+            aria-label="বিক্রয় নোট"
             value={note}
             onChange={(e) => setNote(e.target.value)}
             placeholder="নোট (ঐচ্ছিক)..."

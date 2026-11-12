@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useId } from 'react';
 import { motion } from 'motion/react';
 import {
   X,
@@ -17,6 +17,7 @@ import {
 } from '@/lib/decimal';
 import { buttonClasses } from '@/components/ui/Button';
 import { useCustomerKhataStore } from '../useCustomerKhataStore';
+import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
 
 export function DueCollectionModal() {
   const { selectedCustomer, activeModal, closeModal, submitPayment } =
@@ -28,6 +29,11 @@ export function DueCollectionModal() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successReceipt, setSuccessReceipt] = useState<any | null>(null);
+  const formId = useId();
+  const { titleId, dialogProps, backdropProps } = useDialogAccessibility(
+    Boolean(activeModal === 'payment' && selectedCustomer),
+    closeModal
+  );
 
   if (activeModal !== 'payment' || !selectedCustomer) return null;
 
@@ -88,62 +94,63 @@ export function DueCollectionModal() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40">
+    <div {...backdropProps} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40">
       <motion.div
+        {...dialogProps}
         initial={{ opacity: 0, y: 6, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 4, scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
-        className="bg-white w-full max-w-md rounded-lg shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1),0_8px_10px_-6px_rgba(15,23,42,0.05)] border border-slate-200/90 overflow-hidden"
+        className="bg-surface-card w-full max-w-md rounded-lg shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1),0_8px_10px_-6px_rgba(15,23,42,0.05)] border border-border-default overflow-hidden focus:outline-hidden"
       >
         {/* রসিদ প্রিন্ট ভিউ (সফলভাবে জমা হওয়ার পর) */}
         {successReceipt ? (
           <div className="p-5 text-center space-y-3.5">
-            <div className="w-10 h-10 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center mx-auto">
+            <div className="w-10 h-10 rounded-md bg-cash-bg border border-cash-border text-cash-text flex items-center justify-center mx-auto">
               <CheckCircle size={24} weight="fill" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-slate-900">টাকা জমা সফল হয়েছে!</h3>
-              <p className="text-xs text-slate-600 mt-0.5">
+              <h3 id={titleId} className="text-sm font-semibold text-ink-primary">টাকা জমা সফল হয়েছে!</h3>
+              <p className="text-xs text-ink-secondary mt-0.5">
                 {successReceipt.customerName}-এর একাউন্টে {formatCurrency(successReceipt.paidAmount)} জমা হয়েছে।
               </p>
             </div>
 
             {/* প্রিন্ট স্লিপ বক্স (থার্মাল প্রিন্ট প্রিভিউ) */}
-            <div className="bg-slate-50/70 border border-dashed border-slate-300 p-3.5 rounded-lg text-left font-mono tabular-nums tracking-tight text-xs space-y-1.5">
-              <div className="text-center font-bold pb-1.5 border-b border-slate-200 text-xs text-slate-900">
+            <div className="bg-surface-subtle border border-dashed border-border-strong p-3.5 rounded-lg text-left font-mono tabular-nums tracking-tight text-xs space-y-1.5">
+              <div className="text-center font-bold pb-1.5 border-b border-border-default text-xs text-ink-primary">
                 ইদ্রিস ব্রাদার্স — বাকি আদায়ের রসিদ
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-600">গ্রাহক:</span>
-                <span className="font-semibold text-slate-900">{successReceipt.customerName}</span>
+                <span className="text-ink-secondary">গ্রাহক:</span>
+                <span className="font-semibold text-ink-primary">{successReceipt.customerName}</span>
               </div>
               {successReceipt.customerPhone && (
                 <div className="flex justify-between">
-                  <span className="text-slate-600">মোবাইল:</span>
+                  <span className="text-ink-secondary">মোবাইল:</span>
                   <span>{toBanglaDigits(successReceipt.customerPhone)}</span>
                 </div>
               )}
               <div className="flex justify-between">
-                <span className="text-slate-600">তারিখ:</span>
+                <span className="text-ink-secondary">তারিখ:</span>
                 <span>{successReceipt.date}</span>
               </div>
-              <div className="border-t border-slate-200 pt-1 flex justify-between text-slate-600">
+              <div className="border-t border-border-default pt-1 flex justify-between text-ink-secondary">
                 <span>পূর্বের বকেয়া:</span>
                 <span>{formatCurrency(successReceipt.previousDue)}</span>
               </div>
-              <div className="flex justify-between font-bold text-emerald-700">
+              <div className="flex justify-between font-bold text-cash-text">
                 <span>নগদ জমা:</span>
                 <span>{formatCurrency(successReceipt.paidAmount)}</span>
               </div>
-              <div className="border-t border-slate-200 pt-1 flex justify-between font-bold text-rose-700">
+              <div className="border-t border-border-default pt-1 flex justify-between font-bold text-due-text">
                 <span>বর্তমান অবশিষ্ট বাকি:</span>
                 <span>{formatCurrency(successReceipt.newDue)}</span>
               </div>
             </div>
 
             {/* অ্যাকশন বোতাম */}
-            <div className="flex items-center gap-2 pt-1 border-t border-slate-100">
+            <div className="flex items-center gap-2 pt-1 border-t border-border-subtle">
               <button
                 type="button"
                 onClick={handlePrint}
@@ -165,20 +172,21 @@ export function DueCollectionModal() {
           /* জমা নেওয়ার মূল ফর্ম */
           <form onSubmit={handleSubmit}>
             {/* হেডার */}
-            <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+            <div className="px-4 py-3 border-b border-border-subtle flex items-center justify-between bg-surface-subtle">
               <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center shrink-0">
                   <HandCoins size={17} weight="bold" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-900 text-xs sm:text-sm leading-tight">বাকি উশুল ও জমা গ্রহণ</h3>
-                  <p className="text-xs text-slate-600">গ্রাহক: {selectedCustomer.name}</p>
+                  <h3 id={titleId} className="font-semibold text-ink-primary text-xs sm:text-sm leading-tight">বাকি উশুল ও জমা গ্রহণ</h3>
+                  <p className="text-xs text-ink-secondary">গ্রাহক: {selectedCustomer.name}</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={closeModal}
-                className="p-1.5 rounded-md text-slate-600 hover:text-slate-900 hover:bg-slate-200/70 transition-[background-color,color] duration-150 cursor-pointer"
+                aria-label="বন্ধ করুন"
+                className="p-1.5 rounded-md text-ink-secondary hover:text-ink-primary hover:bg-border-default transition-[background-color,color] duration-150 cursor-pointer"
               >
                 <X size={16} weight="bold" />
               </button>
@@ -187,25 +195,25 @@ export function DueCollectionModal() {
             {/* বডি */}
             <div className="p-4 space-y-3.5">
               {error && (
-                <div className="p-2.5 rounded-md bg-rose-50 border border-rose-200/80 text-rose-700 text-xs flex items-center gap-2">
+                <div className="p-2.5 rounded-md bg-due-bg border border-due-border text-due-text text-xs flex items-center gap-2">
                   <WarningCircle size={15} weight="bold" className="shrink-0" />
                   <span>{error}</span>
                 </div>
               )}
 
               {/* বর্তমান বকেয়া ও লাইভ পরিবর্তন কার্ড */}
-              <div className="bg-slate-50/70 p-3 rounded-lg border border-slate-200/80 grid grid-cols-2 gap-2 text-center">
-                <div className="border-r border-slate-200 pr-2">
-                  <span className="text-xs text-slate-600 font-medium block">পূর্বের বকেয়া</span>
-                  <span className="text-base sm:text-lg font-black font-mono tabular-nums tracking-tight text-rose-700">
+              <div className="bg-surface-subtle p-3 rounded-lg border border-border-default grid grid-cols-2 gap-2 text-center">
+                <div className="border-r border-border-default pr-2">
+                  <span className="text-xs text-ink-secondary font-medium block">পূর্বের বকেয়া</span>
+                  <span className="text-base sm:text-lg font-black font-mono tabular-nums tracking-tight text-due-text">
                     {formatCurrency(currentDue)}
                   </span>
                 </div>
                 <div className="pl-2">
-                  <span className="text-xs text-slate-600 font-medium block">অবশিষ্ট বকেয়া হবে</span>
+                  <span className="text-xs text-ink-secondary font-medium block">অবশিষ্ট বকেয়া হবে</span>
                   <span
                     className={`text-base sm:text-lg font-black font-mono tabular-nums tracking-tight ${
-                      remainingDue <= 0 ? 'text-emerald-700' : 'text-brand-deep'
+                      remainingDue <= 0 ? 'text-cash-text' : 'text-brand-deep'
                     }`}
                   >
                     {formatCurrency(remainingDue)}
@@ -215,14 +223,15 @@ export function DueCollectionModal() {
 
               {/* জমার পরিমাণ ইনপুট */}
               <div>
-                <label className="block text-xs font-medium text-slate-700 mb-1">
+                <label htmlFor={`${formId}-amount`} className="block text-xs font-medium text-ink-body mb-1">
                   নগদ জমার পরিমাণ (টাকা) <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600 text-base font-bold">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-secondary text-base font-bold">
                     ৳
                   </span>
                   <input
+                    id={`${formId}-amount`}
                     type="number"
                     step="any"
                     autoFocus
@@ -233,7 +242,7 @@ export function DueCollectionModal() {
                       setError(null);
                     }}
                     placeholder="০.০০"
-                    className="w-full pl-7 pr-3 py-2 bg-white border border-slate-200 rounded-md text-lg sm:text-xl font-bold font-mono tabular-nums tracking-tight text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow]"
+                    className="w-full pl-7 pr-3 py-2 bg-surface-card border border-border-default rounded-md text-lg sm:text-xl font-bold font-mono tabular-nums tracking-tight text-ink-primary placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow]"
                   />
                 </div>
               </div>
@@ -245,7 +254,7 @@ export function DueCollectionModal() {
                     key={val}
                     type="button"
                     onClick={() => handleQuickAdd(val)}
-                    className="py-1 px-2.5 rounded-md border border-slate-200 bg-white hover:bg-brand-soft/60 hover:border-brand-light text-xs font-mono tabular-nums tracking-tight font-semibold text-slate-700 hover:text-brand-deep transition-[background-color,border-color] duration-150 active:scale-[0.97] cursor-pointer"
+                    className="py-1 px-2.5 rounded-md border border-border-default bg-surface-card hover:bg-brand-soft/60 hover:border-brand-light text-xs font-mono tabular-nums tracking-tight font-semibold text-ink-body hover:text-brand-deep transition-[background-color,border-color] duration-150 active:scale-[0.97] cursor-pointer"
                   >
                     +{formatNumber(val)}
                   </button>
@@ -254,7 +263,7 @@ export function DueCollectionModal() {
                   <button
                     type="button"
                     onClick={handlePayFull}
-                    className="py-1 px-2.5 rounded-md border border-emerald-300 bg-emerald-50 hover:bg-emerald-100 text-xs font-semibold text-emerald-800 transition-[background-color,border-color] duration-150 active:scale-[0.97] ml-auto cursor-pointer"
+                    className="py-1 px-2.5 rounded-md border border-cash-border bg-cash-bg hover:bg-cash-bg text-xs font-semibold text-cash-text transition-[background-color,border-color] duration-150 active:scale-[0.97] ml-auto cursor-pointer"
                   >
                     পুরো বাকি শোধ
                   </button>
@@ -263,15 +272,16 @@ export function DueCollectionModal() {
 
               {/* বিবরণ / নোট */}
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1">
+                <label htmlFor={`${formId}-note`} className="block text-xs font-medium text-ink-secondary mb-1">
                   নোট / মন্তব্য (ঐচ্ছিক)
                 </label>
                 <input
+                  id={`${formId}-note`}
                   type="text"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="মন্তব্য বা রেফারেন্স"
-                  className="w-full px-2.5 py-1.5 bg-white border border-slate-200 rounded-md text-xs text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
+                  className="w-full px-2.5 py-1.5 bg-surface-card border border-border-default rounded-md text-xs text-ink-primary placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep"
                 />
               </div>
 
@@ -281,16 +291,16 @@ export function DueCollectionModal() {
                   type="checkbox"
                   checked={printReceipt}
                   onChange={(e) => setPrintReceipt(e.target.checked)}
-                  className="w-4 h-4 rounded border-slate-300 text-brand-deep focus:ring-brand-deep"
+                  className="w-4 h-4 rounded border-border-strong text-brand-deep focus:ring-brand-deep"
                 />
-                <span className="text-xs text-slate-700 font-medium">
+                <span className="text-xs text-ink-body font-medium">
                   জমা শেষে গ্রাহককে প্রিন্ট স্লিপ প্রদান করুন
                 </span>
               </label>
             </div>
 
             {/* ফুটার */}
-            <div className="px-4 py-3 bg-slate-50/70 border-t border-slate-100 flex items-center justify-end gap-2">
+            <div className="px-4 py-3 bg-surface-subtle border-t border-border-subtle flex items-center justify-end gap-2">
               <button
                 type="button"
                 onClick={closeModal}

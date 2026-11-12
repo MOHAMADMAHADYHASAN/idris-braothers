@@ -9,6 +9,7 @@ import { ChallanItemPickerCard } from './ChallanItemPickerCard';
 import { ChallanSettlementCard } from './ChallanSettlementCard';
 import { ChallanItemMatrixCard } from './ChallanItemMatrixCard';
 import { WarningCircle } from '@phosphor-icons/react';
+import { confirmAction, toast } from '@/lib/feedback';
 
 export function PurchaseChallanClient() {
   const router = useRouter();
@@ -25,19 +26,19 @@ export function PurchaseChallanClient() {
 
   const handleSave = async () => {
     if (!supplierId) {
-      alert('অনুগ্রহ করে আগে মহাজন বা আড়তের গদি নির্বাচন করুন!');
+      toast.warning('অনুগ্রহ করে আগে মহাজন বা আড়তের গদি নির্বাচন করুন!');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
     if (items.length === 0) {
-      alert('চালানে কমপক্ষে একটি পণ্য যোগ করতে হবে!');
+      toast.warning('চালানে কমপক্ষে একটি পণ্য যোগ করতে হবে!');
       return;
     }
 
     try {
       const created = await submitChallan();
-      alert(`চালান #${created.purchaseNumber} সফলভাবে এন্ট্রি হয়েছে এবং মজুত স্টক বৃদ্ধি পেয়েছে!`);
+      toast.success(`চালান #${created.purchaseNumber} সফলভাবে এন্ট্রি হয়েছে এবং মজুত স্টক বৃদ্ধি পেয়েছে!`);
       startTransition(() => {
         router.push('/purchases');
       });
@@ -47,9 +48,15 @@ export function PurchaseChallanClient() {
     }
   };
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (items.length > 0) {
-      if (!confirm('আপনি কি নিশ্চিত যে সম্পূর্ণ খসড়া চালান মুছে নতুন করে শুরু করতে চান?')) {
+      const ok = await confirmAction({
+        title: 'খসড়া চালান রিসেট',
+        message: 'আপনি কি নিশ্চিত যে সম্পূর্ণ খসড়া চালান মুছে নতুন করে শুরু করতে চান?',
+        confirmLabel: 'হ্যাঁ, রিসেট করুন',
+        tone: 'warning',
+      });
+      if (!ok) {
         return;
       }
     }
@@ -57,7 +64,7 @@ export function PurchaseChallanClient() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/70 pb-20 font-sans">
+    <div className="min-h-screen bg-surface-canvas pb-20 font-sans">
       {/* ১. টপ স্টিকি অ্যাকশন বার */}
       <PurchaseStickyHeader
         isSubmitting={isSubmitting || isPending}
@@ -70,8 +77,8 @@ export function PurchaseChallanClient() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* এরর ব্যানার */}
         {draftError && (
-          <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 flex items-start gap-3 shadow-2xs animate-in fade-in duration-150">
-            <WarningCircle size={18} weight="fill" className="text-rose-600 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-xl bg-due-bg border border-due-border text-due-text flex items-start gap-3 shadow-2xs animate-in fade-in duration-150">
+            <WarningCircle size={18} weight="fill" className="text-due-text shrink-0 mt-0.5" />
             <div>
               <div className="font-bold text-xs sm:text-sm">চালান সংরক্ষণে সমস্যা:</div>
               <div className="text-xs mt-0.5">{draftError}</div>

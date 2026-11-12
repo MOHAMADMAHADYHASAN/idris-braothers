@@ -18,18 +18,17 @@ import {
 import { Product, ProductVariant } from '../product.types';
 import { useProductStore } from '../useProductStore';
 import { QuickPriceModal } from './QuickPriceModal';
-import { AddUnitModal } from './AddUnitModal';
 import { RecordWastageModal } from './RecordWastageModal';
 import { DynamicDataTable, ColumnDef } from '@/components/shared/DynamicDataTable';
 import { ActionDropdown, ActionDropdownItem } from '@/components/shared/ActionDropdown';
 import { formatCurrency, formatNumber, formatWeight } from '@/lib/decimal';
+import { confirmAction, toast } from '@/lib/feedback';
 
 interface ProductListTableProps {
   products: Product[];
   isLoading: boolean;
   onEditProduct: (product: Product) => void;
   onOpenPriceModal?: (variant: ProductVariant, productName: string) => void;
-  onOpenUnitModal?: (variant: ProductVariant, productName: string) => void;
   onOpenWastageModal?: (variant: ProductVariant, productName: string) => void;
 }
 
@@ -38,7 +37,6 @@ export function ProductListTable({
   isLoading,
   onEditProduct,
   onOpenPriceModal,
-  onOpenUnitModal,
   onOpenWastageModal,
 }: ProductListTableProps) {
   const router = useRouter();
@@ -48,11 +46,6 @@ export function ProductListTable({
 
   // Modals state (fallback if not handled externally)
   const [activeVariantForPrice, setActiveVariantForPrice] = useState<{
-    variant: ProductVariant;
-    productName: string;
-  } | null>(null);
-
-  const [activeVariantForUnit, setActiveVariantForUnit] = useState<{
     variant: ProductVariant;
     productName: string;
   } | null>(null);
@@ -67,14 +60,6 @@ export function ProductListTable({
       onOpenPriceModal(variant, productName);
     } else {
       setActiveVariantForPrice({ variant, productName });
-    }
-  };
-
-  const handleOpenUnit = (variant: ProductVariant, productName: string) => {
-    if (onOpenUnitModal) {
-      onOpenUnitModal(variant, productName);
-    } else {
-      setActiveVariantForUnit({ variant, productName });
     }
   };
 
@@ -94,19 +79,26 @@ export function ProductListTable({
   };
 
   const handleDeleteVariant = async (variantId: string, variantName: string) => {
-    if (!confirm(`আপনি কি নিশ্চিত যে "${variantName}" ভ্যারিয়েন্টটি মুছতে চান?`)) {
+    const ok = await confirmAction({
+      title: 'ভ্যারিয়েন্ট মুছে ফেলুন',
+      message: `আপনি কি নিশ্চিত যে "${variantName}" ভ্যারিয়েন্টটি মুছতে চান?`,
+      confirmLabel: 'হ্যাঁ, মুছুন',
+    });
+    if (!ok) {
       return;
     }
     setDeletingVariantId(variantId);
     try {
       const res = await deleteVariant(variantId);
       if (res?.deactivated) {
-        alert(
+        toast.info(
           `ঐতিহাসিক বিক্রয় বা পারচেজ রেকর্ড থাকার কারণে "${variantName}" ভ্যারিয়েন্টটি স্থায়ীভাবে মুছে না ফেলে নিষ্ক্রিয় (Deactivated) করা হয়েছে।`
         );
+      } else {
+        toast.success(`"${variantName}" ভ্যারিয়েন্টটি মুছে ফেলা হয়েছে।`);
       }
     } catch (err: any) {
-      alert(err.message || 'ভ্যারিয়েন্ট মুছতে সমস্যা হয়েছে');
+      toast.error(err.message || 'ভ্যারিয়েন্ট মুছতে সমস্যা হয়েছে');
     } finally {
       setDeletingVariantId(null);
     }
@@ -124,10 +116,11 @@ export function ProductListTable({
           const hasMultipleVariants = product.hasVariants && product.variants.length > 1;
           const isExpanded = Boolean(expandedRows[product.id]);
           if (!hasMultipleVariants) {
-            return <div className="w-1.5 h-1.5 rounded-full bg-slate-300 mx-auto" />;
+            return <div className="w-1.5 h-1.5 rounded-full bg-border-strong mx-auto" />;
           }
           return (
             <button
+              type="button"
               onClick={() => toggleRow(product.id)}
               className={`p-1.5 rounded-md transition-all duration-150 cursor-pointer ${
                 isExpanded
@@ -135,6 +128,8 @@ export function ProductListTable({
                   : 'text-ink-secondary hover:text-brand-deep hover:bg-brand-soft'
               }`}
               title={isExpanded ? 'ভ্যারিয়েন্ট লুকান' : 'ভ্যারিয়েন্ট তালিকা দেখুন'}
+              aria-label={isExpanded ? `${product.name} ভ্যারিয়েন্ট লুকান` : `${product.name} ভ্যারিয়েন্ট দেখুন`}
+              aria-expanded={isExpanded}
             >
               {isExpanded ? (
                 <CaretDown size={14} weight="bold" />
@@ -301,41 +296,52 @@ export function ProductListTable({
         },
       },
       {
-        key: 'units',
-        header: 'প্যাকেজিং ইউনিট',
+        key: 'unitMode',
+        header: 'একক ও ধরন',
         renderCell: (product) => {
           const isMulti = product.hasVariants && product.variants.length > 1;
           const primaryVariant = product.variants[0];
-          const units = primaryVariant?.units || [];
 
           if (isMulti) {
+            const uniqueUnits = Array.from(
+              new Set(product.variants.map((v) => v.baseUnitName).filter(Boolean))
+            );
             return (
-              <span className="text-ink-secondary text-xs font-sans">
-                ভ্যারিয়েন্টে দেখুন
-              </span>
+              <div className="space-y-1">
+                <div className="flex flex-wrap gap-1">
+                  {uniqueUnits.map((unitName) => (
+                    <span
+                      key={unitName}
+                      className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-surface-subtle text-ink-body border border-border-default"
+                    >
+                      {unitName}
+                    </span>
+                  ))}
+                </div>
+                <span className="text-ink-secondary text-xs font-sans block">
+                  ভ্যারিয়েন্টে দেখুন
+                </span>
+              </div>
             );
           }
 
-          if (units.length === 0) {
-            return (
-              <span className="text-ink-secondary text-xs font-sans">
-                মূল একক ({product.baseUnitName})
-              </span>
-            );
-          }
+          const unitName = primaryVariant?.baseUnitName || product.baseUnitName || 'কেজি';
+          const isDecimal = primaryVariant?.allowDecimalQty !== false;
 
           return (
-            <div className="flex flex-wrap gap-1 max-w-[190px]">
-              {units.map((u) => (
-                <span
-                  key={u.id}
-                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono tabular-nums bg-surface-subtle text-ink-body border border-border-default"
-                  title={`১ ${u.unitName} = ${formatNumber(u.conversionFactor)} ${product.baseUnitName}`}
-                >
-                  <Package size={11} weight="bold" />
-                  <span>{u.unitName}</span>
-                </span>
-              ))}
+            <div className="space-y-1">
+              <span className="text-ink-primary text-xs font-semibold block">
+                মূল একক ({unitName})
+              </span>
+              <span
+                className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold border ${
+                  isDecimal
+                    ? 'bg-brand-soft text-brand-deep border-brand-light'
+                    : 'bg-wholesale-bg text-wholesale-text border-wholesale-border/60'
+                }`}
+              >
+                {isDecimal ? 'দশমিক ওজন' : 'পূর্ণসংখ্যা'}
+              </span>
             </div>
           );
         },
@@ -415,11 +421,6 @@ export function ProductListTable({
                 onClick: () => handleOpenPrice(primaryVariant, product.name),
               },
               {
-                label: 'কার্টন ইউনিট',
-                icon: <Package size={14} weight="bold" />,
-                onClick: () => handleOpenUnit(primaryVariant, product.name),
-              },
-              {
                 label: 'ওয়েস্টেজ এন্ট্রি',
                 icon: <WarningCircle size={14} weight="bold" />,
                 onClick: () => handleOpenWastage(primaryVariant, product.name),
@@ -459,9 +460,8 @@ export function ProductListTable({
                     <th className="py-2 pl-6 pr-3">ভ্যারিয়েন্ট সাইজ</th>
                     <th className="py-2 px-3">SKU</th>
                     <th className="py-2 px-3">বারকোড</th>
-                    <th className="py-2 px-3 text-center">মোড</th>
+                    <th className="py-2 px-3 text-center">একক ও মোড</th>
                     <th className="py-2 px-3 text-right">মজুত স্টক</th>
-                    <th className="py-2 px-3">কার্টন ও বস্তা রূপান্তর</th>
                     <th className="py-2 px-3 text-right">দরসমূহ</th>
                     <th className="py-2 px-3 text-center w-12">অ্যাকশন</th>
                   </tr>
@@ -475,11 +475,6 @@ export function ProductListTable({
                         label: 'প্রাইস আপডেট',
                         icon: <Coins size={14} weight="bold" />,
                         onClick: () => handleOpenPrice(variant, product.name),
-                      },
-                      {
-                        label: 'কার্টন ইউনিট',
-                        icon: <Package size={14} weight="bold" />,
-                        onClick: () => handleOpenUnit(variant, product.name),
                       },
                       {
                         label: 'ওয়েস্টেজ এন্ট্রি',
@@ -536,15 +531,20 @@ export function ProductListTable({
                         </td>
 
                         <td className="py-2.5 px-3 text-center">
-                          <span
-                            className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold border ${
-                              variant.allowDecimalQty
-                                ? 'bg-brand-soft text-brand-deep border-brand-light'
-                                : 'bg-wholesale-bg text-wholesale-text border-wholesale-border/60'
-                            }`}
-                          >
-                            {variant.allowDecimalQty ? 'ওজনযোগ্য' : 'প্যাকেট'}
-                          </span>
+                          <div className="inline-flex items-center gap-1.5">
+                            <span className="text-xs font-semibold text-ink-primary">
+                              {variant.baseUnitName}
+                            </span>
+                            <span
+                              className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold border ${
+                                variant.allowDecimalQty
+                                  ? 'bg-brand-soft text-brand-deep border-brand-light'
+                                  : 'bg-wholesale-bg text-wholesale-text border-wholesale-border/60'
+                              }`}
+                            >
+                              {variant.allowDecimalQty ? 'দশমিক ওজন' : 'পূর্ণসংখ্যা'}
+                            </span>
+                          </div>
                         </td>
 
                         <td className="py-2.5 px-3 text-right font-mono tabular-nums">
@@ -555,26 +555,6 @@ export function ProductListTable({
                             <span className="inline-flex items-center gap-0.5 text-xs font-semibold text-due-text bg-due-bg px-1.5 py-0.5 rounded border border-due-border mt-0.5">
                               সংকট
                             </span>
-                          )}
-                        </td>
-
-                        <td className="py-2.5 px-3">
-                          {variant.units && variant.units.length > 0 ? (
-                            <div className="flex flex-wrap gap-1 max-w-[200px]">
-                              {variant.units.map((u) => (
-                                <span
-                                  key={u.id}
-                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono tabular-nums bg-surface-card text-ink-body border border-border-default shadow-2xs"
-                                  title={`১ ${u.unitName} = ${formatNumber(u.conversionFactor)} ${variant.baseUnitName}`}
-                                >
-                                  <Package size={11} weight="bold" />
-                                  <span>{u.unitName}</span>
-                                  <span className="text-ink-secondary font-sans">({formatNumber(u.conversionFactor)})</span>
-                                </span>
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-ink-secondary text-xs font-sans">—</span>
                           )}
                         </td>
 
@@ -621,15 +601,6 @@ export function ProductListTable({
           onClose={() => setActiveVariantForPrice(null)}
           variant={activeVariantForPrice.variant}
           productName={activeVariantForPrice.productName}
-        />
-      )}
-
-      {activeVariantForUnit && (
-        <AddUnitModal
-          isOpen={Boolean(activeVariantForUnit)}
-          onClose={() => setActiveVariantForUnit(null)}
-          variant={activeVariantForUnit.variant}
-          productName={activeVariantForUnit.productName}
         />
       )}
 

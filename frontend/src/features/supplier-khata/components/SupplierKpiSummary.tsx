@@ -19,46 +19,46 @@ export function SupplierKpiSummary() {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {/* ১. মোট মহাজন দেনা */}
-      <div className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
+      <div className="bg-surface-card p-3.5 rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-600">মোট মহাজন দেনা</span>
-          <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200/80 text-amber-700 flex items-center justify-center shrink-0">
+          <span className="text-xs font-semibold text-ink-secondary">মোট মহাজন দেনা</span>
+          <div className="w-8 h-8 rounded-lg bg-wholesale-bg border border-wholesale-border text-wholesale-text flex items-center justify-center shrink-0">
             <Truck size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-amber-800">
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-wholesale-text">
             {formatCurrency(totalPayable)}
           </div>
         </div>
       </div>
 
       {/* ২. পাওনাদার মহাজনের সংখ্যা */}
-      <div className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
+      <div className="bg-surface-card p-3.5 rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-600">পাওনাদার আড়তদার</span>
+          <span className="text-xs font-semibold text-ink-secondary">পাওনাদার আড়তদার</span>
           <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center shrink-0">
             <HandCoins size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900">
-            {formatNumber(payableCount)} <span className="text-xs font-medium text-slate-600 font-sans">টি গদি</span>
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-ink-primary">
+            {formatNumber(payableCount)} <span className="text-xs font-medium text-ink-secondary font-sans">টি গদি</span>
           </div>
         </div>
       </div>
 
       {/* ৩. মোট নিবন্ধিত মহাজন */}
-      <div className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
+      <div className="bg-surface-card p-3.5 rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-600">মোট তালিকাভুক্ত মহাজন</span>
+          <span className="text-xs font-semibold text-ink-secondary">মোট তালিকাভুক্ত মহাজন</span>
           <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center shrink-0">
             <Users size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900">
-            {formatNumber(meta.total)} <span className="text-xs font-medium text-slate-600 font-sans">জন</span>
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-ink-primary">
+            {formatNumber(meta.total)} <span className="text-xs font-medium text-ink-secondary font-sans">জন</span>
           </div>
         </div>
       </div>

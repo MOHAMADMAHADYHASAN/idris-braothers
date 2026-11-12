@@ -16,46 +16,46 @@ export function CustomerKpiSummary() {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {/* 1. মোট বকেয়া */}
-      <div className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
+      <div className="bg-surface-card p-3.5 rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-600">মোট বাজার বকেয়া</span>
-          <div className="w-8 h-8 rounded-lg bg-rose-50 border border-rose-200/80 text-rose-700 flex items-center justify-center shrink-0">
+          <span className="text-xs font-semibold text-ink-secondary">মোট বাজার বকেয়া</span>
+          <div className="w-8 h-8 rounded-lg bg-due-bg border border-due-border text-due-text flex items-center justify-center shrink-0">
             <Coins size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-rose-700">
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-due-text">
             {formatCurrency(totalDue)}
           </div>
         </div>
       </div>
 
       {/* 2. বকেয়াদার সংখ্যা */}
-      <div className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
+      <div className="bg-surface-card p-3.5 rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-600">বকেয়াদার কাস্টমার</span>
+          <span className="text-xs font-semibold text-ink-secondary">বকেয়াদার কাস্টমার</span>
           <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center shrink-0">
             <Receipt size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900">
-            {formatNumber(dueHoldersCount)} <span className="text-xs font-medium text-slate-600 font-sans">জন</span>
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-ink-primary">
+            {formatNumber(dueHoldersCount)} <span className="text-xs font-medium text-ink-secondary font-sans">জন</span>
           </div>
         </div>
       </div>
 
       {/* 3. মোট রেজিস্টার্ড কাস্টমার */}
-      <div className="bg-white p-3.5 rounded-xl border border-slate-200/90 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
+      <div className="bg-surface-card p-3.5 rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col justify-between">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-semibold text-slate-600">মোট নিবন্ধিত খাতা</span>
+          <span className="text-xs font-semibold text-ink-secondary">মোট নিবন্ধিত খাতা</span>
           <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center shrink-0">
             <Users size={17} weight="bold" />
           </div>
         </div>
         <div className="mt-2">
-          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-slate-900">
-            {formatNumber(meta.total)} <span className="text-xs font-medium text-slate-600 font-sans">জন</span>
+          <div className="text-xl sm:text-2xl font-black font-mono tabular-nums tracking-tight text-ink-primary">
+            {formatNumber(meta.total)} <span className="text-xs font-medium text-ink-secondary font-sans">জন</span>
           </div>
         </div>
       </div>

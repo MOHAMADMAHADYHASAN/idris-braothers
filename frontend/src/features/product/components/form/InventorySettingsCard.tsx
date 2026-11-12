@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useId } from 'react';
 import { Warehouse, Barcode, Scales, WarningCircle, Sparkle } from '@phosphor-icons/react';
 import { generateRandom6Digits } from '@/lib/skuGenerator';
 
@@ -37,6 +37,7 @@ export function InventorySettingsCard({
   setLowStockAlert,
   isEditMode,
 }: InventorySettingsCardProps) {
+  const formId = useId();
   const handleSelectUnitPreset = (unit: string) => {
     setBaseUnitName(unit);
     setAllowDecimalQty(DECIMAL_CAPABLE_UNITS.has(unit));
@@ -62,10 +63,11 @@ export function InventorySettingsCard({
       <div className="p-5 space-y-4">
         {/* বেস ইউনিট নির্বাচন */}
         <div>
-          <label className="block text-xs font-semibold text-ink-body mb-1">
+          <label htmlFor={`${formId}-base-unit`} className="block text-xs font-semibold text-ink-body mb-1">
             মূল একক <span className="text-danger">*</span>
           </label>
           <input
+            id={`${formId}-base-unit`}
             type="text"
             required
             value={baseUnitName}
@@ -94,11 +96,12 @@ export function InventorySettingsCard({
         {/* স্টক ও অ্যালার্ট লিমিট */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
           <div>
-            <label className="block text-xs font-semibold text-ink-body mb-1">
+            <label htmlFor={`${formId}-stock`} className="block text-xs font-semibold text-ink-body mb-1">
               {isEditMode ? 'বর্তমান মজুত' : 'শুরুর স্টক (কতটুকু যোগ করব)'}
             </label>
             <div className="relative">
               <input
+                id={`${formId}-stock`}
                 type="number"
                 step={allowDecimalQty ? 'any' : '1'}
                 min="0"
@@ -114,12 +117,13 @@ export function InventorySettingsCard({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-ink-body mb-1 flex items-center gap-1">
+            <label htmlFor={`${formId}-alert`} className="block text-xs font-semibold text-ink-body mb-1 flex items-center gap-1">
               <WarningCircle size={13} weight="bold" className="text-wholesale-solid" />
               <span>লো-স্টক অ্যালার্ট</span>
             </label>
             <div className="relative">
               <input
+                id={`${formId}-alert`}
                 type="number"
                 step={allowDecimalQty ? 'any' : '1'}
                 min="0"
@@ -159,6 +163,7 @@ export function InventorySettingsCard({
  * Compact SKU & Barcode card for the product sidebar.
  */
 export function ProductCodeCard({ sku, setSku, barcode, setBarcode }: ProductCodeCardProps) {
+  const codeId = useId();
   return (
     <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden">
       <div className="px-5 py-3.5 bg-surface-subtle/60 border-b border-border-default flex items-center justify-between">
@@ -175,7 +180,7 @@ export function ProductCodeCard({ sku, setSku, barcode, setBarcode }: ProductCod
       <div className="p-5 space-y-3.5">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <label className="block text-xs font-semibold text-ink-body">
+            <label htmlFor={`${codeId}-sku`} className="block text-xs font-semibold text-ink-body">
               SKU (স্টক কোড)
             </label>
             <button
@@ -189,6 +194,7 @@ export function ProductCodeCard({ sku, setSku, barcode, setBarcode }: ProductCod
             </button>
           </div>
           <input
+            id={`${codeId}-sku`}
             type="text"
             value={sku}
             onChange={(e) => setSku(e.target.value)}
@@ -198,11 +204,12 @@ export function ProductCodeCard({ sku, setSku, barcode, setBarcode }: ProductCod
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-ink-body mb-1 flex items-center gap-1">
+          <label htmlFor={`${codeId}-barcode`} className="block text-xs font-semibold text-ink-body mb-1 flex items-center gap-1">
             <Barcode size={14} weight="bold" className="text-ink-secondary" />
             <span>বারকোড নম্বর (ঐচ্ছিক)</span>
           </label>
           <input
+            id={`${codeId}-barcode`}
             type="text"
             value={barcode}
             onChange={(e) => setBarcode(e.target.value)}
