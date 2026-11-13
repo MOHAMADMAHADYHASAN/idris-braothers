@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useId } from 'react';
 import { motion } from 'motion/react';
-import { X, Coins, FloppyDisk } from '@phosphor-icons/react';
+import { X, FloppyDisk } from '@phosphor-icons/react';
 import { ProductVariant } from '../product.types';
 import { useProductStore } from '../useProductStore';
 import { formatCurrency, formatPercent } from '@/lib/decimal';
@@ -25,22 +25,19 @@ function MarginBadge({ costStr, sellStr, label }: { costStr: string; sellStr: st
   const isLoss = profit < 0;
 
   return (
-    <div
-      className={`text-xs font-medium px-2 py-0.5 rounded-md mt-1.5 inline-flex items-center gap-1.5 border transition-colors ${
-        isLoss
-          ? 'bg-due-bg text-due-text border-due-border'
-          : profit === 0
-          ? 'bg-wholesale-bg text-wholesale-text border-wholesale-border/60'
-          : 'bg-cash-bg text-cash-text border-cash-border'
-      }`}
-    >
-      <span className="text-ink-secondary">{label}:</span>
-      <span className="font-mono tabular-nums font-semibold">
+    <div className="text-2xs font-mono tabular-nums mt-1 text-ink-secondary">
+      {label}:{' '}
+      <span
+        className={`font-semibold ${
+          isLoss
+            ? 'text-due-text'
+            : profit === 0
+            ? 'text-ink-body'
+            : 'text-cash-text'
+        }`}
+      >
         {profit >= 0 ? '+' : ''}
-        {formatCurrency(profit)}
-      </span>
-      <span className="font-mono tabular-nums">
-        ({formatPercent(marginPct, 1)})
+        {formatCurrency(profit)} ({formatPercent(marginPct, 1)})
       </span>
     </div>
   );
@@ -102,17 +99,12 @@ export function QuickPriceModal({ isOpen, onClose, variant, productName }: Quick
         transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
         className="bg-surface-card rounded-xl shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1)] border border-border-default max-w-md w-full overflow-hidden focus:outline-hidden"
       >
-        <div className="px-4 py-3.5 border-b border-border-subtle flex items-center justify-between bg-surface-subtle/70">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-brand-soft border border-brand-light text-brand-deep flex items-center justify-center shrink-0">
-              <Coins size={17} weight="bold" />
-            </div>
-            <div>
-              <h3 id={titleId} className="text-sm font-bold text-ink-primary leading-tight">বাজারদর ও বিক্রয়মূল্য পরিবর্তন</h3>
-              <p className="text-xs text-ink-secondary truncate max-w-[240px]">
-                {productName} {variant.variantName !== 'Default' ? `(${variant.variantName})` : ''}
-              </p>
-            </div>
+        <div className="px-4 py-3 border-b border-border-subtle flex items-center justify-between bg-surface-subtle/70">
+          <div>
+            <h3 id={titleId} className="text-sm font-bold text-ink-primary leading-tight">বাজারদর ও বিক্রয়মূল্য পরিবর্তন</h3>
+            <p className="text-xs text-ink-secondary truncate max-w-[280px] mt-0.5">
+              {productName} {variant.variantName !== 'Default' ? `(${variant.variantName})` : ''}
+            </p>
           </div>
           <button
             type="button"

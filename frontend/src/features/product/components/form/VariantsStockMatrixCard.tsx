@@ -2,11 +2,8 @@
 
 import React, { useState } from 'react';
 import {
-  Stack,
   Plus,
   Trash,
-  Lightning,
-  Coins,
   Sparkle,
   ArrowsClockwise,
 } from '@phosphor-icons/react';
@@ -248,23 +245,20 @@ export function VariantsStockMatrixCard({
   };
 
   return (
-    <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden">
+    <div className="bg-surface-card rounded-xl border border-border-default surface-card-crisp overflow-hidden">
       {/* কার্ড হেডার */}
-      <div className="px-5 py-4 bg-surface-subtle/70 border-b border-border-default flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <span className="p-1.5 rounded-lg bg-brand-soft text-brand-deep shadow-2xs">
-            <Stack size={18} weight="bold" />
-          </span>
-          <h2 className="text-sm sm:text-base font-bold text-ink-primary flex items-center gap-2 flex-wrap">
-            ভ্যারিয়েন্ট সাইজ ও স্টক ম্যাট্রিক্স
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-soft text-brand-deep border border-brand-light">
-              {formatNumber(variants.length)}টি ভ্যারিয়েন্ট
-            </span>
+      <div className="px-5 py-3.5 border-b border-border-default flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          <h2 className="text-sm sm:text-base font-bold text-ink-primary">
+            ভ্যারিয়েন্ট ও স্টক
           </h2>
+          <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-brand-soft text-brand-deep border border-brand-light">
+            {formatNumber(variants.length)}টি
+          </span>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
-          <div className="flex items-center gap-1 bg-surface-card border border-border-default rounded-lg p-0.5 text-xs">
+          <div className="flex items-center gap-1 bg-surface-subtle border border-border-default rounded-lg p-0.5 text-xs">
             <span className="px-2 text-ink-secondary font-medium">একক:</span>
             {VARIANT_UNIT_PRESETS.map((u) => (
               <button
@@ -274,7 +268,7 @@ export function VariantsStockMatrixCard({
                 className={`px-2 py-1 rounded-md font-semibold transition-colors cursor-pointer ${
                   defaultVariantUnit === u
                     ? 'bg-brand-deep text-white'
-                    : 'text-ink-body hover:bg-brand-soft hover:text-brand-deep'
+                    : 'text-ink-body hover:bg-surface-card hover:text-brand-deep'
                 }`}
               >
                 {u}
@@ -286,11 +280,11 @@ export function VariantsStockMatrixCard({
             <button
               type="button"
               onClick={handleGenerateMissingSkus}
-              className="px-3 py-1.5 rounded-lg bg-brand-soft hover:bg-brand-light/60 text-brand-deep border border-brand-light text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
+              className="px-3 py-1.5 rounded-lg bg-brand-soft hover:bg-brand-light/60 text-brand-deep border border-brand-light text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
               title="যেকোনো ফাঁকা ভ্যারিয়েন্টে অটো ৬-ডিজিট SKU বসান (পূর্বের SKU অক্ষত থাকবে)"
             >
               <Sparkle size={14} weight="bold" />
-              <span>অটো SKU পূরণ</span>
+              <span>অটো SKU</span>
             </button>
           )}
           <button
@@ -299,23 +293,22 @@ export function VariantsStockMatrixCard({
             className="px-3.5 py-1.5 rounded-lg bg-brand-deep hover:bg-brand-hover text-white text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-2xs cursor-pointer"
           >
             <Plus size={14} weight="bold" />
-            <span>কাস্টম সাইজ যোগ</span>
+            <span>নতুন সাইজ</span>
           </button>
         </div>
       </div>
 
       {/* ১. কুইক প্রিসেট প্যানেল */}
-      <div className="px-5 py-3 bg-brand-soft/40 border-b border-border-default flex items-center flex-wrap gap-1.5">
-        <span className="text-xs font-bold text-ink-body mr-1 flex items-center gap-1 select-none">
-          <Lightning size={13} weight="fill" className="text-wholesale-solid" />
-          কুইক সাইজ প্রিসেট:
+      <div className="px-5 py-2.5 bg-surface-subtle/40 border-b border-border-default flex items-center flex-wrap gap-1.5">
+        <span className="text-xs font-semibold text-ink-secondary mr-1 select-none">
+          প্রিসেট:
         </span>
         {COMMON_SIZE_PRESETS.map((size) => (
           <button
             key={size}
             type="button"
             onClick={() => handleAddPreset(size)}
-            className="px-2.5 py-1 rounded-md text-xs font-semibold bg-surface-card hover:bg-brand-soft text-ink-body hover:text-brand-deep border border-border-default shadow-2xs transition-colors cursor-pointer"
+            className="px-2.5 py-1 rounded-md text-xs font-medium bg-surface-card hover:bg-brand-soft text-ink-body hover:text-brand-deep border border-border-default transition-colors cursor-pointer"
           >
             + {size}
           </button>
@@ -323,10 +316,9 @@ export function VariantsStockMatrixCard({
       </div>
 
       {/* ২. বাল্ক অ্যাপ্লিকেটর বার */}
-      <div className="px-5 py-3 bg-surface-subtle/60 border-b border-border-default flex flex-wrap items-center gap-2.5">
-        <span className="text-xs font-bold text-ink-body flex items-center gap-1 select-none">
-          <Coins size={14} weight="bold" className="text-success" />
-          এক-ক্লিকে সবগুলোতে রেট ও স্টক সেট:
+      <div className="px-5 py-2.5 bg-surface-subtle/30 border-b border-border-default flex flex-wrap items-center gap-2">
+        <span className="text-xs font-semibold text-ink-secondary select-none">
+          সবগুলোতে সেট:
         </span>
 
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -334,6 +326,7 @@ export function VariantsStockMatrixCard({
             type="number"
             step="any"
             placeholder="ক্রয়দর ৳"
+            aria-label="সব ভ্যারিয়েন্টের ক্রয়দর"
             value={bulkPurchase}
             onChange={(e) => setBulkPurchase(e.target.value)}
             className="w-24 px-2.5 py-1.5 rounded-md border border-border-strong font-mono text-xs bg-surface-card text-ink-primary focus:border-brand-deep focus:outline-none"
@@ -342,6 +335,7 @@ export function VariantsStockMatrixCard({
             type="number"
             step="any"
             placeholder="পাইকারি ৳"
+            aria-label="সব ভ্যারিয়েন্টের পাইকারি দর"
             value={bulkWholesale}
             onChange={(e) => setBulkWholesale(e.target.value)}
             className="w-24 px-2.5 py-1.5 rounded-md border border-border-strong font-mono text-xs bg-surface-card text-ink-primary focus:border-brand-deep focus:outline-none"
@@ -350,6 +344,7 @@ export function VariantsStockMatrixCard({
             type="number"
             step="any"
             placeholder="খুচরা ৳"
+            aria-label="সব ভ্যারিয়েন্টের খুচরা দর"
             value={bulkRetail}
             onChange={(e) => setBulkRetail(e.target.value)}
             className="w-24 px-2.5 py-1.5 rounded-md border border-border-strong font-mono text-xs bg-surface-card text-ink-primary focus:border-brand-deep focus:outline-none"
@@ -357,7 +352,8 @@ export function VariantsStockMatrixCard({
           <input
             type="number"
             step="any"
-            placeholder="স্টক পরিমাণ"
+            placeholder="মজুত"
+            aria-label="সব ভ্যারিয়েন্টের মজুত পরিমাণ"
             value={bulkStock}
             onChange={(e) => setBulkStock(e.target.value)}
             className="w-24 px-2.5 py-1.5 rounded-md border border-border-strong font-mono text-xs bg-surface-card text-ink-primary focus:border-brand-deep focus:outline-none"
@@ -365,9 +361,9 @@ export function VariantsStockMatrixCard({
           <button
             type="button"
             onClick={handleApplyBulk}
-            className="px-3.5 py-1.5 rounded-md bg-brand-deep hover:bg-brand-hover text-white text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+            className="px-3 py-1.5 rounded-md bg-brand-deep hover:bg-brand-hover text-white text-xs font-semibold transition-colors cursor-pointer"
           >
-            সবগুলোতে বসান
+            বসান
           </button>
         </div>
       </div>
@@ -375,9 +371,10 @@ export function VariantsStockMatrixCard({
       {/* ৩. ফুল-উইডথ ম্যাট্রিক্স টেবিল */}
       <div className="overflow-x-auto">
         {variants.length === 0 ? (
-          <div className="py-12 text-center">
-            <Stack size={36} weight="duotone" className="text-ink-muted mx-auto mb-2" />
-            <h4 className="text-sm font-bold text-ink-primary">কোনো ভ্যারিয়েন্ট তৈরি করা হয়নি</h4>
+          <div className="py-10 text-center">
+            <p className="text-xs sm:text-sm font-semibold text-ink-secondary">
+              উপরের প্রিসেট বা “নতুন সাইজ” থেকে ভ্যারিয়েন্ট যোগ করুন
+            </p>
           </div>
         ) : (
           <table className="w-full text-left border-collapse text-xs min-w-[820px]">

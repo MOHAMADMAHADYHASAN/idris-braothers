@@ -437,7 +437,6 @@ export function ProductFormClient({ productId, initialProduct }: ProductFormClie
         isEditMode={isEditMode}
         productName={name || loadedProduct?.name}
         isSaving={isSaving || isPending}
-        hasVariants={hasVariants}
         onSave={handleSave}
         onCancel={handleCancel}
       />

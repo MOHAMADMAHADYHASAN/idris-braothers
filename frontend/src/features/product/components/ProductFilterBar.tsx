@@ -7,7 +7,6 @@ import {
   Warning,
   Funnel,
   Tag,
-  ArrowsClockwise,
 } from '@phosphor-icons/react';
 import { useProductStore } from '../useProductStore';
 import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
@@ -20,7 +19,6 @@ export function ProductFilterBar() {
     selectedCategoryId,
     selectedBrandId,
     lowStockOnly,
-    isLoading,
     setSearchQuery,
     setSelectedCategoryId,
     setSelectedBrandId,
@@ -148,17 +146,6 @@ export function ProductFilterBar() {
           >
             <Warning size={14} weight={lowStockOnly ? 'fill' : 'bold'} className={lowStockOnly ? 'text-danger' : 'text-ink-secondary'} />
             <span>স্টক সংকট</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => fetchProducts()}
-            disabled={isLoading}
-            className="h-9 px-2.5 rounded-lg border border-border-strong bg-surface-card hover:bg-surface-subtle active:scale-[0.98] text-ink-secondary hover:text-ink-primary transition-[background-color,border-color,transform] duration-150 disabled:opacity-50 cursor-pointer"
-            title="তালিকা রিফ্রেশ করুন"
-            aria-label="পণ্য তালিকা রিফ্রেশ করুন"
-          >
-            <ArrowsClockwise size={14} weight="bold" className={isLoading ? 'animate-spin' : ''} />
           </button>
         </div>
       </div>

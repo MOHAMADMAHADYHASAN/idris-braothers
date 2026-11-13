@@ -2,15 +2,13 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Check, Spinner, Package } from '@phosphor-icons/react';
-import { Badge } from '@/components/ui/Badge';
+import { ArrowLeft, Check, Spinner } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/Button';
 
 interface ProductStickyHeaderProps {
   isEditMode: boolean;
   productName?: string;
   isSaving: boolean;
-  hasVariants: boolean;
   onSave: () => void;
   onCancel: () => void;
 }
@@ -19,7 +17,6 @@ export function ProductStickyHeader({
   isEditMode,
   productName,
   isSaving,
-  hasVariants,
   onSave,
   onCancel,
 }: ProductStickyHeaderProps) {
@@ -40,17 +37,9 @@ export function ProductStickyHeader({
             <ArrowLeft size={16} weight="bold" />
           </Link>
 
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-sm sm:text-lg font-bold text-ink-primary truncate">
-                {isEditMode ? `পণ্য সম্পাদনা: ${productName || ''}` : 'নতুন পণ্য এন্ট্রি'}
-              </h1>
-              <Badge variant={hasVariants ? 'wholesale' : 'brand'} className="hidden sm:inline-flex">
-                <Package size={12} weight="bold" />
-                {hasVariants ? 'ভ্যারিয়েন্ট মোড' : 'একক পণ্য'}
-              </Badge>
-            </div>
-          </div>
+          <h1 className="text-sm sm:text-lg font-bold text-ink-primary truncate">
+            {isEditMode ? `পণ্য সম্পাদনা: ${productName || ''}` : 'নতুন পণ্য যোগ করুন'}
+          </h1>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
@@ -63,7 +52,7 @@ export function ProductStickyHeader({
             ) : (
               <Check size={14} weight="bold" />
             )}
-            <span>{isEditMode ? 'আপডেট সংরক্ষণ করুন' : 'পণ্য সংরক্ষণ করুন'}</span>
+            <span>{isEditMode ? 'আপডেট সংরক্ষণ' : 'সংরক্ষণ করুন'}</span>
           </Button>
         </div>
       </div>

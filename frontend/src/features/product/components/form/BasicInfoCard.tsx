@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useId } from 'react';
-import { Tag, Package, Stack } from '@phosphor-icons/react';
+import { Package, Stack } from '@phosphor-icons/react';
 
 interface BasicInfoCardProps {
   name: string;
@@ -28,120 +28,89 @@ export function BasicInfoCard({
 }: BasicInfoCardProps) {
   const formId = useId();
   return (
-    <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden">
-      {/* কার্ড হেডার */}
-      <div className="px-5 py-3.5 bg-surface-subtle/60 border-b border-border-default flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="p-1.5 rounded-lg bg-brand-soft text-brand-deep">
-            <Tag size={16} weight="bold" />
-          </span>
-          <h2 className="text-sm font-bold text-ink-primary">
-            ১. মৌলিক পণ্যের বিবরণ
-          </h2>
-        </div>
-        <span className="text-xs text-ink-secondary font-medium">আবশ্যকীয় তথ্য</span>
+    <div className="bg-surface-card rounded-xl border border-border-default surface-card-crisp overflow-hidden">
+      <div className="px-5 py-3.5 border-b border-border-default">
+        <h2 className="text-sm font-bold text-ink-primary">মৌলিক তথ্য</h2>
       </div>
 
       <div className="p-5 space-y-4">
-        {/* পণ্যের নাম */}
-        <div>
-          <label htmlFor={`${formId}-name`} className="block text-xs font-semibold text-ink-body mb-1">
-            পণ্যের নাম <span className="text-danger">*</span>
-          </label>
-          <input
-            id={`${formId}-name`}
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="পণ্যের নাম (ইংরেজি বা মূল)"
-            className="w-full px-3.5 py-2.5 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep text-sm text-ink-primary font-medium placeholder:text-ink-muted"
-          />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label htmlFor={`${formId}-name`} className="block text-xs font-semibold text-ink-body mb-1">
+              পণ্যের নাম <span className="text-danger">*</span>
+            </label>
+            <input
+              id={`${formId}-name`}
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="যেমন: Miniket Rice"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-border-strong bg-surface-card focus:outline-none focus:ring-2 focus:ring-brand-deep text-sm text-ink-primary font-medium placeholder:text-ink-muted"
+            />
+          </div>
+
+          <div>
+            <label htmlFor={`${formId}-bangla`} className="block text-xs font-semibold text-ink-body mb-1">
+              বাংলা নাম (ঐচ্ছিক)
+            </label>
+            <input
+              id={`${formId}-bangla`}
+              type="text"
+              value={banglaName}
+              onChange={(e) => setBanglaName(e.target.value)}
+              placeholder="যেমন: মিনিকেট চাল"
+              className="w-full px-3.5 py-2.5 rounded-lg border border-border-strong bg-surface-card focus:outline-none focus:ring-2 focus:ring-brand-deep text-sm text-ink-primary placeholder:text-ink-muted"
+            />
+          </div>
         </div>
 
-        {/* বাংলা নাম */}
         <div>
-          <label htmlFor={`${formId}-bangla`} className="block text-xs font-semibold text-ink-body mb-1">
-            বাংলা নাম (মেমো ও চালানের মুদ্রণ ফরম্যাট)
-          </label>
-          <input
-            id={`${formId}-bangla`}
-            type="text"
-            value={banglaName}
-            onChange={(e) => setBanglaName(e.target.value)}
-            placeholder="বাংলা নাম"
-            className="w-full px-3.5 py-2.5 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep text-sm text-ink-primary placeholder:text-ink-muted"
-          />
-        </div>
-
-        {/* পণ্যের ধরণ নির্বাচন */}
-        <div className="pt-1">
-          <span className="block text-xs font-semibold text-ink-body mb-2">
-            পণ্যের ধরণ নির্বাচন করুন <span className="text-danger">*</span>
+          <span className="block text-xs font-semibold text-ink-body mb-1.5">
+            পণ্যের ধরন <span className="text-danger">*</span>
           </span>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-1.5 p-1 rounded-lg bg-surface-subtle border border-border-default">
             <button
               type="button"
+              disabled={isEditMode}
               onClick={() => setHasVariants(false)}
-              className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all cursor-pointer ${
+              className={`h-9 px-3 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                 !hasVariants
-                  ? 'border-brand-deep bg-brand-soft/60 ring-1 ring-brand-deep/30 shadow-2xs'
-                  : 'border-border-default hover:border-border-strong bg-surface-card hover:bg-surface-subtle/50'
-              }`}
+                  ? 'bg-surface-card text-brand-deep shadow-2xs border border-border-default'
+                  : 'text-ink-secondary hover:text-ink-primary'
+              } ${isEditMode ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
             >
-              <div
-                className={`p-2 rounded-lg shrink-0 ${
-                  !hasVariants ? 'bg-brand-deep text-white' : 'bg-surface-subtle text-ink-secondary'
-                }`}
-              >
-                <Package size={20} weight="bold" />
-              </div>
-              <div>
-                <div className="text-xs font-bold text-ink-primary">একক পণ্য</div>
-                <p className="text-xs text-ink-secondary mt-0.5 leading-snug">
-                  নির্দিষ্ট এক সাইজ বা ওজন
-                </p>
-              </div>
+              <Package size={15} weight="bold" />
+              <span>একক পণ্য</span>
             </button>
 
             <button
               type="button"
+              disabled={isEditMode}
               onClick={() => setHasVariants(true)}
-              className={`p-3 rounded-xl border text-left flex items-center gap-3 transition-all cursor-pointer ${
+              className={`h-9 px-3 rounded-md text-xs font-semibold flex items-center justify-center gap-1.5 transition-all ${
                 hasVariants
-                  ? 'border-brand-deep bg-brand-soft/60 ring-1 ring-brand-deep/30 shadow-2xs'
-                  : 'border-border-default hover:border-border-strong bg-surface-card hover:bg-surface-subtle/50'
-              }`}
+                  ? 'bg-surface-card text-brand-deep shadow-2xs border border-border-default'
+                  : 'text-ink-secondary hover:text-ink-primary'
+              } ${isEditMode ? 'opacity-70 cursor-not-allowed' : 'cursor-pointer'}`}
             >
-              <div
-                className={`p-2 rounded-lg shrink-0 ${
-                  hasVariants ? 'bg-brand-deep text-white' : 'bg-surface-subtle text-ink-secondary'
-                }`}
-              >
-                <Stack size={20} weight="bold" />
-              </div>
-              <div>
-                <div className="text-xs font-bold text-ink-primary">ভ্যারিয়েন্ট পণ্য (একাধিক সাইজ)</div>
-                <p className="text-xs text-ink-secondary mt-0.5 leading-snug">
-                  আলাদা দাম ও বারকোডসহ একাধিক সাইজ
-                </p>
-              </div>
+              <Stack size={15} weight="bold" />
+              <span>একাধিক ভ্যারিয়েন্ট</span>
             </button>
           </div>
         </div>
 
-        {/* বিবরণ */}
         <div>
           <label htmlFor={`${formId}-desc`} className="block text-xs font-semibold text-ink-body mb-1">
-            বিবরণ বা অভ্যন্তরীণ নোট (ঐচ্ছিক)
+            নোট (ঐচ্ছিক)
           </label>
-          <textarea
+          <input
             id={`${formId}-desc`}
-            rows={2}
+            type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder="বিবরণ বা নোট"
-            className="w-full px-3.5 py-2.5 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep text-xs sm:text-sm text-ink-primary placeholder:text-ink-muted"
+            placeholder="প্রয়োজনীয় নোট লিখুন..."
+            className="w-full px-3.5 py-2.5 rounded-lg border border-border-strong bg-surface-card focus:outline-none focus:ring-2 focus:ring-brand-deep text-xs sm:text-sm text-ink-primary placeholder:text-ink-muted"
           />
         </div>
       </div>

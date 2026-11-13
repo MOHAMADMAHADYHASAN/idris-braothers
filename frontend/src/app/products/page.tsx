@@ -13,7 +13,6 @@ import { QuickPriceModal } from '@/features/product/components/QuickPriceModal';
 import { RecordWastageModal } from '@/features/product/components/RecordWastageModal';
 import { AdminPageHeader } from '@/components/shared/AdminPageHeader';
 import { AdminPagination } from '@/components/shared/AdminPagination';
-import { Badge } from '@/components/ui/Badge';
 import { buttonClasses } from '@/components/ui/Button';
 import { Product, ProductVariant } from '@/features/product/product.types';
 import { confirmAction, toast } from '@/lib/feedback';
@@ -83,7 +82,6 @@ export default function ProductsPage() {
             backHref="/"
             backTitle="ড্যাশবোর্ডে ফিরে যান"
             icon={<Package size={16} weight="bold" />}
-            badge={<Badge variant="brand">ক্যাটালগ</Badge>}
             actions={
               <>
                 <button

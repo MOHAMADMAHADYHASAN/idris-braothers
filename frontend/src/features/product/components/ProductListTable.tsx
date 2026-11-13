@@ -10,7 +10,6 @@ import {
   Package,
   WarningCircle,
   PencilSimple,
-  CheckCircle,
   Warning,
   Trash,
   Eye,
@@ -109,20 +108,20 @@ export function ProductListTable({
       {
         key: 'expand',
         header: '',
-        headerClassName: 'w-10 text-center',
-        cellClassName: 'text-center w-10',
+        headerClassName: 'w-9 text-center',
+        cellClassName: 'text-center w-9',
         disableToggle: true,
         renderCell: (product) => {
           const hasMultipleVariants = product.hasVariants && product.variants.length > 1;
           const isExpanded = Boolean(expandedRows[product.id]);
           if (!hasMultipleVariants) {
-            return <div className="w-1.5 h-1.5 rounded-full bg-border-strong mx-auto" />;
+            return null;
           }
           return (
             <button
               type="button"
               onClick={() => toggleRow(product.id)}
-              className={`p-1.5 rounded-md transition-all duration-150 cursor-pointer ${
+              className={`p-1 rounded-md transition-all duration-150 cursor-pointer ${
                 isExpanded
                   ? 'bg-brand-deep text-white shadow-2xs'
                   : 'text-ink-secondary hover:text-brand-deep hover:bg-brand-soft'
@@ -145,21 +144,40 @@ export function ProductListTable({
         header: 'পণ্যের নাম',
         headerClassName: 'min-w-[190px]',
         disableToggle: true,
-        renderCell: (product) => (
-          <div className="py-0.5">
-            <Link
-              href={`/products/${product.id}`}
-              className="font-semibold text-ink-primary hover:text-brand-deep hover:underline text-xs sm:text-sm block"
-            >
-              {product.name}
-            </Link>
-            {product.banglaName && (
-              <div className="text-ink-secondary text-xs mt-0.5 font-normal">
-                {product.banglaName}
+        renderCell: (product) => {
+          const hasMultipleVariants = product.hasVariants && product.variants.length > 1;
+          return (
+            <div className="py-0.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <Link
+                  href={`/products/${product.id}`}
+                  className="font-semibold text-ink-primary hover:text-brand-deep hover:underline text-xs sm:text-sm"
+                >
+                  {product.name}
+                </Link>
+                {hasMultipleVariants && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleRow(product.id);
+                    }}
+                    className="inline-flex items-center gap-1 text-2xs font-semibold px-1.5 py-0.5 rounded bg-brand-soft text-brand-deep border border-brand-light hover:bg-brand-light/60 transition-colors cursor-pointer"
+                    title="ভ্যারিয়েন্ট টগল করুন"
+                  >
+                    <Package size={11} weight="bold" />
+                    {formatNumber(product.variants.length)}টি ভ্যারিয়েন্ট
+                  </button>
+                )}
               </div>
-            )}
-          </div>
-        ),
+              {product.banglaName && (
+                <div className="text-ink-secondary text-xs mt-0.5 font-normal">
+                  {product.banglaName}
+                </div>
+              )}
+            </div>
+          );
+        },
       },
       {
         key: 'category',
@@ -188,37 +206,6 @@ export function ProductListTable({
         ),
       },
       {
-        key: 'productType',
-        header: 'ধরণ',
-        headerClassName: 'text-center',
-        cellClassName: 'text-center',
-        renderCell: (product) => {
-          const isMulti = product.hasVariants && product.variants.length > 1;
-          const isExpanded = Boolean(expandedRows[product.id]);
-          if (isMulti) {
-            return (
-              <button
-                onClick={() => toggleRow(product.id)}
-                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold border transition-all cursor-pointer ${
-                  isExpanded
-                    ? 'bg-brand-deep text-white border-brand-deep shadow-2xs'
-                    : 'bg-brand-soft text-brand-deep border-brand-light hover:bg-brand-light/50'
-                }`}
-                title="ক্লিক করে ভ্যারিয়েন্ট দেখুন"
-              >
-                <Package size={12} weight="bold" />
-                {formatNumber(product.variants.length)}টি ভ্যারিয়েন্ট
-              </button>
-            );
-          }
-          return (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-surface-subtle text-ink-secondary border border-border-default">
-              একক পণ্য
-            </span>
-          );
-        },
-      },
-      {
         key: 'sku',
         header: 'SKU',
         renderCell: (product) => {
@@ -227,9 +214,7 @@ export function ProductListTable({
 
           if (isMulti) {
             return (
-              <span className="text-ink-secondary text-xs font-sans">
-                ভ্যারিয়েন্টে দেখুন
-              </span>
+              <span className="text-ink-secondary text-xs font-sans">—</span>
             );
           }
 
@@ -249,9 +234,7 @@ export function ProductListTable({
 
           if (isMulti) {
             return (
-              <span className="text-ink-secondary text-xs font-sans">
-                ভ্যারিয়েন্টে দেখুন
-              </span>
+              <span className="text-ink-secondary text-xs font-sans">—</span>
             );
           }
 
@@ -278,70 +261,14 @@ export function ProductListTable({
               <div className="font-mono font-bold text-ink-primary text-xs sm:text-sm tabular-nums">
                 {formatWeight(product.stockQuantity, product.baseUnitName)}
               </div>
-              <div className="mt-0.5">
-                {isLowStock ? (
-                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-due-text bg-due-bg px-2 py-0.5 rounded border border-due-border">
+              {isLowStock && (
+                <div className="mt-0.5">
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-due-text bg-due-bg px-1.5 py-0.5 rounded border border-due-border">
                     <Warning size={11} weight="fill" />
                     স্টক সংকট
                   </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 text-xs font-medium text-cash-text bg-cash-bg px-2 py-0.5 rounded border border-cash-border">
-                    <CheckCircle size={11} weight="bold" />
-                    পর্যাপ্ত
-                  </span>
-                )}
-              </div>
-            </div>
-          );
-        },
-      },
-      {
-        key: 'unitMode',
-        header: 'একক ও ধরন',
-        renderCell: (product) => {
-          const isMulti = product.hasVariants && product.variants.length > 1;
-          const primaryVariant = product.variants[0];
-
-          if (isMulti) {
-            const uniqueUnits = Array.from(
-              new Set(product.variants.map((v) => v.baseUnitName).filter(Boolean))
-            );
-            return (
-              <div className="space-y-1">
-                <div className="flex flex-wrap gap-1">
-                  {uniqueUnits.map((unitName) => (
-                    <span
-                      key={unitName}
-                      className="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-surface-subtle text-ink-body border border-border-default"
-                    >
-                      {unitName}
-                    </span>
-                  ))}
                 </div>
-                <span className="text-ink-secondary text-xs font-sans block">
-                  ভ্যারিয়েন্টে দেখুন
-                </span>
-              </div>
-            );
-          }
-
-          const unitName = primaryVariant?.baseUnitName || product.baseUnitName || 'কেজি';
-          const isDecimal = primaryVariant?.allowDecimalQty !== false;
-
-          return (
-            <div className="space-y-1">
-              <span className="text-ink-primary text-xs font-semibold block">
-                মূল একক ({unitName})
-              </span>
-              <span
-                className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold border ${
-                  isDecimal
-                    ? 'bg-brand-soft text-brand-deep border-brand-light'
-                    : 'bg-wholesale-bg text-wholesale-text border-wholesale-border/60'
-                }`}
-              >
-                {isDecimal ? 'দশমিক ওজন' : 'পূর্ণসংখ্যা'}
-              </span>
+              )}
             </div>
           );
         },
@@ -366,9 +293,6 @@ export function ProductListTable({
                   {minPrice === maxPrice
                     ? formatCurrency(minPrice, false)
                     : `${formatCurrency(minPrice, false)} – ${formatCurrency(maxPrice, false)}`}
-                </div>
-                <div className="text-xs text-ink-secondary mt-0.5 font-sans">
-                  ভ্যারিয়েন্ট রেঞ্জ
                 </div>
               </div>
             );
@@ -457,10 +381,9 @@ export function ProductListTable({
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
                   <tr className="text-xs font-bold text-ink-secondary border-b border-border-default">
-                    <th className="py-2 pl-6 pr-3">ভ্যারিয়েন্ট সাইজ</th>
+                    <th className="py-2 pl-8 pr-3">ভ্যারিয়েন্ট</th>
                     <th className="py-2 px-3">SKU</th>
                     <th className="py-2 px-3">বারকোড</th>
-                    <th className="py-2 px-3 text-center">একক ও মোড</th>
                     <th className="py-2 px-3 text-right">মজুত স্টক</th>
                     <th className="py-2 px-3 text-right">দরসমূহ</th>
                     <th className="py-2 px-3 text-center w-12">অ্যাকশন</th>
@@ -498,29 +421,26 @@ export function ProductListTable({
                         key={variant.id}
                         className="hover:bg-brand-soft/40 transition-colors group"
                       >
-                        <td className="py-2.5 pl-4 pr-3">
-                          <div className="flex items-center gap-2">
-                            <span className="text-ink-muted font-mono text-sm select-none">↳</span>
-                            <div>
-                              <div className="font-semibold text-ink-primary text-xs sm:text-sm">
-                                {variant.variantName}
-                              </div>
-                              {variant.attributes && Object.keys(variant.attributes).length > 0 && (
-                                <div className="text-xs text-ink-secondary mt-0.5">
-                                  {Object.entries(variant.attributes).map(([k, v]) => `${k}: ${v}`).join(' • ')}
-                                </div>
-                              )}
+                        <td className="py-2 pl-8 pr-3">
+                          <div>
+                            <div className="font-semibold text-ink-primary text-xs sm:text-sm">
+                              {variant.variantName}
                             </div>
+                            {variant.attributes && Object.keys(variant.attributes).length > 0 && (
+                              <div className="text-xs text-ink-secondary mt-0.5">
+                                {Object.entries(variant.attributes).map(([k, v]) => `${k}: ${v}`).join(' • ')}
+                              </div>
+                            )}
                           </div>
                         </td>
 
-                        <td className="py-2.5 px-3 font-mono tabular-nums">
+                        <td className="py-2 px-3 font-mono tabular-nums">
                           <span className="font-bold text-ink-body text-xs">
                             {variant.sku}
                           </span>
                         </td>
 
-                        <td className="py-2.5 px-3 font-mono tabular-nums">
+                        <td className="py-2 px-3 font-mono tabular-nums">
                           {variant.barcode ? (
                             <span className="text-xs text-ink-secondary">
                               {variant.barcode}
@@ -530,24 +450,7 @@ export function ProductListTable({
                           )}
                         </td>
 
-                        <td className="py-2.5 px-3 text-center">
-                          <div className="inline-flex items-center gap-1.5">
-                            <span className="text-xs font-semibold text-ink-primary">
-                              {variant.baseUnitName}
-                            </span>
-                            <span
-                              className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold border ${
-                                variant.allowDecimalQty
-                                  ? 'bg-brand-soft text-brand-deep border-brand-light'
-                                  : 'bg-wholesale-bg text-wholesale-text border-wholesale-border/60'
-                              }`}
-                            >
-                              {variant.allowDecimalQty ? 'দশমিক ওজন' : 'পূর্ণসংখ্যা'}
-                            </span>
-                          </div>
-                        </td>
-
-                        <td className="py-2.5 px-3 text-right font-mono tabular-nums">
+                        <td className="py-2 px-3 text-right font-mono tabular-nums">
                           <div className="font-bold text-ink-primary text-xs sm:text-sm">
                             {formatWeight(variant.stockQuantity, variant.baseUnitName)}
                           </div>
@@ -558,7 +461,7 @@ export function ProductListTable({
                           )}
                         </td>
 
-                        <td className="py-2.5 px-3 text-right font-mono tabular-nums text-xs">
+                        <td className="py-2 px-3 text-right font-mono tabular-nums text-xs">
                           <div className="text-ink-primary font-bold">
                             খুচরা: {formatCurrency(variant.retailPrice, false)}
                           </div>
@@ -570,7 +473,7 @@ export function ProductListTable({
                           </div>
                         </td>
 
-                        <td className="py-2.5 px-3 text-center w-12">
+                        <td className="py-2 px-3 text-center w-12">
                           <ActionDropdown items={variantItems} title={`${variant.variantName} অ্যাকশন`} />
                         </td>
                       </tr>
@@ -583,9 +486,7 @@ export function ProductListTable({
         )}
         emptyState={
           <div className="p-12 text-center">
-            <div className="w-10 h-10 rounded-lg bg-brand-soft text-brand-deep border border-brand-light flex items-center justify-center mx-auto mb-2.5">
-              <Package size={22} weight="bold" />
-            </div>
+            <Package size={28} weight="bold" className="mx-auto mb-2 text-ink-muted" />
             <h4 className="text-sm font-semibold text-ink-primary">কোনো পণ্য পাওয়া যায়নি</h4>
             <p className="text-xs text-ink-secondary max-w-sm mx-auto mt-1">
               অনুসন্ধানের সাথে কোনো পণ্য মিলেনি অথবা ক্যাটালগে এখনো পণ্য যুক্ত করা হয়নি।

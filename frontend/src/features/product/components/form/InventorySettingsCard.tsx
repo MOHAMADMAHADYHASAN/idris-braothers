@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useId } from 'react';
-import { Warehouse, Barcode, Scales, WarningCircle, Sparkle } from '@phosphor-icons/react';
+import { Sparkle } from '@phosphor-icons/react';
 import { generateRandom6Digits } from '@/lib/skuGenerator';
 
 interface InventorySettingsCardProps {
@@ -23,7 +23,7 @@ interface ProductCodeCardProps {
   setBarcode: (v: string) => void;
 }
 
-const COMMON_BASE_UNITS = ['কেজি', 'পিস', 'প্যাকেট', 'বোতল', 'লিটার', 'গ্রাম', 'পাতা'];
+const COMMON_BASE_UNITS = ['কেজি', 'পিস', 'প্যাকেট', 'বোতল', 'লিটার'];
 const DECIMAL_CAPABLE_UNITS = new Set(['কেজি', 'গ্রাম', 'লিটার']);
 
 export function InventorySettingsCard({
@@ -44,24 +44,12 @@ export function InventorySettingsCard({
   };
 
   return (
-    <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden">
-      {/* কার্ড হেডার */}
-      <div className="px-5 py-3.5 bg-surface-subtle/60 border-b border-border-default flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="p-1.5 rounded-lg bg-brand-soft text-brand-deep">
-            <Warehouse size={16} weight="bold" />
-          </span>
-          <h2 className="text-sm font-bold text-ink-primary">
-            ৩. একক ও স্টক পরিমাণ
-          </h2>
-        </div>
-        <span className="text-xs text-ink-secondary font-medium">
-          {isEditMode ? 'বর্তমান মজুত' : 'কতটুকু যোগ করব'}
-        </span>
+    <div className="bg-surface-card rounded-xl border border-border-default surface-card-crisp overflow-hidden">
+      <div className="px-5 py-3.5 border-b border-border-default">
+        <h2 className="text-sm font-bold text-ink-primary">স্টক ও একক</h2>
       </div>
 
       <div className="p-5 space-y-4">
-        {/* বেস ইউনিট নির্বাচন */}
         <div>
           <label htmlFor={`${formId}-base-unit`} className="block text-xs font-semibold text-ink-body mb-1">
             মূল একক <span className="text-danger">*</span>
@@ -73,7 +61,7 @@ export function InventorySettingsCard({
             value={baseUnitName}
             onChange={(e) => setBaseUnitName(e.target.value)}
             placeholder="কেজি / পিস / প্যাকেট"
-            className="w-full px-3 py-2 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep text-xs sm:text-sm text-ink-primary font-medium"
+            className="w-full px-3 py-2 rounded-lg border border-border-strong bg-surface-card focus:outline-none focus:ring-2 focus:ring-brand-deep text-xs sm:text-sm text-ink-primary font-medium"
           />
           <div className="flex flex-wrap gap-1.5 mt-2">
             {COMMON_BASE_UNITS.map((u) => (
@@ -93,11 +81,10 @@ export function InventorySettingsCard({
           </div>
         </div>
 
-        {/* স্টক ও অ্যালার্ট লিমিট */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
           <div>
             <label htmlFor={`${formId}-stock`} className="block text-xs font-semibold text-ink-body mb-1">
-              {isEditMode ? 'বর্তমান মজুত' : 'শুরুর স্টক (কতটুকু যোগ করব)'}
+              {isEditMode ? 'বর্তমান মজুত' : 'শুরুর মজুত'}
             </label>
             <div className="relative">
               <input
@@ -108,7 +95,7 @@ export function InventorySettingsCard({
                 value={stockQuantity}
                 onChange={(e) => setStockQuantity(e.target.value)}
                 placeholder="0"
-                className="w-full pl-3 pr-14 py-2 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep font-mono text-xs sm:text-sm font-bold text-ink-primary"
+                className="w-full pl-3 pr-14 py-2 rounded-lg border border-border-strong bg-surface-card focus:outline-none focus:ring-2 focus:ring-brand-deep font-mono text-xs sm:text-sm font-bold text-ink-primary"
               />
               <span className="absolute right-2.5 top-2.5 text-xs text-ink-secondary font-sans pointer-events-none">
                 {baseUnitName || 'একক'}
@@ -117,9 +104,8 @@ export function InventorySettingsCard({
           </div>
 
           <div>
-            <label htmlFor={`${formId}-alert`} className="block text-xs font-semibold text-ink-body mb-1 flex items-center gap-1">
-              <WarningCircle size={13} weight="bold" className="text-wholesale-solid" />
-              <span>লো-স্টক অ্যালার্ট</span>
+            <label htmlFor={`${formId}-alert`} className="block text-xs font-semibold text-ink-body mb-1">
+              লো-স্টক অ্যালার্ট
             </label>
             <div className="relative">
               <input
@@ -130,7 +116,7 @@ export function InventorySettingsCard({
                 value={lowStockAlert}
                 onChange={(e) => setLowStockAlert(e.target.value)}
                 placeholder="10"
-                className="w-full pl-3 pr-14 py-2 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep font-mono text-xs sm:text-sm text-ink-primary"
+                className="w-full pl-3 pr-14 py-2 rounded-lg border border-border-strong bg-surface-card focus:outline-none focus:ring-2 focus:ring-brand-deep font-mono text-xs sm:text-sm text-ink-primary"
               />
               <span className="absolute right-2.5 top-2.5 text-xs text-ink-secondary font-sans pointer-events-none">
                 {baseUnitName || 'একক'}
@@ -139,18 +125,16 @@ export function InventorySettingsCard({
           </div>
         </div>
 
-        {/* ওজনযোগ্য (ডেসিমাল) টগল */}
-        <div className="pt-1 border-t border-border-subtle">
-          <label className="flex items-center gap-2.5 cursor-pointer pt-2">
+        <div className="pt-2 border-t border-border-subtle">
+          <label className="flex items-center gap-2.5 cursor-pointer">
             <input
               type="checkbox"
               checked={allowDecimalQty}
               onChange={(e) => setAllowDecimalQty(e.target.checked)}
               className="rounded accent-brand-deep h-4 w-4 border-border-strong cursor-pointer"
             />
-            <span className="text-xs font-bold text-ink-primary flex items-center gap-1.5">
-              <Scales size={14} weight="bold" className="text-brand-deep" />
-              ওজনযোগ্য পণ্য (ভগ্নাংশ যেমন ০.৫, ০.৭৫ বিক্রি সম্ভব)
+            <span className="text-xs font-semibold text-ink-primary">
+              ভগ্নাংশ ওজন অনুমোদিত (যেমন ০.৫ কেজি)
             </span>
           </label>
         </div>
@@ -165,28 +149,21 @@ export function InventorySettingsCard({
 export function ProductCodeCard({ sku, setSku, barcode, setBarcode }: ProductCodeCardProps) {
   const codeId = useId();
   return (
-    <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden">
-      <div className="px-5 py-3.5 bg-surface-subtle/60 border-b border-border-default flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="p-1.5 rounded-lg bg-brand-soft text-brand-deep">
-            <Barcode size={16} weight="bold" />
-          </span>
-          <h2 className="text-sm font-bold text-ink-primary">
-            SKU ও বারকোড
-          </h2>
-        </div>
+    <div className="bg-surface-card rounded-xl border border-border-default surface-card-crisp overflow-hidden">
+      <div className="px-5 py-3.5 border-b border-border-default">
+        <h2 className="text-sm font-bold text-ink-primary">SKU ও বারকোড</h2>
       </div>
 
       <div className="p-5 space-y-3.5">
         <div>
           <div className="flex items-center justify-between mb-1">
             <label htmlFor={`${codeId}-sku`} className="block text-xs font-semibold text-ink-body">
-              SKU (স্টক কোড)
+              SKU
             </label>
             <button
               type="button"
               onClick={() => setSku(generateRandom6Digits())}
-              className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-brand-soft hover:bg-brand-light/60 text-brand-deep text-xs font-bold border border-brand-light transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-brand-soft hover:bg-brand-light/60 text-brand-deep text-xs font-semibold border border-brand-light transition-colors cursor-pointer"
               title="নতুন ৬-ডিজিটের ইউনিক SKU তৈরি করুন"
             >
               <Sparkle size={12} weight="bold" />
@@ -199,14 +176,13 @@ export function ProductCodeCard({ sku, setSku, barcode, setBarcode }: ProductCod
             value={sku}
             onChange={(e) => setSku(e.target.value)}
             placeholder="৬-ডিজিট SKU"
-            className="w-full px-3 py-2 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep font-mono text-xs sm:text-sm text-ink-primary"
+            className="w-full px-3 py-2 rounded-lg border border-border-strong bg-surface-card focus:outline-none focus:ring-2 focus:ring-brand-deep font-mono text-xs sm:text-sm text-ink-primary"
           />
         </div>
 
         <div>
-          <label htmlFor={`${codeId}-barcode`} className="block text-xs font-semibold text-ink-body mb-1 flex items-center gap-1">
-            <Barcode size={14} weight="bold" className="text-ink-secondary" />
-            <span>বারকোড নম্বর (ঐচ্ছিক)</span>
+          <label htmlFor={`${codeId}-barcode`} className="block text-xs font-semibold text-ink-body mb-1">
+            বারকোড (ঐচ্ছিক)
           </label>
           <input
             id={`${codeId}-barcode`}
@@ -214,7 +190,7 @@ export function ProductCodeCard({ sku, setSku, barcode, setBarcode }: ProductCod
             value={barcode}
             onChange={(e) => setBarcode(e.target.value)}
             placeholder="বারকোড লিখুন বা স্ক্যান করুন"
-            className="w-full px-3 py-2 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep font-mono text-xs sm:text-sm text-ink-primary"
+            className="w-full px-3 py-2 rounded-lg border border-border-strong bg-surface-card focus:outline-none focus:ring-2 focus:ring-brand-deep font-mono text-xs sm:text-sm text-ink-primary"
           />
         </div>
       </div>

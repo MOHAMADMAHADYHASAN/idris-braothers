@@ -43,44 +43,34 @@ export function ProductMobileCard({
       {/* ১. হেডার */}
       <div className="p-3 bg-surface-subtle/60 border-b border-border-subtle flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <Link
-              href={`/products/${product.id}`}
-              className="font-bold text-ink-primary text-sm hover:underline hover:text-brand-deep"
-            >
-              {product.name}
-            </Link>
-            {product.category && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-surface-subtle text-ink-body border border-border-default">
-                {product.category.banglaName || product.category.name}
-              </span>
-            )}
-            {product.brand && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-brand-soft text-brand-deep border border-brand-light">
-                {product.brand.banglaName || product.brand.name}
-              </span>
-            )}
-          </div>
-          {product.banglaName && (
+          <Link
+            href={`/products/${product.id}`}
+            className="font-bold text-ink-primary text-sm hover:underline hover:text-brand-deep block truncate"
+          >
+            {product.name}
+          </Link>
+          {(product.banglaName || product.category || product.brand) && (
             <p className="text-xs text-ink-secondary mt-0.5 truncate">
-              {product.banglaName}
+              {[
+                product.banglaName,
+                product.category ? (product.category.banglaName || product.category.name) : null,
+                product.brand ? (product.brand.banglaName || product.brand.name) : null,
+              ]
+                .filter(Boolean)
+                .join(' • ')}
             </p>
           )}
         </div>
 
-        {/* স্টক স্ট্যাটাস ব্যাজ */}
-        <div className="shrink-0">
-          {isLowStock ? (
+        {/* স্টক স্ট্যাটাস ব্যাজ (কেবল সংকট থাকলে) */}
+        {isLowStock && (
+          <div className="shrink-0">
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-due-bg text-due-text border border-due-border">
               <Warning size={12} weight="fill" />
               <span>স্টক সংকট</span>
             </span>
-          ) : (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-semibold bg-cash-bg text-cash-text border border-cash-border">
-              পর্যাপ্ত
-            </span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* ২. কী-ভ্যালু গ্রিড */}
@@ -91,9 +81,9 @@ export function ProductMobileCard({
               SKU ও বারকোড
             </span>
             <span className="font-mono text-ink-primary font-semibold tabular-nums text-xs">
-              {primaryVariant?.sku || '—'}
+              {hasMultipleVariants ? '—' : primaryVariant?.sku || '—'}
             </span>
-            {primaryVariant?.barcode && (
+            {!hasMultipleVariants && primaryVariant?.barcode && (
               <span className="block font-mono text-xs text-ink-secondary tabular-nums">
                 {primaryVariant.barcode}
               </span>
@@ -117,42 +107,15 @@ export function ProductMobileCard({
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <span className="text-xs font-semibold text-ink-secondary block">
-              একক ও ধরন
-            </span>
-            <div className="mt-1 flex flex-wrap items-center gap-1.5">
-              <span className="text-xs font-semibold text-ink-primary">
-                {primaryVariant?.baseUnitName || product.baseUnitName || 'কেজি'}
-              </span>
-              <span
-                className={`inline-flex px-2 py-0.5 rounded text-xs font-semibold border ${
-                  primaryVariant?.allowDecimalQty !== false
-                    ? 'bg-brand-soft text-brand-deep border-brand-light'
-                    : 'bg-wholesale-bg text-wholesale-text border-wholesale-border/60'
-                }`}
-              >
-                {primaryVariant?.allowDecimalQty !== false ? 'দশমিক ওজন' : 'পূর্ণসংখ্যা'}
-              </span>
-            </div>
+        <div className="flex items-center justify-between gap-2 text-xs font-mono tabular-nums">
+          <div className="text-ink-secondary">
+            কেনা: {formatCurrency(primaryVariant?.currentPurchasePrice ?? 0, false)}
           </div>
-
-          <div className="text-right">
-            <span className="text-xs font-semibold text-ink-secondary block">
-              কেনা ও বিক্রয় দর
-            </span>
-            <div className="mt-1 space-y-0.5 font-mono tabular-nums text-xs">
-              <div className="text-ink-secondary">
-                কেনা: {formatCurrency(primaryVariant?.currentPurchasePrice ?? 0, false)}
-              </div>
-              <div className="font-bold text-ink-primary">
-                খুচরা: {formatCurrency(primaryVariant?.retailPrice ?? 0, false)}
-              </div>
-              <div className="text-wholesale-text font-semibold">
-                পাইকারি: {formatCurrency(primaryVariant?.wholesalePrice ?? 0, false)}
-              </div>
-            </div>
+          <div className="font-bold text-ink-primary">
+            খুচরা: {formatCurrency(primaryVariant?.retailPrice ?? 0, false)}
+          </div>
+          <div className="text-wholesale-text font-semibold">
+            পাইকারি: {formatCurrency(primaryVariant?.wholesalePrice ?? 0, false)}
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useId } from 'react';
-import { Folders, Plus } from '@phosphor-icons/react';
+import { Plus } from '@phosphor-icons/react';
 import { Category, Brand } from '../../product.types';
 import { InlineTaxonomyModal } from './InlineTaxonomyModal';
 import { CustomSelect } from '@/components/shared/CustomSelect';
@@ -43,18 +43,9 @@ export function TaxonomyCard({
 
   return (
     <>
-      <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden">
-        {/* কার্ড হেডার */}
-        <div className="px-5 py-3.5 bg-surface-subtle/60 border-b border-border-default flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="p-1.5 rounded-lg bg-wholesale-bg text-wholesale-text">
-              <Folders size={16} weight="bold" />
-            </span>
-            <h2 className="text-sm font-bold text-ink-primary">
-              ক্যাটাগরি ও ব্র্যান্ড
-            </h2>
-          </div>
-          <span className="text-xs text-ink-secondary">শ্রেণিবিভাগ</span>
+      <div className="bg-surface-card rounded-xl border border-border-default surface-card-crisp overflow-hidden">
+        <div className="px-5 py-3.5 border-b border-border-default">
+          <h2 className="text-sm font-bold text-ink-primary">ক্যাটাগরি ও ব্র্যান্ড</h2>
         </div>
 
         <div className="p-5 space-y-4">

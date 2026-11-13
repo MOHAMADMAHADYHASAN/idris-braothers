@@ -2,7 +2,7 @@
 
 import React, { useState, useId } from 'react';
 import { motion } from 'motion/react';
-import { X, WarningCircle, ArrowDown } from '@phosphor-icons/react';
+import { X, ArrowDown } from '@phosphor-icons/react';
 import { ProductVariant } from '../product.types';
 import { useProductStore } from '../useProductStore';
 import { formatCurrency, formatWeight } from '@/lib/decimal';
@@ -76,17 +76,15 @@ export function RecordWastageModal({ isOpen, onClose, variant, productName }: Re
         transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
         className="bg-surface-card rounded-xl shadow-[0_20px_25px_-5px_rgba(15,23,42,0.1)] border border-border-default max-w-md w-full overflow-hidden focus:outline-hidden"
       >
-        <div className="px-4 py-3.5 border-b border-border-subtle flex items-center justify-between bg-surface-subtle/70">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-wholesale-bg border border-wholesale-border/60 text-wholesale-text flex items-center justify-center shrink-0">
-              <WarningCircle size={17} weight="bold" />
-            </div>
-            <div>
-              <h3 id={titleId} className="text-sm font-bold text-ink-primary leading-tight">স্টক অপচয় ও ঘাটতি এন্ট্রি</h3>
-              <p className="text-xs text-ink-secondary truncate max-w-[240px]">
-                {productName} {variant.variantName !== 'Default' ? `(${variant.variantName})` : ''}
-              </p>
-            </div>
+        <div className="px-4 py-3 border-b border-border-subtle flex items-center justify-between bg-surface-subtle/70">
+          <div>
+            <h3 id={titleId} className="text-sm font-bold text-ink-primary leading-tight">স্টক অপচয় ও ঘাটতি এন্ট্রি</h3>
+            <p className="text-xs text-ink-secondary truncate max-w-[280px] mt-0.5">
+              {productName} {variant.variantName !== 'Default' ? `(${variant.variantName})` : ''} • বর্তমান স্টক:{' '}
+              <span className="font-mono font-semibold text-ink-primary">
+                {formatWeight(variant.stockQuantity, variant.baseUnitName)}
+              </span>
+            </p>
           </div>
           <button
             type="button"
@@ -104,13 +102,6 @@ export function RecordWastageModal({ isOpen, onClose, variant, productName }: Re
               {error}
             </div>
           )}
-
-          <div className="bg-surface-subtle p-3 rounded-lg border border-border-default flex items-center justify-between text-xs">
-            <span className="text-ink-secondary font-medium">বর্তমান মোট স্টক:</span>
-            <span className="font-mono tabular-nums font-bold text-ink-primary">
-              {formatWeight(variant.stockQuantity, variant.baseUnitName)}
-            </span>
-          </div>
 
           <div>
             <label htmlFor={`${formId}-qty`} className="block text-xs font-semibold text-ink-body mb-1">
