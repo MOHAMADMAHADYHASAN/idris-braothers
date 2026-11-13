@@ -289,3 +289,10 @@ src/
    - `BasicInfoCard`, `PricingMarginCard`, `InventorySettingsCard`, `ProductCodeCard`, `TaxonomyCard`, `ProductStickyHeader` ও `VariantsStockMatrixCard` থেকে নম্বরিং (`১.`, `২.`, `৩.`), রঙিন হেডার আইকন বক্স ও অতিরিক্ত সাব-টেক্সট/ব্যাজ সরিয়ে পরিচ্ছন্ন টাইপোগ্রাফিক হেডার করা হয়েছে।
    - `BasicInfoCard`-এ `পণ্যের নাম` ও `বাংলা নাম` পাশাপাশি গ্রিডে আনা হয়েছে, ২টি বড় ধরণ কার্ডের বদলে কম্প্যাক্ট Segmented Toggle (এডিট মোডে লকড) এবং `textarea`-র বদলে ১-লাইনের `নোট` ইনপুট দেওয়া হয়েছে।
    - `PricingMarginCard`-এ কার্ডের ভেতর থাকা ২টি মার্জিন বক্স সরিয়ে পাইকারি ও খুচরা দরের নিচে সরাসরি ১-লাইনের ইনলাইন লাভ/লোকসান ইন্ডিকেটর রাখা হয়েছে (`VariantsStockMatrixCard`-এর প্রিসেট স্ট্রিপ অপরিবর্তিত রাখা হয়েছে)।
+12. **`impeccable /distill` + `/clarify` অনুযায়ী পণ্য ক্যাটালগ ও ইনভেন্টরি পেজ (`/products`) ক্লিনআপ:**
+   - পেজ হেডার থেকে ডুপ্লিকেট `ক্যাটালগ` ব্যাজ ও `ProductFilterBar`-এর ডুপ্লিকেট রিফ্রেশ বাটন অপসারিত।
+   - `ProductKpiSummary`-র ৪টি কার্ড থেকে রঙিন আইকন বক্স সরানো হয়েছে এবং পেজ-ভিত্তিক মেট্রিক্সে `(এই পেজ)` স্পষ্ট করা হয়েছে।
+   - `ProductListTable`-এর অপ্রয়োজনীয় `ধরণ` ও `একক ও ধরন` কলাম দুটি বাদ দিয়ে টেবিল ৯-কলামে নামানো হয়েছে, একক পণ্যের ধূসর ডট সরানো হয়েছে, সবুজ `পর্যাপ্ত` ব্যাজ বাদ দিয়ে কেবল `স্টক সংকট` রাখা হয়েছে, এবং সাব-টেবিল থেকে অপ্রয়োজনীয় কলাম সরানো হয়েছে।
+   - `ProductMobileCard`, `QuickPriceModal` এবং `RecordWastageModal` থেকে হেডার আইকন বক্স, আলাদা স্টক বক্স ও রঙিন পিল ক্লিন করে ইনলাইন স্টাইলে আনা হয়েছে।
+13. **Impeccable Skills Suite (`jetsongdev/impeccable`) প্রজেক্ট ফোল্ডারে অন্তর্ভুক্তি:**
+   - প্রজেক্ট রুটের `.agents/skills/`-এ `jetsongdev/impeccable`-এর ২১টি পূর্ণাঙ্গ ডিজাইন স্কিল (`frontend-design` ও এর ৭টি ডোমেইন রেফারেন্স সহ `adapt`, `animate`, `arrange`, `audit`, `bolder`, `clarify`, `colorize`, `critique`, `delight`, `distill`, `extract`, `harden`, `normalize`, `onboard`, `optimize`, `overdrive`, `polish`, `quieter`, `teach-impeccable`, `typeset`) যুক্ত করা হয়েছে।
