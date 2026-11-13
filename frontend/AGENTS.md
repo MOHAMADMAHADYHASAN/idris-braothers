@@ -294,5 +294,6 @@ src/
    - `ProductKpiSummary`-র ৪টি কার্ড থেকে রঙিন আইকন বক্স সরানো হয়েছে এবং পেজ-ভিত্তিক মেট্রিক্সে `(এই পেজ)` স্পষ্ট করা হয়েছে।
    - `ProductListTable`-এর অপ্রয়োজনীয় `ধরণ` ও `একক ও ধরন` কলাম দুটি বাদ দিয়ে টেবিল ৯-কলামে নামানো হয়েছে, একক পণ্যের ধূসর ডট সরানো হয়েছে, সবুজ `পর্যাপ্ত` ব্যাজ বাদ দিয়ে কেবল `স্টক সংকট` রাখা হয়েছে, এবং সাব-টেবিল থেকে অপ্রয়োজনীয় কলাম সরানো হয়েছে।
    - `ProductMobileCard`, `QuickPriceModal` এবং `RecordWastageModal` থেকে হেডার আইকন বক্স, আলাদা স্টক বক্স ও রঙিন পিল ক্লিন করে ইনলাইন স্টাইলে আনা হয়েছে।
-13. **Impeccable Skills Suite (`jetsongdev/impeccable`) প্রজেক্ট ফোল্ডারে অন্তর্ভুক্তি:**
+13. **Impeccable Skills Suite (`jetsongdev/impeccable`) প্রজেক্ট ফোল্ডারে অন্তর্ভুক্তি ও প্রাইভেসি রক্ষা:**
    - প্রজেক্ট রুটের `.agents/skills/`-এ `jetsongdev/impeccable`-এর ২১টি পূর্ণাঙ্গ ডিজাইন স্কিল (`frontend-design` ও এর ৭টি ডোমেইন রেফারেন্স সহ `adapt`, `animate`, `arrange`, `audit`, `bolder`, `clarify`, `colorize`, `critique`, `delight`, `distill`, `extract`, `harden`, `normalize`, `onboard`, `optimize`, `overdrive`, `polish`, `quieter`, `teach-impeccable`, `typeset`) যুক্ত করা হয়েছে।
+   - রিপোজিটরি ক্লোন করলে অন্যরা যাতে দেখতে না পায় সেজন্য রুট `.gitignore`-এ `.agents/skills/` যোগ করে সুরক্ষিত রাখা হয়েছে।
