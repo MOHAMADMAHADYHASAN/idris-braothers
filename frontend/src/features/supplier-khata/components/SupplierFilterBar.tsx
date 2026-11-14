@@ -42,7 +42,7 @@ export function SupplierFilterBar() {
             type="text"
             value={localSearch}
             onChange={(e) => setLocalSearch(e.target.value)}
-            placeholder="নাম, গদি, ফোন বা মোকাম খুঁজুন..."
+            placeholder="নাম, প্রতিষ্ঠান, ফোন বা ঠিকানা খুঁজুন..."
             className="w-full pl-8 pr-8 py-1.5 bg-surface-subtle border border-border-default rounded-md text-xs sm:text-sm text-ink-primary placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep focus:bg-surface-card transition-[background-color,border-color,box-shadow]"
           />
           {localSearch && (

@@ -147,7 +147,7 @@ export function CashboxReconciliationCard() {
         )}
       </div>
 
-      {/* ডানে: ফিজিক্যাল নোট গণক */}
+      {/* ডানে: ফিজিক্যাল নোট গণনা */}
       <div className="lg:col-span-5 bg-surface-card rounded-xl border border-border-default p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] space-y-3.5">
         <div className="border-b border-border-default pb-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -156,11 +156,12 @@ export function CashboxReconciliationCard() {
             </div>
             <div>
               <h3 className="font-bold text-sm text-ink-primary">
-                ক্যাশ ড্রয়ার নোট গণক
+                নোট গণনা (ক্যাশ ড্রয়ার)
               </h3>
             </div>
           </div>
           <button
+            type="button"
             onClick={resetDenominations}
             className="text-xs text-brand-deep hover:underline font-semibold active:scale-[0.98] transition-colors cursor-pointer"
           >

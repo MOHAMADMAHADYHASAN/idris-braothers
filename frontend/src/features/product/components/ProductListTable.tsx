@@ -251,7 +251,7 @@ export function ProductListTable({
       },
       {
         key: 'stockQuantity',
-        header: 'মজুত স্টক',
+        header: 'বর্তমান স্টক',
         headerClassName: 'text-right',
         cellClassName: 'text-right',
         renderCell: (product) => {
@@ -384,7 +384,7 @@ export function ProductListTable({
                     <th className="py-2 pl-8 pr-3">ভ্যারিয়েন্ট</th>
                     <th className="py-2 px-3">SKU</th>
                     <th className="py-2 px-3">বারকোড</th>
-                    <th className="py-2 px-3 text-right">মজুত স্টক</th>
+                    <th className="py-2 px-3 text-right">বর্তমান স্টক</th>
                     <th className="py-2 px-3 text-right">দরসমূহ</th>
                     <th className="py-2 px-3 text-center w-12">অ্যাকশন</th>
                   </tr>

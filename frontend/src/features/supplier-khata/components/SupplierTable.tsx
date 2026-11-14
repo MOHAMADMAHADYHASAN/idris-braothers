@@ -57,7 +57,7 @@ export function SupplierTable() {
       },
       {
         key: 'address',
-        header: 'মোকাম / আড়ত এলাকা',
+        header: 'ঠিকানা',
         renderCell: (s) =>
           s.address ? (
             <div className="flex items-center gap-1 text-ink-body text-xs">
@@ -158,15 +158,15 @@ export function SupplierTable() {
               <span>দেনা শোধ</span>
             </button>
 
-            {/* খতিয়ান বিবরণী বাটন */}
+            {/* লেজার বিবরণী বাটন */}
             <Link
               href={`/khata/suppliers/${s.id}`}
               onClick={(e) => e.stopPropagation()}
               className={buttonClasses({ variant: 'secondary', size: 'xs', className: 'gap-1' })}
-              title="মহাজনের রানিং চালান ও খতিয়ান"
+              title="মহাজনের চালান ও লেজার"
             >
               <Scroll size={14} weight="bold" className="text-brand-deep" />
-              <span>খতিয়ান</span>
+              <span>লেজার</span>
             </Link>
 
             {/* ছাড় / সমন্বয় */}

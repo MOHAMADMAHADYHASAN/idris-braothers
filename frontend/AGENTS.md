@@ -297,3 +297,22 @@ src/
 13. **Impeccable Skills Suite (`jetsongdev/impeccable`) প্রজেক্ট ফোল্ডারে অন্তর্ভুক্তি ও প্রাইভেসি রক্ষা:**
    - প্রজেক্ট রুটের `.agents/skills/`-এ `jetsongdev/impeccable`-এর ২১টি পূর্ণাঙ্গ ডিজাইন স্কিল (`frontend-design` ও এর ৭টি ডোমেইন রেফারেন্স সহ `adapt`, `animate`, `arrange`, `audit`, `bolder`, `clarify`, `colorize`, `critique`, `delight`, `distill`, `extract`, `harden`, `normalize`, `onboard`, `optimize`, `overdrive`, `polish`, `quieter`, `teach-impeccable`, `typeset`) যুক্ত করা হয়েছে।
    - রিপোজিটরি ক্লোন করলে অন্যরা যাতে দেখতে না পায় সেজন্য রুট `.gitignore`-এ `.agents/skills/` যোগ করে সুরক্ষিত রাখা হয়েছে।
+
+14. **Category Preset Config & UoM Matrix Integration (`Category.presetConfig`):**
+    - ক্যাটাগরি নির্বাচনের সাথে সাথে ফর্মের একক ও মোড স্বয়ংক্রিয়ভাবে সমন্বয় করার জন্য `Category.presetConfig` ইন্টিগ্রেশন সম্পন্ন হয়েছে:
+      - `frontend/src/features/product/product.types.ts`: `CategoryQuickSize`, `CategorySuggestedUnit`, `CategoryPresetConfig` টাইপ ও `Category.presetConfig` যুক্ত করা হয়েছে।
+      - `frontend/src/features/product/components/form/ProductFormClient.tsx`: নতুন পণ্য যোগ করার সময় ক্যাটাগরি বাছাই করলেই ডিফল্ট বেস ইউনিট (`defaultBaseUnit`) ও দশমিক মোড (`allowDecimal`) অটো-সিঙ্ক হয় এবং নির্বাচিত ক্যাটাগরির প্রিসেট কনফিগ `VariantsStockMatrixCard`-এ পাস করা হয়।
+      - `frontend/src/features/product/components/form/VariantsStockMatrixCard.tsx`: নির্বাচিত ক্যাটাগরির কুইক সাইজ প্রিসেট বাটনগুলো (যেমন: `১ কেজি`, `৫ কেজি`, `২৫ কেজি বস্তা`, `৫০ কেজি বস্তা`) প্রদর্শিত হয় এবং ক্লিক করলে স্বয়ংক্রিয়ভাবে ভ্যারিয়েন্টের নাম, একক ও মোড সেট করে ৬-ডিজিটের ইউনিক SKU জেনারেট হয়। পাশাপাশি আড়তের সহায়ক রূপান্তর হিসাব (যেমন: `১ বস্তা = ৫০ কেজি`, `১ পাল্লা = ৫ কেজি`) ইনফো ব্যাজ আকারে প্রদর্শিত হয়।
+      - `frontend/src/features/product/components/form/InventorySettingsCard.tsx`: একক পণ্যের ক্ষেত্রে আড়ত রূপান্তর নির্দেশিকা প্রদর্শনের সুযোগ রাখা হয়েছে।
+
+15. **Cashbox Expense Category Filter Dropdown Overhaul (`ExpenseHistoryTable.tsx`):**
+    - দোকানের খরচের খাতা (`/cashbox`) ফিল্টার বারের অনুভূমিক বাটন পিলস সরিয়ে সেন্ট্রালাইজড [`CustomSelect`](src/components/shared/CustomSelect.tsx) পোর্টাল ড্রপডাউন যুক্ত করা হয়েছে।
+    - অপশনসমূহ সরাসরি ডাটাবেজ `enum ExpenseCategory` (`LABOR_KULI`, `TRANSPORT_VAN`, `TEA_SNACKS`, `ELECTRICITY_UTILITY`, `SHOP_MAINTENANCE`, `OTHER`) এর সাথে সিঙ্ক করা হয়েছে এবং `ALL` অপশনের মাধ্যমে সম্পূর্ণ খরচের তালিকা দেখার ব্যবস্থা রাখা হয়েছে।
+
+16. **Commercial UX Writing & Terminology Overhaul (সহজ বাণিজ্যিক ভাষা ও বাংলিশ স্ট্যান্ডার্ড):**
+    - পুরো প্রজেক্ট থেকে কৃত্রিম, অতিরিক্ত আড়ষ্ট ও সাহিত্যিক অনুবাদ দূর করে দৈনন্দিন ব্যবসার মুখে মুখে ব্যবহৃত স্বাভাবিক ভাষা প্রতিস্থাপন করা হয়েছে:
+      - মহাজন ও কাস্টমার খাতা: `মোকাম / আড়ত এলাকা` ➔ `ঠিকানা`, `কোম্পানি ও মোকামের গদির নাম` ➔ `কোম্পানি বা প্রতিষ্ঠানের নাম`, `খতিয়ান` ➔ `লেজার`, `খতিয়ান দেখুন` ➔ `লেজার দেখুন` (`SupplierTable.tsx`, `SupplierFormModal.tsx`, `SupplierStatementClient.tsx`, `CustomerTable.tsx`, `CustomerStatementClient.tsx`)।
+      - ক্যাশবাক্স ও খরচ: `ক্যাশবাক্স রিকনসিলিয়েশন ও নোট গণক` ➔ `ক্যাশ ও নোট মেলানো`, `ক্যাশ ড্রয়ার নোট গণক` ➔ `নোট গণনা (ক্যাশ ড্রয়ার)`, `ক্যাশ আউট ভাউচার ও দৈনিক ছোট খরচ` ➔ `দৈনিক ছোট খরচ ও বিল` (`src/app/cashbox/page.tsx`, `CashboxReconciliationCard.tsx`, `ExpenseHistoryTable.tsx`, `CashboxHeroBanner.tsx`)।
+      - চালান ও পারচেজ: `মোকাম চালান ও স্টক-ইন রেজিস্টার` ➔ `ক্রয় চালান ও স্টক-ইন`, `মোকাম মেমো ও চালান নম্বর` ➔ `চালান / বিল নম্বর`, `মোকাম পরিচিতি` ➔ `মহাজন ও সরবরাহকারী তথ্য` (`src/app/purchases/page.tsx`, `ChallanHeaderCard.tsx`, `PurchaseHistoryTable.tsx`, `PurchaseDetailClient.tsx`, `PurchaseMobileCard.tsx`)।
+      - পণ্য ও ইনভেন্টরি: `মজুত স্টক` ও `বর্তমান মজুত` ➔ `বর্তমান স্টক`, `মজুত অ্যালার্ট সীমা` ➔ `স্টক ও অ্যালার্ট সীমা` (`ProductListTable.tsx`, `InventorySettingsCard.tsx`, `ProductProfile360Client.tsx`, `ProductMobileCard.tsx`, `VariantsStockMatrixCard.tsx`)।
+      - ড্যাশবোর্ড ও পিওএস: `সর্বমোট প্রদেয় বিল:` ➔ `মোট বিল:`, `সাধারণ নগদ খদ্দের (বাকি খাতা নেই)` ➔ `নগদ কাস্টমার (ওয়াক-ইন)`, `মেমো রেজিস্টার` ➔ `বিক্রয় মেমো`, `৪ দশমিক ও বস্তা রূপান্তর` ➔ `পণ্য তালিকা ও ইনভেন্টরি`, `আর্থিক রিকনসিলিয়েশন হিসাব` ➔ `পেমেন্ট ও বকেয়া হিসাব` (`src/app/page.tsx`, `PosSettlementPanel.tsx`, `SaleInvoiceDetailClient.tsx`)।

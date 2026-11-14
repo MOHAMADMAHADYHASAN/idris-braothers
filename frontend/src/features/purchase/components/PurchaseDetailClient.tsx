@@ -87,7 +87,7 @@ export function PurchaseDetailClient({ purchaseId }: PurchaseDetailClientProps) 
             <div>
               <div className="flex items-center gap-2">
                 <h1 className="text-base sm:text-lg font-bold text-ink-primary">
-                  মোকাম চালান #{purchase.purchaseNumber}
+                  ক্রয় চালান #{purchase.purchaseNumber}
                 </h1>
                 <span
                   className={`px-2 py-0.5 rounded-md text-xs font-bold border ${
@@ -148,7 +148,7 @@ export function PurchaseDetailClient({ purchaseId }: PurchaseDetailClientProps) 
             <div className="p-4 rounded-xl bg-surface-subtle/70 border border-border-default flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <span className="text-xs font-bold text-ink-secondary block mb-0.5">
-                  মহাজন ও মোকামের তথ্য
+                  মহাজন ও সরবরাহকারী তথ্য
                 </span>
                 <div className="font-bold text-ink-primary text-sm sm:text-base flex items-center gap-2">
                   <Buildings size={16} weight="bold" className="text-brand-deep" />

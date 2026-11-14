@@ -120,7 +120,7 @@ export function QuickExpenseBar() {
             <button
               type="submit"
               disabled={isSubmitting || !amountStr || !description.trim()}
-              className="w-full py-2 px-3 rounded-lg bg-brand-deep hover:bg-brand-hover active:scale-[0.98] text-white font-semibold text-xs flex items-center justify-center gap-1 transition-all shadow-2xs disabled:opacity-50 cursor-pointer"
+              className="w-full py-2 px-3 rounded-lg bg-brand-deep hover:bg-brand-hover active:scale-[0.98] text-white font-semibold text-xs flex items-center justify-center gap-1.5 transition-all shadow-2xs disabled:opacity-50 cursor-pointer"
             >
               <Plus size={14} weight="bold" />
               <span>যুক্ত করুন</span>

@@ -51,10 +51,10 @@ export function PurchaseMobileCard({ purchase, onOpenDetail }: PurchaseMobileCar
         <div className="grid grid-cols-2 gap-2 pb-2.5 border-b border-border-subtle">
           <div>
             <span className="text-xs font-semibold text-ink-secondary block">
-              মোকাম ও ঠিকানা
+              ঠিকানা
             </span>
             <span className="text-ink-body text-xs truncate block">
-              {purchase.supplier?.address || 'মোকাম তথ্য নেই'}
+              {purchase.supplier?.address || 'ঠিকানা দেওয়া নেই'}
             </span>
           </div>
 

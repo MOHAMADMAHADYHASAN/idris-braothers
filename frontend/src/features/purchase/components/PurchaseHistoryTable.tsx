@@ -54,7 +54,7 @@ export function PurchaseHistoryTable({ onOpenDetail }: PurchaseHistoryTableProps
       },
       {
         key: 'supplier',
-        header: 'মহাজন ও মোকাম',
+        header: 'মহাজন ও ঠিকানা',
         renderCell: (p) => (
           <div>
             <span className="font-semibold text-ink-primary text-xs sm:text-sm block">

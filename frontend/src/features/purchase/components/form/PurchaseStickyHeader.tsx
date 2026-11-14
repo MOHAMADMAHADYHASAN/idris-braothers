@@ -36,7 +36,7 @@ export function PurchaseStickyHeader({
           <div className="min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <h1 className="text-sm sm:text-lg font-bold text-ink-primary truncate">
-                মোকাম চালান এন্ট্রি ও স্টক-ইন
+                ক্রয় চালান এন্ট্রি ও স্টক-ইন
               </h1>
               <Badge variant={itemCount > 0 ? 'brand' : 'wholesale'} className="hidden sm:inline-flex">
                 <Truck size={12} weight="bold" />

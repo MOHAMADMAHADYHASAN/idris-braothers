@@ -92,7 +92,7 @@ export function ProductMobileCard({
 
           <div className="text-right">
             <span className="text-xs font-semibold text-ink-secondary block">
-              মোট মজুত স্টক
+              মোট স্টক
             </span>
             <span
               className={`font-mono text-sm font-black tabular-nums ${

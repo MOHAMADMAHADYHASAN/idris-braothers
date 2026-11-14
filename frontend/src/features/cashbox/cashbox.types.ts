@@ -18,8 +18,8 @@ export interface DailyExpense {
   description: string;
   recordedAt: string;
   note?: string | null;
-  createdAt: string;
-  updatedAt: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CreateExpenseDTO {

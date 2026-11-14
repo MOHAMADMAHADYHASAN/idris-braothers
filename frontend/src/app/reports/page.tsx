@@ -73,6 +73,7 @@ export default function ReportsPage() {
             actions={
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={() => fetchAllReports()}
                   disabled={isAnyLoading}
                   className={buttonClasses({ variant: 'secondary', size: 'xs' })}

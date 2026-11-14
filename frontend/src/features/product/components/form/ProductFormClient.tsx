@@ -77,6 +77,25 @@ export function ProductFormClient({ productId, initialProduct }: ProductFormClie
     }
   }, [productId, initialProduct]);
 
+  // Selected Category Helper
+  const selectedCategory = categories.find((c) => c.id === categoryId);
+
+  // Auto-apply Category Preset on Category Selection (New Product Mode)
+  useEffect(() => {
+    if (!productId && !initialProduct && categoryId) {
+      const targetCat = categories.find((c) => c.id === categoryId);
+      if (targetCat?.presetConfig) {
+        const { defaultBaseUnit: catBaseUnit, allowDecimal: catAllowDecimal } = targetCat.presetConfig;
+        if (catBaseUnit) {
+          setBaseUnitName(catBaseUnit);
+        }
+        if (typeof catAllowDecimal === 'boolean') {
+          setAllowDecimalQty(catAllowDecimal);
+        }
+      }
+    }
+  }, [categoryId, categories, productId, initialProduct]);
+
   // Load product if editing via URL param
   useEffect(() => {
     if (productId && !initialProduct) {
@@ -527,6 +546,7 @@ export function ProductFormClient({ productId, initialProduct }: ProductFormClie
                     setIsDirty(true);
                   }}
                   isEditMode={isEditMode}
+                  suggestedUnits={selectedCategory?.presetConfig?.suggestedUnits}
                 />
               </>
             )}
@@ -581,6 +601,8 @@ export function ProductFormClient({ productId, initialProduct }: ProductFormClie
               }}
               defaultBaseUnit={baseUnitName}
               simpleSku={sku}
+              presetConfig={selectedCategory?.presetConfig || null}
+              categoryName={selectedCategory?.banglaName || selectedCategory?.name}
             />
           </div>
         )}

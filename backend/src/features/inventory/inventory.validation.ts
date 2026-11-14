@@ -131,6 +131,8 @@ export interface CreateCategoryInput {
   name: string;
   banglaName?: string | null;
   parentId?: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  presetConfig?: Record<string, any> | null;
 }
 
 export interface CreateBrandInput {
@@ -346,6 +348,7 @@ function validateCreateCategory(obj: PlainObject, ctx: ValidationContext): Creat
     name: parseString(obj, 'name', ctx, { required: true, min: 1, message: 'Category name is required' }) as string,
     banglaName: parseString(obj, 'banglaName', ctx, { nullable: true }),
     parentId: parseString(obj, 'parentId', ctx, { nullable: true }),
+    presetConfig: parseRecord(obj, 'presetConfig', ctx) || {},
   };
 }
 

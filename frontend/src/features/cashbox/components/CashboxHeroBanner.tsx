@@ -29,7 +29,7 @@ export function CashboxHeroBanner() {
           </div>
           <div>
             <h2 className="font-bold text-sm text-ink-primary leading-tight">
-              দৈনিক ক্যাশবাক্স ক্লোজিং ও রিকনসিলিয়েশন
+              দৈনিক ক্যাশ ক্লোজিং ও হিসাব
             </h2>
           </div>
         </div>
@@ -46,6 +46,7 @@ export function CashboxHeroBanner() {
           </div>
 
           <button
+            type="button"
             onClick={openClosingReceipt}
             className="px-3 py-1.5 rounded-lg bg-brand-deep hover:bg-brand-hover active:scale-[0.98] text-white text-xs font-semibold flex items-center gap-1.5 transition-[background-color,transform] duration-150 cursor-pointer"
             title="দিনের শেষে ক্যাশবাক্স ক্লোজিং স্লিপ প্রিন্ট করুন"

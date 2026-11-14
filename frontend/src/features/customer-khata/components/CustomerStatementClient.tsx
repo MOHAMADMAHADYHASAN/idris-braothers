@@ -211,7 +211,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
             </Link>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-base sm:text-lg font-bold text-ink-primary tracking-tight truncate">
+                <h1 className="text-base sm:text-lg font-bold text-ink-primary truncate">
                   {customer.name}
                 </h1>
                 <Badge variant={customer.customerType === 'WHOLESALE' ? 'wholesale' : 'neutral'}>
@@ -254,7 +254,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
             <div>
               <h2 className="text-xl font-bold text-ink-primary">মেসার্স ইদ্রিস ব্রাদার্স</h2>
               <p className="text-xs text-ink-secondary">মরিচপট্টি, ফেনী বাজার, ফেনী</p>
-              <p className="text-xs text-ink-secondary">গ্রাহক খতিয়ান ও হিসাব বিবরণী</p>
+              <p className="text-xs text-ink-secondary">কাস্টমার লেজার ও হিসাব বিবরণী</p>
             </div>
             <div className="text-right">
               <h3 className="text-base font-bold text-ink-primary">{customer.name}</h3>
@@ -267,7 +267,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* বাঁয়ে: খতিয়ান স্টেটমেন্ট টেবিল ও ফিল্টার (৮ কলাম / ~৭০%) */}
+          {/* বাঁয়ে: লেজার স্টেটমেন্ট টেবিল ও ফিল্টার (৮ কলাম / ~৭০%) */}
           <div className="lg:col-span-8 space-y-4 print:w-full">
             {/* ফিল্টার টুলবার */}
             <div className="bg-surface-card rounded-xl border border-border-default p-3 shadow-2xs flex items-center justify-between flex-wrap gap-2 print:hidden">
@@ -319,8 +319,8 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                   <span className="p-1.5 rounded-lg bg-brand-soft text-brand-deep">
                     <Receipt size={16} weight="bold" />
                   </span>
-                  <h3 className="text-sm font-bold text-ink-primary tracking-tight">
-                    লেনদেন খতিয়ান বিবরণী
+                  <h3 className="text-sm font-bold text-ink-primary">
+                    লেনদেন ও লেজার বিবরণী
                   </h3>
                 </div>
               </div>
@@ -342,7 +342,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                       <tr>
                         <td colSpan={6} className="py-12 text-center text-ink-secondary">
                           <Spinner size={24} className="animate-spin mx-auto mb-1 text-brand-deep" />
-                          <span>খতিয়ান লোড হচ্ছে...</span>
+                          <span>লেজার লোড হচ্ছে...</span>
                         </td>
                       </tr>
                     ) : filteredEntries.length === 0 ? (

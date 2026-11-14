@@ -79,6 +79,10 @@ model Category {
   children    Category[] @relation("CategoryHierarchy")
   
   products    Product[]
+  
+  // আব্বুর ফর্ম হেল্পার: ক্যাটাগরি প্রিসেট কনফিগ (JSONB)
+  presetConfig Json?      @default("{}")
+  
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 

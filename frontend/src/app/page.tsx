@@ -46,20 +46,20 @@ const DASHBOARD_MODULES = [
   },
   {
     href: '/sales',
-    title: 'মেমো রেজিস্টার',
-    subtitle: 'অর্ডার হিস্ট্রি ও রসিদ',
+    title: 'বিক্রয় মেমো',
+    subtitle: 'বিক্রয় তালিকা ও রসিদ',
     Icon: FileText,
   },
   {
     href: '/purchases',
     title: 'চালান এন্ট্রি',
-    subtitle: 'মোকাম মাল ও স্টক ইন',
+    subtitle: 'পণ্য ক্রয় ও স্টক-ইন',
     Icon: Receipt,
   },
   {
     href: '/products',
     title: 'পণ্য ও স্টক',
-    subtitle: '৪ দশমিক ও বস্তা রূপান্তর',
+    subtitle: 'পণ্য তালিকা ও ইনভেন্টরি',
     Icon: Package,
   },
   {

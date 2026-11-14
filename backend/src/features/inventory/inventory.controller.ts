@@ -95,6 +95,7 @@ export class InventoryController {
   });
 
   getCategories = asyncHandler(async (req: Request, res: Response) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     const categories = await prisma.category.findMany({
       orderBy: { name: 'asc' },
       include: { children: true },
@@ -103,7 +104,7 @@ export class InventoryController {
   });
 
   createCategory = asyncHandler(async (req: Request, res: Response) => {
-    const { name, banglaName, parentId } = req.body;
+    const { name, banglaName, parentId, presetConfig } = req.body;
     const cleanSlug = name
       .toLowerCase()
       .trim()
@@ -117,12 +118,14 @@ export class InventoryController {
         banglaName: banglaName?.trim() || null,
         slug: uniqueSlug,
         parentId: parentId || null,
+        presetConfig: (presetConfig && typeof presetConfig === 'object') ? presetConfig : {},
       },
     });
     sendResponse(res, 201, 'Category created successfully', category);
   });
 
   getBrands = asyncHandler(async (req: Request, res: Response) => {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
     const brands = await prisma.brand.findMany({
       orderBy: { name: 'asc' },
     });

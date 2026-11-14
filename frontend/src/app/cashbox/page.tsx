@@ -70,6 +70,7 @@ export default function CashboxPage() {
         {/* ৩. ট্যাব নেভিগেশন */}
         <div className="flex items-center gap-1.5 bg-surface-subtle p-1 rounded-lg border border-border-default w-fit">
           <button
+            type="button"
             onClick={() => setActiveTab('reconciliation')}
             className={`py-1.5 px-3.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-[background-color,color,box-shadow] duration-150 active:scale-[0.98] cursor-pointer ${
               activeTab === 'reconciliation'
@@ -78,10 +79,11 @@ export default function CashboxPage() {
             }`}
           >
             <Calculator size={14} weight="bold" />
-            <span>ক্যাশবাক্স রিকনসিলিয়েশন ও নোট গণক</span>
+            <span>ক্যাশ ও নোট মেলানো</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('expenses')}
             className={`py-1.5 px-3.5 rounded-md text-xs font-semibold flex items-center gap-1.5 transition-[background-color,color,box-shadow] duration-150 active:scale-[0.98] cursor-pointer ${
               activeTab === 'expenses'
@@ -90,7 +92,7 @@ export default function CashboxPage() {
             }`}
           >
             <Receipt size={14} weight="bold" />
-            <span>দৈনিক খরচের খাতা ও রেজিস্টার</span>
+            <span>দৈনিক খরচের তালিকা</span>
           </button>
         </div>
 

@@ -114,7 +114,7 @@ export function SupplierMobileCard({ supplier }: { supplier: Supplier }) {
           className={buttonClasses({ variant: 'secondary', size: 'sm', className: 'gap-1.5' })}
         >
           <Scroll size={14} weight="bold" className="text-brand-deep" />
-          <span>খতিয়ান দেখুন</span>
+          <span>লেজার দেখুন</span>
         </Link>
 
         <button

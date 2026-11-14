@@ -269,3 +269,7 @@ npx tsx scripts/test-all-apis-e2e.ts
 5. **6-Digit Base SKU Engine & Hardware Barcode Lookup (`inventory/skuGenerator.ts`, `inventory.repository.ts`):**
    - Blank SKUs auto-generate a DB-verified cryptographic 6-digit base code (`100000–999999`), appending Bengali-safe normalized size suffixes (`৫০০ গ্রাম` -> `500G`, `১ কেজি` -> `1KG`, `৫০ কেজি বস্তা` -> `50KG-BAG`) and collision retries.
    - `GET /api/v1/inventory/barcode/:barcode` uses `findByScanCode()` (`variant.barcode` -> `unit.barcode` -> `variant.sku` fallback) so thermal SKU stickers scan seamlessly even when factory `barcode` is left optional/blank.
+6. **Category Preset Config & Relational UoM Architecture (`schema.prisma`, `inventory.validation.ts`, `inventory.controller.ts`):**
+   - `model Category` includes `presetConfig Json? @default("{}")` storing UI helper metadata (`defaultBaseUnit`, `allowDecimal`, `quickSizes`, `suggestedUnits`, `attributeKeys`).
+   - Core inventory logic strictly preserves relational integrity via `VariantUnit` (`conversionFactor Decimal @db.Decimal(12, 4)`) without cluttering the relational schema with unneeded preset join tables.
+   - Procurement and sales ledger records compute exact base quantities (`baseQuantity = quantity * conversionFactor`) against `ProductVariant.baseUnitName`.

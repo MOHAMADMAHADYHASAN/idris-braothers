@@ -377,14 +377,14 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                   </div>
                 )}
 
-                {/* কাস্টমার খতিয়ান শর্টকাট */}
+                {/* কাস্টমার লেজার শর্টকাট */}
                 {sale.customer && (
                   <div className="pt-2 border-t border-border-subtle">
                     <Link
                       href={`/khata/customers/${sale.customer.id}`}
                       className={buttonClasses({ variant: 'secondary', size: 'sm', className: 'w-full gap-1.5' })}
                     >
-                      <span>কাস্টমারের পূর্ণাঙ্গ খতিয়ান দেখুন</span>
+                      <span>কাস্টমারের পূর্ণাঙ্গ লেজার দেখুন</span>
                       <ArrowSquareOut size={13} weight="bold" />
                     </Link>
                   </div>
@@ -392,10 +392,10 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
               </div>
             </div>
 
-            {/* কার্ড ২: আর্থিক রিকনসিলিয়েশন সামারি */}
+            {/* কার্ড ২: পেমেন্ট ও বকেয়া সামারি */}
             <div className="bg-surface-card rounded-xl border border-border-default p-4 shadow-2xs space-y-3">
               <span className="text-xs font-bold text-ink-primary border-b border-border-subtle pb-2 block">
-                আর্থিক রিকনসিলিয়েশন হিসাব
+                পেমেন্ট ও বকেয়া হিসাব
               </span>
 
               <div className="space-y-2 text-xs">

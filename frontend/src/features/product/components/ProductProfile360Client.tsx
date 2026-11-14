@@ -299,7 +299,7 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
 
               <div className="min-w-0 space-y-2">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <h1 className="text-xl sm:text-2xl font-bold text-ink-primary tracking-tight">
+                  <h1 className="text-xl sm:text-2xl font-bold text-ink-primary">
                     {product.banglaName || product.name}
                   </h1>
                   <span
@@ -369,8 +369,8 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                   )}
                 </div>
                 <div>
-                  <span className="text-xs font-bold block uppercase tracking-wider">
-                    {isLowStock ? 'সতর্কতা: কম মজুত' : 'পর্যাপ্ত মজুত স্টক'}
+                  <span className="text-xs font-bold block text-ink-secondary">
+                    {isLowStock ? 'সতর্কতা: কম স্টক' : 'পর্যাপ্ত স্টক'}
                   </span>
                   <div className="font-mono font-black text-lg sm:text-xl text-ink-primary">
                     {formatWeight(totalStock, product.baseUnitName)}
@@ -426,7 +426,7 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                 <Package size={22} weight="bold" />
               </div>
               <div className="min-w-0">
-                <span className="text-xs font-semibold text-ink-secondary block truncate">মোট মজুত স্টক</span>
+                <span className="text-xs font-semibold text-ink-secondary block truncate">মোট বর্তমান স্টক</span>
                 <span className="font-mono text-base sm:text-lg font-black text-ink-primary tabular-nums block truncate">
                   {formatWeight(totalStock, product.baseUnitName)}
                 </span>
@@ -593,10 +593,10 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
               <div className="hidden md:block overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
                   <thead>
-                    <tr className="bg-surface-subtle/70 border-b border-border-default text-ink-secondary font-bold text-xs uppercase tracking-wider">
+                    <tr className="bg-surface-subtle/70 border-b border-border-default text-ink-secondary font-bold text-xs">
                       <th className="py-3 px-4">ভ্যারিয়েন্ট / সাইজ</th>
                       <th className="py-3 px-4">SKU ও বারকোড</th>
-                      <th className="py-3 px-4 text-right">মজুত স্টক</th>
+                      <th className="py-3 px-4 text-right">বর্তমান স্টক</th>
                       <th className="py-3 px-4 text-right">কেনাদর (৳)</th>
                       <th className="py-3 px-4 text-right">পাইকারি দর (৳)</th>
                       <th className="py-3 px-4 text-right">খুচরা দর (৳)</th>
@@ -1053,7 +1053,7 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="bg-surface-subtle/70 border-b border-border-default text-ink-secondary font-bold text-xs uppercase tracking-wider">
+                      <tr className="bg-surface-subtle/70 border-b border-border-default text-ink-secondary font-bold text-xs">
                         <th className="py-3 px-4">তারিখ</th>
                         <th className="py-3 px-4">ভ্যারিয়েন্ট</th>
                         <th className="py-3 px-4 text-right">ঘাটতির পরিমাণ</th>
@@ -1108,42 +1108,42 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div className="p-3 bg-surface-subtle/50 rounded-xl border border-border-subtle">
-                    <span className="text-2xs text-ink-secondary font-bold block mb-1 uppercase">বাংলা নাম</span>
+                    <span className="text-2xs text-ink-secondary font-bold block mb-1">বাংলা নাম</span>
                     <span className="font-bold text-ink-primary text-sm">
                       {product.banglaName || 'নাম দেওয়া নেই'}
                     </span>
                   </div>
 
                   <div className="p-3 bg-surface-subtle/50 rounded-xl border border-border-subtle">
-                    <span className="text-2xs text-ink-secondary font-bold block mb-1 uppercase">ইংরেজি নাম</span>
+                    <span className="text-2xs text-ink-secondary font-bold block mb-1">ইংরেজি নাম</span>
                     <span className="font-semibold text-ink-primary text-sm">
                       {product.name}
                     </span>
                   </div>
 
                   <div className="p-3 bg-surface-subtle/50 rounded-xl border border-border-subtle">
-                    <span className="text-2xs text-ink-secondary font-bold block mb-1 uppercase">ক্যাটাগরি</span>
+                    <span className="text-2xs text-ink-secondary font-bold block mb-1">ক্যাটাগরি</span>
                     <span className="font-semibold text-ink-body">
                       {product.category?.banglaName || product.category?.name || 'ক্যাটাগরি নেই'}
                     </span>
                   </div>
 
                   <div className="p-3 bg-surface-subtle/50 rounded-xl border border-border-subtle">
-                    <span className="text-2xs text-ink-secondary font-bold block mb-1 uppercase">ব্র্যান্ড / প্রস্তুতকারক</span>
+                    <span className="text-2xs text-ink-secondary font-bold block mb-1">ব্র্যান্ড / প্রস্তুতকারক</span>
                     <span className="font-semibold text-ink-body">
                       {product.brand?.banglaName || product.brand?.name || 'নিজস্ব / খোলা মাল'}
                     </span>
                   </div>
 
                   <div className="p-3 bg-surface-subtle/50 rounded-xl border border-border-subtle">
-                    <span className="text-2xs text-ink-secondary font-bold block mb-1 uppercase">মূল হিসাব একক</span>
+                    <span className="text-2xs text-ink-secondary font-bold block mb-1">মূল হিসাব একক</span>
                     <span className="font-mono font-bold text-ink-primary">
                       {product.baseUnitName}
                     </span>
                   </div>
 
                   <div className="p-3 bg-surface-subtle/50 rounded-xl border border-border-subtle">
-                    <span className="text-2xs text-ink-secondary font-bold block mb-1 uppercase">বিক্রয় ও ওজন মোড</span>
+                    <span className="text-2xs text-ink-secondary font-bold block mb-1">বিক্রয় ও ওজন মোড</span>
                     <span className="font-semibold text-ink-body">
                       {selectedVariant?.allowDecimalQty
                         ? 'ওজনযোগ্য (ভগ্নাংশ ০.২৫ কেজি বিক্রয়যোগ্য)'
@@ -1152,14 +1152,14 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
                   </div>
 
                   <div className="p-3 bg-surface-subtle/50 rounded-xl border border-border-subtle">
-                    <span className="text-2xs text-ink-secondary font-bold block mb-1 uppercase">কম স্টক অ্যালার্ট সীমা</span>
+                    <span className="text-2xs text-ink-secondary font-bold block mb-1">কম স্টক অ্যালার্ট সীমা</span>
                     <span className="font-mono font-bold text-ink-primary">
                       &le; {formatNumber(product.lowStockAlert || 10)} {product.baseUnitName}
                     </span>
                   </div>
 
                   <div className="p-3 bg-surface-subtle/50 rounded-xl border border-border-subtle">
-                    <span className="text-2xs text-ink-secondary font-bold block mb-1 uppercase">ভ্যারিয়েন্ট স্ট্রাকচার</span>
+                    <span className="text-2xs text-ink-secondary font-bold block mb-1">ভ্যারিয়েন্ট স্ট্রাকচার</span>
                     <span className="font-semibold text-ink-body">
                       {product.hasVariants
                         ? `${formatNumber(product.variants.length)} টি স্বতন্ত্র ভ্যারিয়েন্টযুক্ত`

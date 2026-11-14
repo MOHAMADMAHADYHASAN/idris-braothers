@@ -272,7 +272,7 @@ function UnifiedDateRangeFilterInner({
                 <button
                   type="submit"
                   disabled={!startInput || !endInput}
-                  className="flex-1 h-8 rounded-md bg-brand-deep text-white text-xs font-bold hover:bg-brand-hover active:scale-[0.98] transition-colors disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center justify-center gap-1"
+                  className="flex-1 h-8 rounded-md bg-brand-deep text-white text-xs font-bold hover:bg-brand-hover active:scale-[0.98] transition-colors disabled:opacity-40 disabled:pointer-events-none cursor-pointer flex items-center justify-center gap-1.5"
                 >
                   <Check size={13} weight="bold" />
                   <span>প্রয়োগ করুন</span>

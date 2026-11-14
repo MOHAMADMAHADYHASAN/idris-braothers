@@ -16,9 +16,12 @@ import {
 } from './cashbox.types';
 
 function sanitizeExpense(raw: any): DailyExpense {
+  const recordedAt = raw.recordedAt || raw.createdAt || new Date().toISOString();
   return {
     ...raw,
     amount: parseDecimal(raw.amount),
+    recordedAt,
+    createdAt: raw.createdAt || recordedAt,
   };
 }
 

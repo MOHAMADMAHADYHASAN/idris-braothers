@@ -13,6 +13,26 @@ export interface UnitMaster {
   updatedAt?: string;
 }
 
+export interface CategoryQuickSize {
+  label: string;
+  baseUnitName: string;
+  allowDecimalQty: boolean;
+  skuSuffix?: string;
+}
+
+export interface CategorySuggestedUnit {
+  unitName: string;
+  conversionFactor: number;
+}
+
+export interface CategoryPresetConfig {
+  defaultBaseUnit?: string;
+  allowDecimal?: boolean;
+  quickSizes?: CategoryQuickSize[];
+  suggestedUnits?: CategorySuggestedUnit[];
+  attributeKeys?: string[];
+}
+
 export interface Category {
   id: string;
   name: string;
@@ -20,6 +40,7 @@ export interface Category {
   slug: string;
   parentId?: string | null;
   children?: Category[];
+  presetConfig?: CategoryPresetConfig | null;
 }
 
 export interface Brand {

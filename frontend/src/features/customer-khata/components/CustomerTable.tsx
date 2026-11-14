@@ -156,15 +156,15 @@ export function CustomerTable() {
               <span>উশুল</span>
             </button>
 
-            {/* খতিয়ান বিবরণী বাটন */}
+            {/* লেজার বিবরণী বাটন */}
             <Link
               href={`/khata/customers/${c.id}`}
               onClick={(e) => e.stopPropagation()}
               className={buttonClasses({ variant: 'secondary', size: 'xs', className: 'gap-1' })}
-              title="রানিং খতিয়ান ও লেনদেন স্টেটমেন্ট"
+              title="রানিং লেজার ও হিসাব বিবরণী"
             >
               <Scroll size={14} weight="bold" className="text-brand-deep" />
-              <span>খতিয়ান</span>
+              <span>লেজার</span>
             </Link>
 
             {/* হিসাব সমন্বয় (ছাড়) */}

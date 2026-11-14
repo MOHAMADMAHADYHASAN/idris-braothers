@@ -190,7 +190,7 @@ export function SaleReturnClient({ saleId }: SaleReturnClientProps) {
 
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-base sm:text-lg font-bold text-ink-primary tracking-tight flex items-center gap-1.5">
+                <h1 className="text-base sm:text-lg font-bold text-ink-primary flex items-center gap-1.5">
                   <ArrowCounterClockwise size={18} weight="bold" className="text-wholesale-text" />
                   <span>পণ্য ফেরত ও স্টক রিস্টকিং</span>
                 </h1>

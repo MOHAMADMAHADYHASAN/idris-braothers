@@ -108,14 +108,25 @@ export function formatPercent(
 }
 
 /**
+ * Helper to safely parse and validate a Date input (Date, string, number, null, undefined).
+ * Returns a valid Date instance or null if invalid/empty.
+ */
+function toValidDate(date: Date | string | number | null | undefined): Date | null {
+  if (date === null || date === undefined || date === '') return null;
+  const d = date instanceof Date ? date : new Date(date);
+  if (isNaN(d.getTime())) return null;
+  return d;
+}
+
+/**
  * Format dates consistently in `bn-BD` (Asia/Dhaka timezone).
  */
 export function formatDateBn(
-  date: Date | string,
+  date: Date | string | number | null | undefined,
   options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric' }
 ): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '—';
+  const d = toValidDate(date);
+  if (!d) return '—';
   return d.toLocaleDateString('bn-BD', { timeZone: DHAKA_TZ, ...options });
 }
 
@@ -140,11 +151,11 @@ function getDhakaPeriodLabel(d: Date): string {
  * Format time consistently in `bn-BD` with natural Bengali period (Asia/Dhaka timezone).
  */
 export function formatTimeBn(
-  date: Date | string,
+  date: Date | string | number | null | undefined,
   options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' }
 ): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '—';
+  const d = toValidDate(date);
+  if (!d) return '—';
   const raw = d.toLocaleTimeString('bn-BD', { timeZone: DHAKA_TZ, ...options });
   if (options.hour12 === false) return raw;
   const cleanedTime = raw.replace(/\s*(?:AM|PM|am|pm|পূর্বাহ্ণ|অপরাহ্ণ)\s*/g, '').trim();
@@ -154,9 +165,9 @@ export function formatTimeBn(
 /**
  * Format full date + time in `bn-BD` with natural Bengali period (Asia/Dhaka timezone).
  */
-export function formatDateTimeBn(date: Date | string): string {
-  const d = typeof date === 'string' ? new Date(date) : date;
-  if (isNaN(d.getTime())) return '—';
+export function formatDateTimeBn(date: Date | string | number | null | undefined): string {
+  const d = toValidDate(date);
+  if (!d) return '—';
   return `${formatDateBn(d, { day: 'numeric', month: 'short', year: 'numeric' })}, ${formatTimeBn(d)}`;
 }
 

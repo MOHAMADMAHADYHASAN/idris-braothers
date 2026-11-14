@@ -1,20 +1,21 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
 import {
   MagnifyingGlass,
   Barcode,
   Plus,
-  Lightning,
+  SlidersHorizontal,
   WarningCircle,
   X,
+  Package,
+  ProhibitInset,
 } from '@phosphor-icons/react';
-import { Product, ProductVariant } from '@/features/product/product.types';
+import { Product, ProductVariant, ProductUnit } from '@/features/product/product.types';
 import { useProductStore } from '@/features/product/useProductStore';
 import { usePosStore } from '../usePosStore';
 import { formatCurrency, formatNumber, formatWeight } from '@/lib/decimal';
-import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
+import { PosQuickAddModal } from './PosQuickAddModal';
 
 export function PosProductCatalog() {
   const { products, categories: storeCategories, isLoading, fetchProducts, fetchCategories } = useProductStore();
@@ -22,16 +23,13 @@ export function PosProductCatalog() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
-  const [selectedVariantByProduct, setSelectedVariantByProduct] = useState<Record<string, string>>({});
-  const [reverseModalTarget, setReverseModalTarget] = useState<{ product: Product; variant?: ProductVariant } | null>(null);
-  const [customAmount, setCustomAmount] = useState<string>('20');
-
-  const { titleId: reverseTitleId, dialogProps: reverseDialogProps, backdropProps: reverseBackdropProps } =
-    useDialogAccessibility<HTMLFormElement>(Boolean(reverseModalTarget), () => setReverseModalTarget(null));
+  const [modalProduct, setModalProduct] = useState<Product | null>(null);
+  const [isTouchDevice, setIsTouchDevice] = useState(false);
 
   useEffect(() => {
     fetchProducts({ page: 1, limit: 100 });
     fetchCategories();
+    setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
   }, [fetchProducts, fetchCategories]);
 
   const query = searchTerm.trim().toLowerCase();
@@ -67,26 +65,38 @@ export function PosProductCatalog() {
     })),
   ];
 
-  const handleReverseSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!reverseModalTarget) return;
-    const amount = parseFloat(customAmount);
-    if (amount > 0) {
-      addReversePriceItem(reverseModalTarget.product, amount, reverseModalTarget.variant);
-      setReverseModalTarget(null);
-      setCustomAmount('20');
+  // Identifies whether a product requires the Smart Quick-Add Modal (weighable, multi-variant, or multi-packaging)
+  const isComplexProduct = (p: Product) => {
+    const variants = p.variants || [];
+    const hasMultipleVariants = p.hasVariants && variants.length > 1;
+    const hasUnits = variants.some((v) => v.units && v.units.length > 0) || Boolean(p.units && p.units.length > 0);
+    const isDecimal = variants.some((v) => v.allowDecimalQty);
+    return hasMultipleVariants || hasUnits || isDecimal;
+  };
+
+  const handleCardClick = (product: Product) => {
+    const activeStock = product.variants?.[0]?.stockQuantity ?? product.stockQuantity ?? 0;
+    if (activeStock <= 0) return;
+
+    if (isComplexProduct(product)) {
+      // Smart Hybrid: opens customized quick-add modal for weighable or variant items
+      setModalProduct(product);
+    } else {
+      // Fast 1-tap add for simple single-packet items (like soap, chips, biscuit)
+      addItem(product, product.variants?.[0], undefined, 1);
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-surface-card rounded-xl border border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)] overflow-hidden">
-      {/* 1. Header: Search Bar & Category Filter */}
-      <div className="p-3 border-b border-border-default bg-surface-subtle/60 space-y-2.5">
+    <div className="flex flex-col h-full bg-surface-card rounded-2xl border border-border-default shadow-xs overflow-hidden">
+      {/* 1. Clean Search & Category Header */}
+      <div className="p-3.5 border-b border-border-default/80 bg-surface-card space-y-3">
+        {/* Modern Search Bar */}
         <div className="relative">
           <MagnifyingGlass
-            size={16}
+            size={18}
             weight="bold"
-            className="text-ink-secondary absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            className="text-ink-secondary absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"
           />
           <input
             id="pos-search-input"
@@ -94,27 +104,38 @@ export function PosProductCatalog() {
             aria-label="পণ্য খুঁজুন (নাম, বারকোড বা SKU)"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="পণ্য খুঁজুন (নাম, বারকোড বা SKU) [F2]"
-            className="w-full h-10 pl-9 pr-9 rounded-lg border border-border-strong bg-surface-card text-xs sm:text-sm font-medium text-ink-primary placeholder:text-ink-muted focus:outline-hidden focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
+            placeholder={isTouchDevice ? 'পণ্য খুঁজুন (নাম, বারকোড বা SKU)...' : 'পণ্য খুঁজুন (নাম, বারকোড বা SKU)... [F2]'}
+            className="w-full h-11 pl-10 pr-10 rounded-xl border border-border-strong bg-surface-subtle/50 focus:bg-surface-card text-xs sm:text-sm font-medium text-ink-primary placeholder:text-ink-muted focus:outline-hidden focus:border-brand-deep transition-all shadow-2xs"
           />
-          <Barcode
-            size={18}
-            weight="bold"
-            className="text-ink-secondary absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
-          />
+          {searchTerm ? (
+            <button
+              type="button"
+              onClick={() => setSearchTerm('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-ink-secondary hover:text-ink-primary rounded-md"
+              title="সার্চ মুছুন"
+            >
+              <X size={15} weight="bold" />
+            </button>
+          ) : (
+            <Barcode
+              size={20}
+              weight="bold"
+              className="text-ink-secondary absolute right-3.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-60"
+            />
+          )}
         </div>
 
-        {/* Category Pills */}
+        {/* Minimalist Rounded Category Filter Pills */}
         <div className="flex gap-1.5 overflow-x-auto pb-0.5 no-scrollbar">
           {categoryList.map((cat) => (
             <button
               key={cat.id}
               type="button"
               onClick={() => setSelectedCategory(cat.id)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-[background-color,border-color,color] duration-150 cursor-pointer active:scale-[0.98] ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-150 cursor-pointer active:scale-[0.98] ${
                 selectedCategory === cat.id
                   ? 'bg-brand-deep text-white shadow-2xs'
-                  : 'bg-surface-card border border-border-default text-ink-body hover:bg-surface-subtle hover:text-ink-primary'
+                  : 'bg-surface-subtle hover:bg-brand-soft/70 text-ink-body hover:text-brand-deep border border-border-subtle'
               }`}
             >
               {cat.label}
@@ -123,39 +144,32 @@ export function PosProductCatalog() {
         </div>
       </div>
 
-      {/* 2. Products Grid */}
-      <div className="flex-1 overflow-y-auto p-3">
+      {/* 2. Modern Product Grid — One-Tap Square POS Card Style */}
+      <div className="flex-1 overflow-y-auto p-3.5">
         {isLoading ? (
           <div className="h-64 flex flex-col items-center justify-center text-ink-secondary text-xs font-medium">
-            <span className="w-5 h-5 border-2 border-brand-deep border-t-transparent rounded-full animate-spin mb-2" />
-            পণ্য তালিকা লোড হচ্ছে...
+            <span className="w-6 h-6 border-2 border-brand-deep border-t-transparent rounded-full animate-spin mb-2" />
+            <span>পণ্য ক্যাটালগ লোড হচ্ছে...</span>
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="h-64 flex flex-col items-center justify-center text-ink-secondary text-xs text-center p-4">
-            <WarningCircle size={28} weight="duotone" className="text-ink-muted mb-1.5" />
-            <p className="font-semibold text-sm text-ink-primary">কোনো পণ্য খুঁজে পাওয়া যায়নি</p>
+            <div className="w-12 h-12 rounded-2xl bg-surface-subtle flex items-center justify-center mb-2 text-ink-muted">
+              <WarningCircle size={26} weight="duotone" />
+            </div>
+            <p className="font-bold text-sm text-ink-primary">কোনো পণ্য খুঁজে পাওয়া যায়নি</p>
+            {query && (
+              <p className="text-xs text-ink-secondary mt-1">
+                &quot;{searchTerm}&quot; দিয়ে মিল পাওয়া যায়নি। বানান চেক করুন বা বারকোড স্ক্যান করুন।
+              </p>
+            )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
             {filteredProducts.map((product) => {
               const isWholesale = saleType === 'WHOLESALE';
               const variants = product.variants || [];
-              const hasMultipleVariants = product.hasVariants && variants.length > 1;
-
-              const searchMatchedVariant = query
-                ? variants.find(
-                    (v) =>
-                      v.variantName.toLowerCase().includes(query) ||
-                      (v.sku && v.sku.toLowerCase().includes(query)) ||
-                      (v.barcode && v.barcode.toLowerCase().includes(query))
-                  )
-                : undefined;
-
-              const explicitVariantId = selectedVariantByProduct[product.id];
-              const activeVariant =
-                variants.find((v) => v.id === explicitVariantId) ||
-                searchMatchedVariant ||
-                variants[0];
+              const activeVariant = variants[0];
+              const isComplex = isComplexProduct(product);
 
               const activePrice = activeVariant
                 ? isWholesale
@@ -164,109 +178,121 @@ export function PosProductCatalog() {
                 : isWholesale
                 ? product.wholesalePrice
                 : product.retailPrice;
+
               const activeStock = activeVariant ? activeVariant.stockQuantity : product.stockQuantity;
               const activeLowAlert = activeVariant ? activeVariant.lowStockAlert : product.lowStockAlert;
               const activeUnitName = activeVariant ? activeVariant.baseUnitName : product.baseUnitName;
-              const isDecimalAllowed = activeVariant ? activeVariant.allowDecimalQty : true;
-              const isLowStock = activeStock <= activeLowAlert;
+              const isOutOfStock = activeStock <= 0;
+              const isLowStock = activeStock <= activeLowAlert && !isOutOfStock;
 
               return (
                 <div
                   key={product.id}
-                  className="bg-surface-card border border-border-default hover:border-brand-mid rounded-lg p-3 shadow-[0_1px_2px_rgba(15,23,42,0.02)] transition-[border-color,box-shadow] duration-150 flex flex-col justify-between group"
+                  onClick={() => handleCardClick(product)}
+                  className={`relative rounded-xl p-3 border transition-all duration-150 flex flex-col justify-between text-left select-none ${
+                    isOutOfStock
+                      ? 'bg-surface-subtle/50 border-border-default opacity-60 cursor-not-allowed'
+                      : 'bg-surface-card hover:bg-surface-subtle/40 border-border-default hover:border-brand-mid/80 shadow-2xs hover:shadow-xs cursor-pointer active:scale-[0.98]'
+                  }`}
+                  role="button"
+                  tabIndex={isOutOfStock ? -1 : 0}
+                  aria-disabled={isOutOfStock}
+                  aria-label={`${product.banglaName || product.name}, মূল্য ${formatCurrency(activePrice, false)}`}
+                  onKeyDown={(e) => {
+                    if ((e.key === 'Enter' || e.key === ' ') && !isOutOfStock) {
+                      e.preventDefault();
+                      handleCardClick(product);
+                    }
+                  }}
                 >
                   <div>
-                    {/* Top: Name & Stock Badge */}
-                    <div className="flex items-start justify-between gap-2 pb-1.5">
-                      <div className="min-w-0">
-                        <h3 className="font-bold text-ink-primary text-xs sm:text-sm truncate">
-                          {product.banglaName || product.name}
-                        </h3>
-                        {product.banglaName && (
-                          <p className="text-xs text-ink-secondary truncate">
-                            {product.name}
-                          </p>
-                        )}
+                    {/* Top Row: Icon + Stock Indicator */}
+                    <div className="flex items-center justify-between gap-1.5 mb-2">
+                      <div className="w-8 h-8 rounded-lg bg-brand-soft/70 border border-brand-light/50 flex items-center justify-center text-brand-deep shrink-0">
+                        <Package size={17} weight="duotone" />
                       </div>
-                      <span
-                        className={`shrink-0 px-2 py-0.5 rounded text-xs font-semibold border font-mono tabular-nums ${
-                          isLowStock
-                            ? 'bg-due-bg text-due-text border-due-border'
-                            : 'bg-surface-subtle text-ink-body border-border-default'
-                        }`}
-                        title="বর্তমান গুদাম স্টক"
-                      >
-                        {formatWeight(activeStock, activeUnitName)}
-                      </span>
-                    </div>
 
-                    {/* Variant Size Pills (for multi-variant products e.g. ৫০০ml, ১L, ৫L) */}
-                    {hasMultipleVariants && (
-                      <div className="flex flex-wrap gap-1 pt-1 pb-1.5">
-                        {variants.map((v) => {
-                          const isSelected = activeVariant?.id === v.id;
-                          return (
-                            <button
-                              key={v.id}
-                              type="button"
-                              onClick={() =>
-                                setSelectedVariantByProduct((prev) => ({
-                                  ...prev,
-                                  [product.id]: v.id,
-                                }))
-                              }
-                              className={`px-2 py-1 rounded text-xs font-semibold border transition-colors cursor-pointer ${
-                                isSelected
-                                  ? 'bg-brand-deep text-white border-brand-deep shadow-2xs'
-                                  : 'bg-surface-subtle text-ink-body border-border-default hover:bg-brand-soft hover:text-brand-deep'
-                              }`}
-                            >
-                              {v.variantName}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    )}
-
-                    {/* Price Tag */}
-                    <div className="py-1">
-                      <div className="flex items-baseline gap-1.5 flex-wrap">
-                        <span className="text-base font-bold text-ink-primary font-mono tabular-nums">
-                          {formatCurrency(activePrice, false)}
-                        </span>
-                        <span className="text-xs text-ink-secondary font-medium">
-                          / {activeUnitName}
-                        </span>
-                        {isWholesale && (
-                          <span className="text-xs bg-wholesale-bg text-wholesale-text border border-wholesale-border/60 px-1.5 py-0.5 rounded font-semibold">
-                            পাইকারি
+                      <div className="text-right">
+                        {isOutOfStock ? (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-bold bg-due-bg text-due-text border border-due-border">
+                            <ProhibitInset size={11} weight="bold" />
+                            <span>স্টক নেই</span>
+                          </span>
+                        ) : isLowStock ? (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-bold bg-due-bg/70 text-due-text border border-due-border font-mono">
+                            <span>কম ({formatNumber(activeStock)})</span>
+                          </span>
+                        ) : (
+                          <span className="text-2xs font-mono font-semibold text-ink-secondary">
+                            স্টক: {formatWeight(activeStock, activeUnitName)}
                           </span>
                         )}
                       </div>
                     </div>
+
+                    {/* Product Bangla & English Name */}
+                    <div className="min-w-0">
+                      <h3 className="font-bold text-ink-primary text-xs sm:text-sm line-clamp-2 leading-snug">
+                        {product.banglaName || product.name}
+                      </h3>
+                      {product.banglaName && product.name && (
+                        <p className="text-2xs text-ink-secondary truncate mt-0.5">
+                          {product.name}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Tag showing that clicking will open modal (for weighable or variant items) */}
+                    {isComplex && (
+                      <div className="mt-2">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-bold bg-brand-soft/80 text-brand-deep border border-brand-light/60">
+                          <SlidersHorizontal size={11} weight="bold" />
+                          <span>
+                            {variants.length > 1
+                              ? `${formatNumber(variants.length)} সাইজ / ওজন`
+                              : 'ওজন ও টাকা মোড'}
+                          </span>
+                        </span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Actions */}
-                  <div className="pt-2.5 mt-2 border-t border-border-subtle flex flex-col gap-1.5">
-                    <button
-                      type="button"
-                      onClick={() => addItem(product, activeVariant, undefined, 1)}
-                      className="w-full h-9 rounded-lg bg-brand-deep hover:bg-brand-hover text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-[background-color,transform] duration-150 shadow-[0_1px_2px_rgba(30,74,122,0.16)] active:scale-[0.98] cursor-pointer"
-                    >
-                      <Plus size={14} weight="bold" />
-                      <span>যোগ করুন (১ {activeUnitName})</span>
-                    </button>
+                  {/* Bottom Row: Price & Tap CTA */}
+                  <div className="pt-2.5 mt-2 border-t border-border-subtle/80 flex items-end justify-between gap-1">
+                    <div>
+                      <div className="font-black text-sm sm:text-base text-ink-primary font-mono tabular-nums leading-none">
+                        {formatCurrency(activePrice, false)}
+                        <span className="text-2xs font-medium text-ink-secondary ml-0.5 font-sans">
+                          /{activeUnitName}
+                        </span>
+                      </div>
+                      {isWholesale && (
+                        <span className="text-2xs font-bold text-wholesale-text block mt-0.5">
+                          পাইকারি রেট
+                        </span>
+                      )}
+                    </div>
 
-                    {/* Weighable products: টাকার অংকে বিক্রি */}
-                    {isDecimalAllowed && (
-                      <button
-                        type="button"
-                        onClick={() => setReverseModalTarget({ product, variant: activeVariant })}
-                        className="w-full py-1.5 rounded-md bg-wholesale-bg/70 hover:bg-wholesale-bg text-wholesale-text border border-wholesale-border/60 text-xs font-semibold flex items-center justify-center gap-1 transition-[background-color,transform] duration-150 active:scale-[0.98] cursor-pointer"
+                    {/* Tap indicator button */}
+                    {!isOutOfStock && (
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleCardClick(product);
+                        }}
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 shadow-2xs transition-transform group-hover:scale-105 ${
+                          isComplex
+                            ? 'bg-wholesale-bg text-wholesale-text border border-wholesale-border/70 hover:bg-wholesale-solid hover:text-white'
+                            : 'bg-brand-deep text-white'
+                        }`}
+                        title={isComplex ? 'ক্লিক করে সাইজ ও ওজন নির্ধারণ করুন' : '১ পিস কার্টে যোগ করুন'}
                       >
-                        <Lightning size={13} weight="fill" className="text-wholesale-solid" />
-                        <span>টাকার অংকে বিক্রি</span>
-                      </button>
+                        {isComplex ? (
+                          <SlidersHorizontal size={13} weight="bold" />
+                        ) : (
+                          <Plus size={14} weight="bold" />
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
@@ -276,134 +302,19 @@ export function PosProductCatalog() {
         )}
       </div>
 
-      {/* Reverse Price Modal */}
-      <AnimatePresence>
-        {reverseModalTarget && (
-          <div
-            {...reverseBackdropProps}
-            className="fixed inset-0 z-50 modal-backdrop-frosted flex items-center justify-center p-4"
-          >
-            <motion.form
-              {...reverseDialogProps}
-              initial={{ opacity: 0, y: 6, scale: 0.98 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 4, scale: 0.98 }}
-              transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
-              onSubmit={handleReverseSubmit}
-              className="bg-surface-card rounded-xl max-w-sm w-full p-4 shadow-xl border border-border-default space-y-3.5 relative focus:outline-hidden"
-            >
-              {(() => {
-                const targetProduct = reverseModalTarget.product;
-                const targetVariant = reverseModalTarget.variant || targetProduct.variants?.[0];
-                const reverseRate = targetVariant
-                  ? saleType === 'RETAIL'
-                    ? targetVariant.retailPrice
-                    : targetVariant.wholesalePrice
-                  : saleType === 'RETAIL'
-                  ? targetProduct.retailPrice
-                  : targetProduct.wholesalePrice;
-                const reverseUnit = targetVariant?.baseUnitName || targetProduct.baseUnitName || 'কেজি';
-                const variantSuffix =
-                  targetVariant?.variantName && targetVariant.variantName !== 'Default'
-                    ? ` (${targetVariant.variantName})`
-                    : '';
-                const parsedAmt = parseFloat(customAmount) || 0;
-                const qtyInUnit = reverseRate > 0 ? parsedAmt / reverseRate : 0;
-
-                return (
-                  <>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <span className="text-xs font-bold text-wholesale-text flex items-center gap-1">
-                          <Lightning size={13} weight="fill" />
-                          টাকার অংকে বিক্রি
-                        </span>
-                        <h3 id={reverseTitleId} className="text-sm font-bold text-ink-primary mt-0.5">
-                          {targetProduct.banglaName || targetProduct.name}
-                          {variantSuffix}
-                        </h3>
-                        <p className="text-xs text-ink-secondary font-mono tabular-nums mt-0.5">
-                          দর: {formatCurrency(reverseRate, false)} / {reverseUnit}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setReverseModalTarget(null)}
-                        aria-label="বন্ধ করুন"
-                        className="w-10 h-10 -mr-1.5 -mt-1.5 flex items-center justify-center rounded-lg text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle transition-colors cursor-pointer"
-                      >
-                        <X size={16} weight="bold" />
-                      </button>
-                    </div>
-
-                    <div>
-                      <label htmlFor="pos-reverse-amount-input" className="block text-xs font-semibold text-ink-body mb-1">
-                        কাস্টমার কত টাকার নিতে চান?
-                      </label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-ink-secondary text-xs">
-                          ৳
-                        </span>
-                        <input
-                          id="pos-reverse-amount-input"
-                          type="number"
-                          autoFocus
-                          required
-                          min="1"
-                          step="any"
-                          value={customAmount}
-                          onChange={(e) => setCustomAmount(e.target.value)}
-                          className="w-full h-10 pl-7 pr-3 rounded-lg border border-border-strong text-sm font-bold font-mono tabular-nums text-ink-primary focus:outline-hidden focus:border-brand-deep"
-                        />
-                      </div>
-
-                      <div className="flex gap-1.5 mt-2">
-                        {[20, 50, 100, 500].map((amt) => (
-                          <button
-                            key={amt}
-                            type="button"
-                            onClick={() => setCustomAmount(amt.toString())}
-                            className="flex-1 py-1.5 rounded-md bg-surface-subtle hover:bg-brand-soft hover:text-brand-deep border border-border-default text-xs font-semibold font-mono tabular-nums text-ink-body transition-colors cursor-pointer"
-                          >
-                            {formatNumber(amt)}৳
-                          </button>
-                        ))}
-                      </div>
-
-                      {parsedAmt > 0 && (
-                        <div className="mt-2.5 p-2.5 bg-surface-subtle border border-border-default rounded-lg text-xs text-ink-body font-mono tabular-nums flex justify-between items-center">
-                          <span className="text-ink-secondary">হিসাবকৃত পরিমাণ:</span>
-                          <span className="font-bold text-ink-primary">
-                            {reverseUnit === 'কেজি' && qtyInUnit < 1
-                              ? `${formatNumber(qtyInUnit * 1000, { minDecimals: 0, maxDecimals: 1 })} গ্রাম`
-                              : `${formatNumber(qtyInUnit, { minDecimals: 2, maxDecimals: 4 })} ${reverseUnit}`}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-border-subtle">
-                      <button
-                        type="button"
-                        onClick={() => setReverseModalTarget(null)}
-                        className="px-3.5 py-2 text-xs font-semibold text-ink-body border border-border-strong hover:bg-surface-subtle rounded-lg transition-colors cursor-pointer"
-                      >
-                        বাতিল
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-4 py-2 text-xs font-semibold bg-brand-deep text-white rounded-lg hover:bg-brand-hover transition-[background-color,transform] duration-150 active:scale-[0.98] cursor-pointer"
-                      >
-                        কার্টে যুক্ত করুন
-                      </button>
-                    </div>
-                  </>
-                );
-              })()}
-            </motion.form>
-          </div>
-        )}
-      </AnimatePresence>
+      {/* 3. Smart Quick-Add Modal */}
+      <PosQuickAddModal
+        isOpen={Boolean(modalProduct)}
+        onClose={() => setModalProduct(null)}
+        product={modalProduct}
+        saleType={saleType}
+        onAddStandardItem={(prod, variant, unit, qty) => {
+          addItem(prod, variant, unit, qty);
+        }}
+        onAddReversePriceItem={(prod, customTotal, variant) => {
+          addReversePriceItem(prod, customTotal, variant);
+        }}
+      />
     </div>
   );
 }

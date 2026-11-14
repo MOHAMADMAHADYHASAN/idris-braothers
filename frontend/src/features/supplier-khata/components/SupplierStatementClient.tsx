@@ -206,7 +206,7 @@ export function SupplierStatementClient({ supplierId }: SupplierStatementClientP
             </Link>
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-base sm:text-lg font-bold text-ink-primary tracking-tight truncate">
+                <h1 className="text-base sm:text-lg font-bold text-ink-primary truncate">
                   {supplier.companyName || supplier.name}
                 </h1>
                 {supplier.companyName && (
@@ -237,7 +237,7 @@ export function SupplierStatementClient({ supplierId }: SupplierStatementClientP
               </div>
               <p className="text-xs text-ink-secondary truncate mt-0.5 font-mono tabular-nums">
                 {supplier.phone ? `ফোন: ${toBanglaDigits(supplier.phone)}` : ''}{' '}
-                {supplier.address ? `• মোকাম: ${supplier.address}` : ''}
+                {supplier.address ? `• ঠিকানা: ${supplier.address}` : ''}
               </p>
             </div>
           </div>
@@ -263,7 +263,7 @@ export function SupplierStatementClient({ supplierId }: SupplierStatementClientP
             <div>
               <h2 className="text-xl font-bold text-ink-primary">মেসার্স ইদ্রিস ব্রাদার্স</h2>
               <p className="text-xs text-ink-secondary">মরিচপট্টি, ফেনী বাজার, ফেনী</p>
-              <p className="text-xs text-ink-secondary">মহাজন খতিয়ান ও হিসাব বিবরণী</p>
+              <p className="text-xs text-ink-secondary">মহাজন লেজার ও হিসাব বিবরণী</p>
             </div>
             <div className="text-right">
               <h3 className="text-base font-bold text-ink-primary">
@@ -275,13 +275,13 @@ export function SupplierStatementClient({ supplierId }: SupplierStatementClientP
               <p className="text-xs text-ink-secondary font-mono">
                 {supplier.phone ? toBanglaDigits(supplier.phone) : ''}
               </p>
-              <p className="text-xs text-ink-secondary">মোকাম: {supplier.address || ''}</p>
+              <p className="text-xs text-ink-secondary">ঠিকানা: {supplier.address || ''}</p>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* বাঁয়ে: খতিয়ান স্টেটমেন্ট টেবিল ও ফিল্টার (৮ কলাম / ~৭০%) */}
+          {/* বাঁয়ে: লেজার স্টেটমেন্ট টেবিল ও ফিল্টার (৮ কলাম / ~৭০%) */}
           <div className="lg:col-span-8 space-y-4 print:w-full">
             {/* ফিল্টার টুলবার */}
             <div className="bg-surface-card rounded-xl border border-border-default p-3 shadow-2xs flex items-center justify-between flex-wrap gap-2 print:hidden">
@@ -348,7 +348,7 @@ export function SupplierStatementClient({ supplierId }: SupplierStatementClientP
                       <tr>
                         <td colSpan={6} className="py-12 text-center text-ink-secondary">
                           <Spinner size={24} weight="bold" className="animate-spin inline mr-2 text-brand-deep" />
-                          খতিয়ান বিবরণী লোড হচ্ছে...
+                          লেজার বিবরণী লোড হচ্ছে...
                         </td>
                       </tr>
                     ) : filteredEntries.length === 0 ? (
@@ -506,12 +506,12 @@ export function SupplierStatementClient({ supplierId }: SupplierStatementClientP
 
           {/* ডানে: মহাজন প্রোফাইল ও দ্রুত পরিশোধ অ্যাকশন (৪ কলাম / ~৩০% - Sticky) */}
           <div className="lg:col-span-4 space-y-4 print:hidden lg:sticky lg:top-20">
-            {/* কার্ড ১: মহাজন / মোকাম সারসংক্ষেপ */}
+            {/* কার্ড ১: মহাজন সারসংক্ষেপ */}
             <div className="bg-surface-card rounded-xl border border-border-default p-4 shadow-2xs space-y-3">
               <div className="flex items-center justify-between border-b border-border-subtle pb-2.5">
                 <span className="text-xs font-bold text-ink-primary flex items-center gap-1.5">
                   <Storefront size={16} weight="bold" className="text-brand-deep" />
-                  মহাজন ও মোকাম তথ্য
+                  মহাজনের তথ্য
                 </span>
                 <Badge variant={supplier.isActive ? 'cash' : 'neutral'}>
                   {supplier.isActive ? 'সক্রিয় মহাজন' : 'নিষ্ক্রিয়'}
@@ -551,7 +551,7 @@ export function SupplierStatementClient({ supplierId }: SupplierStatementClientP
                 {supplier.address && (
                   <div className="flex items-start justify-between gap-2">
                     <span className="text-ink-secondary flex items-center gap-1">
-                      <MapPin size={13} weight="bold" /> মোকাম:
+                      <MapPin size={13} weight="bold" /> ঠিকানা:
                     </span>
                     <span className="text-ink-primary text-right font-medium">
                       {supplier.address}

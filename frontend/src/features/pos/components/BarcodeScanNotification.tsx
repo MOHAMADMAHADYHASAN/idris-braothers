@@ -22,7 +22,7 @@ export function BarcodeScanNotification({
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -8, scale: 0.98 }}
           transition={{ type: 'spring', stiffness: 450, damping: 32, mass: 0.8 }}
-          className="fixed top-14 left-1/2 -translate-x-1/2 z-50 pointer-events-auto"
+          className="fixed top-20 sm:top-14 left-1/2 -translate-x-1/2 z-50 pointer-events-auto max-w-[92vw]"
         >
           <div
             className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border shadow-[0_4px_16px_rgba(15,23,42,0.08)] bg-surface-card ${

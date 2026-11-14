@@ -18,7 +18,7 @@ export interface Supplier {
   name: string;                // মহাজনের নাম / মালিকের নাম
   companyName: string | null;  // গদি / প্রতিষ্ঠানের নাম (যেমন: মেসার্স আলম ট্রেডার্স)
   phone: string | null;
-  address: string | null;      // মোকাম / আড়তের ঠিকানা (যেমন: খাতুনগঞ্জ, চট্টগ্রাম)
+  address: string | null;      // মহাজন বা প্রতিষ্ঠানের ঠিকানা (যেমন: খাতুনগঞ্জ, চট্টগ্রাম)
   currentPayable: number;      // দোকানে মহাজনের পাওনা (Sanitized from Prisma Decimal)
   isActive: boolean;
   createdAt: string;

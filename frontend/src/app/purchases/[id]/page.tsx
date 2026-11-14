@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { PurchaseDetailClient } from '@/features/purchase/components/PurchaseDetailClient';
 
 export const metadata: Metadata = {
-  title: 'মোকাম চালান বিবরণী | ইদ্রিস ব্রাদার্স',
+  title: 'ক্রয় চালান বিবরণী | ইদ্রিস ব্রাদার্স',
   description: 'চালানের বিস্তারিত বিবরণ, পণ্য তালিকা ও আর্থিক নিষ্পত্তি',
 };
 

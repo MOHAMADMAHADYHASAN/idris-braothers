@@ -71,6 +71,7 @@ export function SaleDetailModal() {
           <div className="flex items-center gap-2">
             {selectedSale && selectedSale.status !== 'CANCELLED' && (
               <button
+                type="button"
                 onClick={() => {
                   if (!selectedSale) return;
                   const id = selectedSale.id;
@@ -87,6 +88,7 @@ export function SaleDetailModal() {
             )}
 
             <button
+              type="button"
               onClick={handlePrint}
               disabled={isLoadingDetail || !selectedSale}
               className={buttonClasses({ variant: 'primary', size: 'sm', className: 'gap-1.5' })}
@@ -210,7 +212,7 @@ export function SaleDetailModal() {
                 </table>
               </div>
 
-              {/* আর্থিক রিকনসিলিয়েশন বক্স */}
+              {/* পেমেন্ট ও বকেয়া বক্স */}
               <div className="bg-surface-subtle p-3.5 rounded-lg border border-border-default space-y-1.5 text-xs">
                 <div className="flex justify-between text-ink-body">
                   <span>পণ্য উপমোট:</span>

@@ -138,7 +138,7 @@ export function ThermalReceipt({
           >
             {/* Header: Store Identity */}
             <div className="text-center pb-2 border-b border-dashed border-black">
-              <h2 id={titleId} className="text-base font-black tracking-tight">
+              <h2 id={titleId} className="text-base font-black">
                 {data.storeInfo.name}
               </h2>
               <p className="text-[11px] font-medium">{data.storeInfo.tagline}</p>

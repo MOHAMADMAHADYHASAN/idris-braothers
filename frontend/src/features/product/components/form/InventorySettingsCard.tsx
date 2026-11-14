@@ -3,6 +3,7 @@
 import React, { useId } from 'react';
 import { Sparkle } from '@phosphor-icons/react';
 import { generateRandom6Digits } from '@/lib/skuGenerator';
+import { CategorySuggestedUnit } from '../../product.types';
 
 interface InventorySettingsCardProps {
   baseUnitName: string;
@@ -14,6 +15,7 @@ interface InventorySettingsCardProps {
   lowStockAlert: string;
   setLowStockAlert: (v: string) => void;
   isEditMode: boolean;
+  suggestedUnits?: CategorySuggestedUnit[];
 }
 
 interface ProductCodeCardProps {
@@ -36,6 +38,7 @@ export function InventorySettingsCard({
   lowStockAlert,
   setLowStockAlert,
   isEditMode,
+  suggestedUnits,
 }: InventorySettingsCardProps) {
   const formId = useId();
   const handleSelectUnitPreset = (unit: string) => {
@@ -79,12 +82,21 @@ export function InventorySettingsCard({
               </button>
             ))}
           </div>
+
+          {suggestedUnits && suggestedUnits.length > 0 && (
+            <div className="mt-2 text-[11px] text-ink-muted bg-surface-subtle p-2 rounded-md border border-border-default flex items-center gap-1.5 flex-wrap">
+              <span className="font-semibold text-brand-deep">আড়ত রূপান্তর নির্দেশিকা:</span>
+              <span>
+                {suggestedUnits.map((u) => `১ ${u.unitName} = ${u.conversionFactor} ${baseUnitName}`).join(' • ')}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
           <div>
             <label htmlFor={`${formId}-stock`} className="block text-xs font-semibold text-ink-body mb-1">
-              {isEditMode ? 'বর্তমান মজুত' : 'শুরুর মজুত'}
+              {isEditMode ? 'বর্তমান স্টক' : 'শুরুর স্টক'}
             </label>
             <div className="relative">
               <input

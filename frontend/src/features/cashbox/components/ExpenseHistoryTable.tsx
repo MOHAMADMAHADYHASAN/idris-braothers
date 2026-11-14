@@ -12,6 +12,7 @@ import { useCashboxStore } from '../useCashboxStore';
 import { ExpenseCategory, DailyExpense } from '../cashbox.types';
 import { AdminPagination } from '@/components/shared/AdminPagination';
 import { DynamicDataTable, ColumnDef } from '@/components/shared/DynamicDataTable';
+import { CustomSelect, SelectOption } from '@/components/shared/CustomSelect';
 import { confirmAction, toast } from '@/lib/feedback';
 
 function getCategoryBadge(cat: ExpenseCategory): { label: string; badgeClass: string } {
@@ -32,6 +33,16 @@ function getCategoryBadge(cat: ExpenseCategory): { label: string; badgeClass: st
       return { label: cat, badgeClass: 'bg-surface-subtle text-ink-body border-border-default' };
   }
 }
+
+const EXPENSE_CATEGORY_FILTER_OPTIONS: SelectOption<string>[] = [
+  { value: 'ALL', label: 'সব খরচ' },
+  { value: 'LABOR_KULI', label: 'কুলি ও লেবার' },
+  { value: 'TRANSPORT_VAN', label: 'ভ্যান ও গাড়িভাড়া' },
+  { value: 'TEA_SNACKS', label: 'চা-নাস্তা ও আপ্যায়ন' },
+  { value: 'ELECTRICITY_UTILITY', label: 'বিদ্যুৎ ও ইউটিলিটি' },
+  { value: 'SHOP_MAINTENANCE', label: 'দোকান সরঞ্জাম' },
+  { value: 'OTHER', label: 'বিবিধ খরচ' },
+];
 
 export function ExpenseHistoryTable() {
   const {
@@ -74,7 +85,7 @@ export function ExpenseHistoryTable() {
         header: 'সময়',
         disableToggle: true,
         cellClassName: 'font-mono tabular-nums text-ink-secondary text-xs whitespace-nowrap',
-        renderCell: (expense) => formatTimeBn(expense.createdAt),
+        renderCell: (expense) => formatTimeBn(expense.recordedAt || expense.createdAt),
         renderFooterCell: () => (
           <span className="text-xs font-bold text-ink-secondary">
             মোট খরচ:
@@ -169,38 +180,33 @@ export function ExpenseHistoryTable() {
               দোকানের খরচের খাতা ({toBanglaDigits(targetDate)})
             </h4>
             <p className="text-xs text-ink-secondary">
-              ক্যাশ আউট ভাউচার ও দৈনিক ছোট খরচ
+              দৈনিক খরচের তালিকা ও ভাউচার
             </p>
           </div>
         </div>
 
-        {/* ক্যাটাগরি ফিল্টার পিলস */}
-        <div className="flex items-center gap-1.5 overflow-x-auto text-xs scrollbar-none">
-          <span className="text-ink-secondary font-medium mr-1 flex items-center gap-1 shrink-0 text-xs">
+        {/* ক্যাটাগরি ফিল্টার ড্রপডাউন */}
+        <div className="flex items-center gap-2 self-stretch sm:self-auto sm:justify-end">
+          <label
+            htmlFor="expense-category-filter"
+            className="text-xs font-semibold text-ink-secondary whitespace-nowrap flex items-center gap-1.5 shrink-0 select-none"
+          >
             <Funnel size={13} weight="bold" />
             <span>ফিল্টার:</span>
-          </span>
-          {[
-            { id: undefined, label: 'সব খরচ' },
-            { id: 'LABOR_KULI', label: 'কুলি' },
-            { id: 'TRANSPORT_VAN', label: 'গাড়িভাড়া' },
-            { id: 'TEA_SNACKS', label: 'চা-নাস্তা' },
-            { id: 'ELECTRICITY_UTILITY', label: 'বিদ্যুৎ' },
-            { id: 'SHOP_MAINTENANCE', label: 'সরঞ্জাম' },
-          ].map((cat) => (
-            <button
-              key={cat.label}
-              type="button"
-              onClick={() => setCategoryFilter(cat.id as ExpenseCategory | undefined)}
-              className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-[background-color,color,transform] duration-150 active:scale-[0.98] whitespace-nowrap cursor-pointer ${
-                categoryFilter === cat.id
-                  ? 'bg-brand-deep text-white shadow-2xs'
-                  : 'bg-surface-subtle text-ink-body hover:bg-brand-soft hover:text-brand-deep border border-border-default'
-              }`}
-            >
-              {cat.label}
-            </button>
-          ))}
+          </label>
+          <div className="w-full sm:w-52 shrink-0">
+            <CustomSelect
+              id="expense-category-filter"
+              options={EXPENSE_CATEGORY_FILTER_OPTIONS}
+              value={categoryFilter || 'ALL'}
+              onChange={(val) => {
+                setCategoryFilter(val === 'ALL' ? undefined : (val as ExpenseCategory));
+              }}
+              placeholder="সব খরচ..."
+              className="w-full"
+              buttonClassName="w-full"
+            />
+          </div>
         </div>
       </div>
 

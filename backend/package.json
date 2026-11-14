@@ -10,7 +10,8 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "seed": "tsx scripts/seed.ts",
-    "test:flow": "tsx scripts/test-pos-flow.ts"
+    "test:flow": "tsx scripts/test-pos-flow.ts",
+    "test:uom": "tsx scripts/test-uom-calculations.ts"
   },
   "keywords": [
     "pos",

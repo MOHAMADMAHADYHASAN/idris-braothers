@@ -101,7 +101,7 @@ export function SupplierLedgerDrawer() {
             <div>
               <div className="flex items-center gap-2">
                 <h3 id={titleId} className="font-bold text-ink-primary text-sm sm:text-base">
-                  {selectedSupplier.companyName || selectedSupplier.name} — খতিয়ান বিবরণী
+                  {selectedSupplier.companyName || selectedSupplier.name} — লেজার বিবরণী
                 </h3>
               </div>
               <div className="flex items-center gap-3 text-xs text-ink-secondary mt-0.5 flex-wrap">
@@ -132,7 +132,7 @@ export function SupplierLedgerDrawer() {
               type="button"
               onClick={handlePrint}
               className={buttonClasses({ variant: 'primary', size: 'sm', className: 'gap-1.5' })}
-              title="খতিয়ান প্রিন্ট করুন"
+              title="লেজার প্রিন্ট করুন"
             >
               <Printer size={15} weight="bold" />
               <span className="hidden sm:inline">প্রিন্ট</span>
@@ -172,12 +172,12 @@ export function SupplierLedgerDrawer() {
           </div>
         </div>
 
-        {/* খতিয়ান টেবিল বডি (স্ক্রলেবল) */}
+        {/* লেজার টেবিল বডি (স্ক্রলেবল) */}
         <div className="flex-1 overflow-y-auto p-3.5">
           {isLedgerLoading && ledgerEntries.length === 0 ? (
             <div className="py-16 text-center text-ink-secondary">
               <ArrowsClockwise size={24} weight="bold" className="animate-spin mx-auto mb-2 text-brand-deep" />
-              <p className="text-xs">মহাজনের খতিয়ান বিবরণী লোড হচ্ছে...</p>
+              <p className="text-xs">মহাজনের লেজার বিবরণী লোড হচ্ছে...</p>
             </div>
           ) : ledgerEntries.length === 0 ? (
             <div className="py-16 text-center text-ink-secondary">

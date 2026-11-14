@@ -102,7 +102,7 @@ export function InlineSupplierModal({
 
           <div>
             <label htmlFor={`${formId}-company`} className="block text-xs font-semibold text-ink-body mb-1">
-              কোম্পানি ও মোকামের গদির নাম
+              কোম্পানি বা প্রতিষ্ঠানের নাম
             </label>
             <input
               id={`${formId}-company`}
@@ -130,14 +130,14 @@ export function InlineSupplierModal({
             </div>
             <div>
               <label htmlFor={`${formId}-address`} className="block text-xs font-semibold text-ink-body mb-1">
-                মোকাম ও ঠিকানা
+                ঠিকানা
               </label>
               <input
                 id={`${formId}-address`}
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="মোকাম / ঠিকানা"
+                placeholder="ঠিকানা / এলাকা"
                 className="w-full px-3 py-2 rounded-lg border border-border-strong focus:outline-none focus:ring-2 focus:ring-brand-deep text-xs text-ink-primary"
               />
             </div>

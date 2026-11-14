@@ -23,5 +23,6 @@ const shutdown = async (signal: string) => {
   }, 10000);
 };
 
+// POS Server Started - timestamp check: 1
 process.on('SIGTERM', () => shutdown('SIGTERM'));
 process.on('SIGINT', () => shutdown('SIGINT'));

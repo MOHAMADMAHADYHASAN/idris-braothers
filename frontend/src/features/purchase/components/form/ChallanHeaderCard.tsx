@@ -66,7 +66,7 @@ export function ChallanHeaderCard() {
               ১. চালান ও সরবরাহকারীর বিবরণ
             </h2>
           </div>
-          <span className="text-xs text-ink-secondary font-medium">মোকাম পরিচিতি</span>
+          <span className="text-xs text-ink-secondary font-medium">মহাজন ও সরবরাহকারী তথ্য</span>
         </div>
 
         <div className="p-5 space-y-4">
@@ -164,10 +164,10 @@ export function ChallanHeaderCard() {
               )}
             </div>
 
-            {/* ২. মোকাম চালান নম্বর */}
+            {/* ২. চালান নম্বর */}
             <div>
               <label htmlFor={`${formId}-purchase-no`} className="block text-xs font-semibold text-ink-body mb-1.5">
-                মোকাম মেমো ও চালান নম্বর
+                চালান / বিল নম্বর
               </label>
               <input
                 id={`${formId}-purchase-no`}

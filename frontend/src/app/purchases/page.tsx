@@ -50,7 +50,7 @@ export default function PurchasesPage() {
       <div className="bg-surface-card border-b border-border-default shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
           <AdminPageHeader
-            title="মোকাম চালান ও স্টক-ইন রেজিস্টার"
+            title="ক্রয় চালান ও স্টক-ইন"
             backHref="/"
             backTitle="ড্যাশবোর্ডে ফিরে যান"
             icon={<Truck size={16} weight="bold" />}
@@ -102,7 +102,7 @@ export default function PurchasesPage() {
         <div className="bg-surface-card rounded-xl border border-border-default p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
           <div className="text-xs font-bold text-ink-primary flex items-center gap-1.5">
             <Receipt size={16} weight="bold" className="text-brand-deep" />
-            <span>মোকাম চালান ফিল্টার ও সময়কাল:</span>
+            <span>তারিখ ও চালান ফিল্টার:</span>
           </div>
 
           <div className="overflow-x-auto pb-0.5 scrollbar-none w-full sm:w-auto">

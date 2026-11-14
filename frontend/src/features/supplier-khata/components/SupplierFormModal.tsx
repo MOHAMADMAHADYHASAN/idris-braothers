@@ -180,17 +180,17 @@ export function SupplierFormModal() {
               />
             </div>
 
-            {/* মোকাম / ঠিকানা */}
+            {/* ঠিকানা */}
             <div>
               <label htmlFor={`${formId}-address`} className="block text-xs font-medium text-ink-secondary mb-1">
-                মোকাম / আড়তের এলাকা
+                ঠিকানা
               </label>
               <input
                 id={`${formId}-address`}
                 type="text"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
-                placeholder="মোকাম / এলাকা"
+                placeholder="মহাজন বা প্রতিষ্ঠানের ঠিকানা"
                 className="w-full px-3 py-1.5 bg-surface-card border border-border-default rounded-md text-xs sm:text-sm text-ink-primary placeholder:text-ink-muted focus:outline-none focus:ring-2 focus:ring-brand-deep/20 focus:border-brand-deep transition-[border-color,box-shadow] duration-150"
               />
             </div>

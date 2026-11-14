@@ -135,7 +135,7 @@ export function PaySupplierModal() {
               )}
               {successReceipt.supplierAddress && (
                 <div className="flex justify-between">
-                  <span className="text-ink-secondary">মোকাম:</span>
+                  <span className="text-ink-secondary">ঠিকানা:</span>
                   <span className="text-ink-primary">{successReceipt.supplierAddress}</span>
                 </div>
               )}

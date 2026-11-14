@@ -1,13 +1,13 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Plus,
   Trash,
   Sparkle,
   ArrowsClockwise,
 } from '@phosphor-icons/react';
-import { FormUnitItem } from '../../product.types';
+import { FormUnitItem, CategoryPresetConfig, CategoryQuickSize } from '../../product.types';
 import {
   extractBaseProductCode,
   generateProductVariantSkus,
@@ -38,6 +38,8 @@ interface VariantsStockMatrixCardProps {
   setVariants: React.Dispatch<React.SetStateAction<FormVariantItem[]>>;
   defaultBaseUnit: string;
   simpleSku?: string;
+  presetConfig?: CategoryPresetConfig | null;
+  categoryName?: string;
 }
 
 const COMMON_SIZE_PRESETS = [
@@ -85,10 +87,21 @@ export function VariantsStockMatrixCard({
   setVariants,
   defaultBaseUnit,
   simpleSku,
+  presetConfig,
+  categoryName,
 }: VariantsStockMatrixCardProps) {
   const [defaultVariantUnit, setDefaultVariantUnit] = useState<string>(
-    defaultBaseUnit === 'কেজি' ? 'প্যাকেট' : defaultBaseUnit || 'পিস'
+    presetConfig?.defaultBaseUnit || (defaultBaseUnit === 'কেজি' ? 'প্যাকেট' : defaultBaseUnit || 'পিস')
   );
+
+  // ক্যাটাগরি বা ডিফল্ট একক পরিবর্তন হলে ভ্যারিয়েন্ট ইউনিট সিঙ্ক
+  useEffect(() => {
+    if (presetConfig?.defaultBaseUnit) {
+      setDefaultVariantUnit(presetConfig.defaultBaseUnit);
+    } else if (defaultBaseUnit) {
+      setDefaultVariantUnit(defaultBaseUnit === 'কেজি' ? 'প্যাকেট' : defaultBaseUnit);
+    }
+  }, [presetConfig?.defaultBaseUnit, defaultBaseUnit]);
 
   // বাল্ক অ্যাপ্লিকেটর স্টেট
   const [bulkPurchase, setBulkPurchase] = useState('');
@@ -112,14 +125,20 @@ export function VariantsStockMatrixCard({
   };
 
   // কুইক প্রিসেট দিয়ে নতুন ভ্যারিয়েন্ট যোগ (অটো ৬-ডিজিট SKU সহ)
-  const handleAddPreset = (sizeName: string) => {
+  const handleAddPreset = (sizeName: string, quickConfig?: CategoryQuickSize) => {
     // ডুপ্লিকেট নাম রোধ
     if (variants.some((v) => v.variantName.toLowerCase() === sizeName.toLowerCase())) {
       toast.warning(`"${sizeName}" ভ্যারিয়েন্টটি ইতিমধ্যে তালিকায় আছে!`);
       return;
     }
 
-    const { baseUnitName, allowDecimalQty } = inferVariantUnitAndDecimal(sizeName, defaultVariantUnit);
+    const baseUnitName =
+      quickConfig?.baseUnitName ??
+      inferVariantUnitAndDecimal(sizeName, defaultVariantUnit).baseUnitName;
+    const allowDecimalQty =
+      quickConfig !== undefined
+        ? quickConfig.allowDecimalQty
+        : inferVariantUnitAndDecimal(sizeName, defaultVariantUnit).allowDecimalQty;
 
     setVariants((prev) => {
       const autoSku = generateSingleVariantSku(sizeName, prev, prev.length, simpleSku);
@@ -300,19 +319,41 @@ export function VariantsStockMatrixCard({
 
       {/* ১. কুইক প্রিসেট প্যানেল */}
       <div className="px-5 py-2.5 bg-surface-subtle/40 border-b border-border-default flex items-center flex-wrap gap-1.5">
-        <span className="text-xs font-semibold text-ink-secondary mr-1 select-none">
-          প্রিসেট:
+        <span className="text-xs font-semibold text-ink-secondary mr-1 select-none flex items-center gap-1">
+          {categoryName ? `${categoryName} প্রিসেট:` : 'প্রিসেট:'}
         </span>
-        {COMMON_SIZE_PRESETS.map((size) => (
-          <button
-            key={size}
-            type="button"
-            onClick={() => handleAddPreset(size)}
-            className="px-2.5 py-1 rounded-md text-xs font-medium bg-surface-card hover:bg-brand-soft text-ink-body hover:text-brand-deep border border-border-default transition-colors cursor-pointer"
-          >
-            + {size}
-          </button>
-        ))}
+        {presetConfig?.quickSizes && presetConfig.quickSizes.length > 0 ? (
+          <>
+            {presetConfig.quickSizes.map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => handleAddPreset(item.label, item)}
+                className="px-2.5 py-1 rounded-md text-xs font-medium bg-surface-card hover:bg-brand-soft text-ink-body hover:text-brand-deep border border-brand-light/70 hover:border-brand-deep transition-colors cursor-pointer shadow-2xs"
+                title={`একক: ${item.baseUnitName} (${item.allowDecimalQty ? 'ভগ্নাংশ গ্রহণযোগ্য' : 'পূর্ণ সংখ্যা'})`}
+              >
+                + {item.label}
+              </button>
+            ))}
+          </>
+        ) : (
+          COMMON_SIZE_PRESETS.map((size) => (
+            <button
+              key={size}
+              type="button"
+              onClick={() => handleAddPreset(size)}
+              className="px-2.5 py-1 rounded-md text-xs font-medium bg-surface-card hover:bg-brand-soft text-ink-body hover:text-brand-deep border border-border-default transition-colors cursor-pointer"
+            >
+              + {size}
+            </button>
+          ))
+        )}
+
+        {presetConfig?.suggestedUnits && presetConfig.suggestedUnits.length > 0 && (
+          <span className="text-[11px] font-medium text-ink-muted bg-surface-subtle px-2 py-0.5 rounded border border-border-default ml-auto">
+            হিসাব: {presetConfig.suggestedUnits.map((u) => `১ ${u.unitName} = ${formatNumber(u.conversionFactor)} ${presetConfig.defaultBaseUnit || 'কেজি'}`).join(' • ')}
+          </span>
+        )}
       </div>
 
       {/* ২. বাল্ক অ্যাপ্লিকেটর বার */}
@@ -384,7 +425,7 @@ export function VariantsStockMatrixCard({
                 <th className="py-2.5 px-3">SKU</th>
                 <th className="py-2.5 px-3">বারকোড</th>
                 <th className="py-2.5 px-3 text-center">একক ও মোড</th>
-                <th className="py-2.5 px-3">মজুত স্টক ও অ্যালার্ট</th>
+                <th className="py-2.5 px-3">স্টক ও অ্যালার্ট সীমা</th>
                 <th className="py-2.5 px-3">ক্রয়দর (৳) *</th>
                 <th className="py-2.5 px-3">পাইকারি (৳) *</th>
                 <th className="py-2.5 px-3">খুচরা (৳) *</th>
@@ -468,7 +509,7 @@ export function VariantsStockMatrixCard({
                     </div>
                   </td>
 
-                  {/* ৫. মজুত স্টক ও অ্যালার্ট */}
+                  {/* ৫. স্টক ও অ্যালার্ট */}
                   <td className="py-2.5 px-3 w-[130px]">
                     <div className="flex items-center gap-1">
                       <input
@@ -476,10 +517,10 @@ export function VariantsStockMatrixCard({
                         step={v.allowDecimalQty ? 'any' : '1'}
                         value={v.stockQuantity}
                         onChange={(e) => handleUpdateVariant(idx, 'stockQuantity', e.target.value)}
-                        placeholder="মজুত"
+                        placeholder="স্টক"
                         className="w-16 px-1.5 py-1.5 rounded border border-border-strong font-mono text-xs text-right bg-surface-card text-ink-primary font-bold"
-                        title="বর্তমান মজুত"
-                        aria-label={`ভ্যারিয়েন্ট ${idx + 1} বর্তমান মজুত`}
+                        title="বর্তমান স্টক"
+                        aria-label={`ভ্যারিয়েন্ট ${idx + 1} বর্তমান স্টক`}
                       />
                       <span className="text-ink-secondary font-mono">/</span>
                       <input
