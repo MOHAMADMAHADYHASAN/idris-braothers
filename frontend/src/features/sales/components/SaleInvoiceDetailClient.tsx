@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { handleSmartBack } from '@/lib/navigation';
 import {
   ArrowLeft,
   Printer,
@@ -35,6 +37,7 @@ interface SaleInvoiceDetailClientProps {
 }
 
 export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps) {
+  const router = useRouter();
   const { openCancelModal, isCancelModalOpen } = useSalesStore();
 
   const [sale, setSale] = useState<SaleDetail | null>(null);
@@ -108,7 +111,8 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/sales"
-              className="p-2 rounded-lg text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle border border-border-default transition-colors shrink-0"
+              onClick={(e) => handleSmartBack(e, router, '/sales')}
+              className="p-2 rounded-lg text-ink-secondary hover:text-ink-primary hover:bg-surface-subtle border border-border-default transition-colors shrink-0 cursor-pointer"
               title="বিক্রয় তালিকায় ফিরে যান"
               aria-label="বিক্রয় তালিকায় ফিরে যান"
             >

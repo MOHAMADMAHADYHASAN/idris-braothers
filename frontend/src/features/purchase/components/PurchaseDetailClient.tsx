@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { handleSmartBack } from '@/lib/navigation';
 import {
   ArrowLeft,
   Printer,
@@ -20,6 +22,7 @@ interface PurchaseDetailClientProps {
 }
 
 export function PurchaseDetailClient({ purchaseId }: PurchaseDetailClientProps) {
+  const router = useRouter();
   const { fetchPurchaseById, selectedPurchase } = usePurchaseStore();
   const [purchase, setPurchase] = useState<Purchase | null>(
     selectedPurchase?.id === purchaseId ? selectedPurchase : null
@@ -78,7 +81,8 @@ export function PurchaseDetailClient({ purchaseId }: PurchaseDetailClientProps) 
           <div className="flex items-center gap-3">
             <Link
               href="/purchases"
-              className="p-2 rounded-lg text-ink-secondary hover:text-brand-deep hover:bg-brand-soft border border-border-default transition-colors"
+              onClick={(e) => handleSmartBack(e, router, '/purchases')}
+              className="p-2 rounded-lg text-ink-secondary hover:text-brand-deep hover:bg-brand-soft border border-border-default transition-colors cursor-pointer"
               title="চালান তালিকায় ফিরুন"
               aria-label="চালান তালিকায় ফিরুন"
             >

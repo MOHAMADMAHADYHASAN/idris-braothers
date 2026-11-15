@@ -2,7 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft } from '@phosphor-icons/react';
+import { handleSmartBack } from '@/lib/navigation';
 
 interface AdminPageHeaderProps {
   title: string;
@@ -30,6 +32,8 @@ export function AdminPageHeader({
   actions,
   className = '',
 }: AdminPageHeaderProps) {
+  const router = useRouter();
+
   return (
     <header
       className={`sticky top-0 z-30 surface-glass-header border-b border-border-default/80 px-4 py-2.5 md:static md:px-0 md:py-0 md:border-0 md:bg-transparent ${className}`}
@@ -40,7 +44,8 @@ export function AdminPageHeader({
           {backHref && (
             <Link
               href={backHref}
-              className="p-1.5 rounded-md text-ink-secondary hover:text-brand-deep hover:bg-brand-soft/60 transition-[background-color,color,transform] duration-150 active:scale-[0.98] shrink-0"
+              onClick={(e) => handleSmartBack(e, router, backHref)}
+              className="p-1.5 rounded-md text-ink-secondary hover:text-brand-deep hover:bg-brand-soft/60 transition-[background-color,color,transform] duration-150 active:scale-[0.98] shrink-0 cursor-pointer"
               title={backTitle}
               aria-label={backTitle}
             >

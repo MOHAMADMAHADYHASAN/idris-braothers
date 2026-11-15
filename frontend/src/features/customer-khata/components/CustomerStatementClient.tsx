@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useId } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { handleSmartBack } from '@/lib/navigation';
 import {
   ArrowLeft,
   Printer,
@@ -34,6 +36,7 @@ interface CustomerStatementClientProps {
 }
 
 export function CustomerStatementClient({ customerId }: CustomerStatementClientProps) {
+  const router = useRouter();
   const payFormId = useId();
   const payAmountId = `${payFormId}-amount`;
   const payNoteId = `${payFormId}-note`;
@@ -203,7 +206,8 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/khata/customers"
-              className="p-2 rounded-lg text-ink-secondary hover:text-brand-deep hover:bg-brand-soft/60 border border-border-default transition-colors shrink-0"
+              onClick={(e) => handleSmartBack(e, router, '/khata/customers')}
+              className="p-2 rounded-lg text-ink-secondary hover:text-brand-deep hover:bg-brand-soft/60 border border-border-default transition-colors shrink-0 cursor-pointer"
               title="কাস্টমার তালিকায় ফিরে যান"
               aria-label="কাস্টমার তালিকায় ফিরে যান"
             >

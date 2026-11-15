@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useId, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { handleSmartBack } from '@/lib/navigation';
 import {
   ArrowLeft,
   PencilSimple,
@@ -45,6 +47,7 @@ interface ProductProfile360ClientProps {
 type TabType = 'variants' | 'barcode' | 'wastage' | 'specs';
 
 export function ProductProfile360Client({ productId }: ProductProfile360ClientProps) {
+  const router = useRouter();
   const barcodeFormId = useId();
   const variantSelectId = `${barcodeFormId}-variant`;
   const stickerCountId = `${barcodeFormId}-count`;
@@ -177,7 +180,8 @@ export function ProductProfile360Client({ productId }: ProductProfile360ClientPr
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href="/products"
-              className="p-2 rounded-xl text-ink-secondary hover:text-brand-deep hover:bg-brand-soft border border-border-default bg-surface-card transition-colors shrink-0 shadow-2xs"
+              onClick={(e) => handleSmartBack(e, router, '/products')}
+              className="p-2 rounded-xl text-ink-secondary hover:text-brand-deep hover:bg-brand-soft border border-border-default bg-surface-card transition-colors shrink-0 shadow-2xs cursor-pointer"
               title="পণ্য তালিকায় ফিরে যান"
               aria-label="পণ্য তালিকায় ফিরে যান"
             >

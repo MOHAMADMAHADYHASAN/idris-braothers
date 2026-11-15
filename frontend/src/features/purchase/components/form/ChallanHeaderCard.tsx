@@ -55,9 +55,9 @@ export function ChallanHeaderCard() {
 
   return (
     <>
-      <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden">
+      <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs relative z-30">
         {/* কার্ড হেডার */}
-        <div className="px-5 py-3.5 bg-surface-subtle/60 border-b border-border-default flex items-center justify-between">
+        <div className="px-5 py-3.5 bg-surface-subtle/60 border-b border-border-default flex items-center justify-between rounded-t-xl">
           <div className="flex items-center gap-2">
             <span className="p-1.5 rounded-lg bg-brand-soft text-brand-deep">
               <FileText size={16} weight="bold" />
@@ -113,7 +113,7 @@ export function ChallanHeaderCard() {
               </button>
 
               {isDropdownOpen && (
-                <div className="absolute top-full left-0 right-0 mt-1 z-50 surface-glass-popover border border-border-default rounded-xl overflow-hidden max-h-64 flex flex-col animate-in fade-in zoom-in-95 duration-100">
+                <div className="absolute top-full left-0 right-0 mt-1.5 z-50 bg-surface-card border border-border-default rounded-xl shadow-xl overflow-hidden max-h-64 flex flex-col animate-in fade-in zoom-in-95 duration-100">
                   <div className="p-2 border-b border-border-subtle bg-surface-subtle">
                     <input
                       type="text"

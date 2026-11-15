@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useId } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { handleSmartBack } from '@/lib/navigation';
 import {
   ArrowLeft,
   ArrowCounterClockwise,
@@ -181,7 +182,8 @@ export function SaleReturnClient({ saleId }: SaleReturnClientProps) {
           <div className="flex items-center gap-3 min-w-0">
             <Link
               href={`/sales/${sale.id}`}
-              className="p-2 rounded-lg text-ink-secondary hover:text-brand-deep hover:bg-brand-soft/60 border border-border-default transition-colors shrink-0"
+              onClick={(e) => handleSmartBack(e, router, `/sales/${sale.id}`)}
+              className="p-2 rounded-lg text-ink-secondary hover:text-brand-deep hover:bg-brand-soft/60 border border-border-default transition-colors shrink-0 cursor-pointer"
               title="মেমোতে ফিরে যান"
               aria-label="মেমোতে ফিরে যান"
             >

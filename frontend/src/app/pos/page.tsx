@@ -2,7 +2,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, ShoppingCart, GridFour, Receipt, Barcode } from '@phosphor-icons/react';
+import { handleSmartBack } from '@/lib/navigation';
 import { usePosStore } from '@/features/pos/usePosStore';
 import { useProductStore } from '@/features/product/useProductStore';
 import { PosHeaderModeBar } from '@/components/ui/PosHeaderModeBar';
@@ -16,6 +18,7 @@ import { BarcodeScanNotification } from '@/features/pos/components/BarcodeScanNo
 import { formatCurrency, formatNumber } from '@/lib/decimal';
 
 export default function PosPage() {
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
@@ -136,7 +139,8 @@ export default function PosPage() {
           <div className="flex items-center gap-2.5 min-w-0">
             <Link
               href="/"
-              className="p-1.5 rounded-xl text-ink-secondary hover:text-brand-deep hover:bg-brand-soft border border-border-default/80 bg-surface-card transition-colors shrink-0 shadow-2xs"
+              onClick={(e) => handleSmartBack(e, router, '/')}
+              className="p-1.5 rounded-xl text-ink-secondary hover:text-brand-deep hover:bg-brand-soft border border-border-default/80 bg-surface-card transition-colors shrink-0 shadow-2xs cursor-pointer"
               title="ড্যাশবোর্ডে ফিরুন"
               aria-label="ড্যাশবোর্ডে ফিরুন"
             >

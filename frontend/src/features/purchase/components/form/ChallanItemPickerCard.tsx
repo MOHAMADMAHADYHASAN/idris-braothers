@@ -43,6 +43,18 @@ export function ChallanItemPickerCard() {
 
   const [validationError, setValidationError] = useState<string | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+
+  // Close search results on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setSearchResults([]);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Debounced product search
   useEffect(() => {
@@ -151,9 +163,9 @@ export function ChallanItemPickerCard() {
   const lineTotal = qty * cost;
 
   return (
-    <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs overflow-hidden">
+    <div className="bg-surface-card rounded-xl border border-border-default shadow-2xs relative z-20">
       {/* কার্ড হেডার */}
-      <div className="px-5 py-3.5 bg-surface-subtle/60 border-b border-border-default flex items-center justify-between">
+      <div className="px-5 py-3.5 bg-surface-subtle/60 border-b border-border-default flex items-center justify-between rounded-t-xl">
         <div className="flex items-center gap-2">
           <span className="p-1.5 rounded-lg bg-brand-soft text-brand-deep">
             <Package size={16} weight="bold" />
@@ -183,7 +195,7 @@ export function ChallanItemPickerCard() {
         )}
 
         {/* সার্চ বার */}
-        <div className="relative">
+        <div ref={searchContainerRef} className="relative">
           <label htmlFor={searchInputId} className="block text-xs font-semibold text-ink-body mb-1.5">
             পণ্য খুঁজুন (নাম, SKU বা বারকোড স্ক্যান) <span className="text-danger">*</span>
           </label>
@@ -217,7 +229,7 @@ export function ChallanItemPickerCard() {
 
           {/* ড্রপডাউন সার্চ রেজাল্ট */}
           {searchResults.length > 0 && !selectedProduct && (
-            <div className="absolute top-full left-0 right-0 mt-1 z-50 surface-glass-popover border border-border-default rounded-xl overflow-hidden max-h-64 divide-y divide-border-subtle animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute top-full left-0 right-0 mt-1.5 z-50 bg-surface-card border border-border-default rounded-xl shadow-xl overflow-y-auto max-h-72 divide-y divide-border-subtle animate-in fade-in zoom-in-95 duration-100">
               {searchResults.map((product) => {
                 if (product.hasVariants && product.variants.length > 1) {
                   return product.variants.map((v) => (

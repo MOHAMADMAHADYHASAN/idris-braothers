@@ -2,7 +2,9 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, Check, Spinner, Truck, ArrowsCounterClockwise } from '@phosphor-icons/react';
+import { handleSmartBack } from '@/lib/navigation';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { formatNumber } from '@/lib/decimal';
@@ -20,12 +22,14 @@ export function PurchaseStickyHeader({
   onSave,
   onReset,
 }: PurchaseStickyHeaderProps) {
+  const router = useRouter();
   return (
     <header className="sticky top-0 z-40 surface-glass-header border-b border-border-default/80 shadow-2xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
           <Link
             href="/purchases"
+            onClick={(e) => handleSmartBack(e, router, '/purchases')}
             className="p-2 rounded-lg text-ink-secondary hover:text-brand-deep hover:bg-brand-soft transition-colors cursor-pointer border border-border-default shadow-2xs"
             title="চালান তালিকায় ফিরে যান"
             aria-label="চালান তালিকায় ফিরে যান"
