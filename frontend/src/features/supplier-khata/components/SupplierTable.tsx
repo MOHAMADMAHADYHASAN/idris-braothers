@@ -76,7 +76,7 @@ export function SupplierTable() {
           s.phone ? (
             <div className="flex items-center gap-1">
               <Phone size={12} weight="bold" className="text-ink-secondary" />
-              <span>{toBanglaDigits(s.phone)}</span>
+              <span>{s.phone}</span>
             </div>
           ) : (
             <span className="text-xs text-ink-secondary italic font-sans">মোবাইল নেই</span>

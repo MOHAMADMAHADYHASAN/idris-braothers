@@ -3,6 +3,7 @@ import { AppError } from '../../common/errors/AppError';
 import { prisma } from '../../config/prisma';
 import { supplierRepository } from './suppliers.repository';
 import { getPagination, buildPaginationMeta, PaginationParams } from '../../common/utils/pagination';
+import { normalizePhone } from '../../common/utils/phone';
 import {
   CreateSupplierInput,
   UpdateSupplierInput,
@@ -16,6 +17,7 @@ export class SupplierService {
    */
   async createSupplier(data: CreateSupplierInput) {
     if (data.phone) {
+      data.phone = normalizePhone(data.phone);
       const existing = await supplierRepository.findByPhone(data.phone);
       if (existing) {
         throw new AppError(`Supplier with phone number "${data.phone}" already exists`, 409);
@@ -69,11 +71,16 @@ export class SupplierService {
     };
 
     if (query.search) {
+      const search = query.search.trim();
+      const normPhone = normalizePhone(search);
       where.OR = [
-        { name: { contains: query.search, mode: 'insensitive' } },
-        { companyName: { contains: query.search, mode: 'insensitive' } },
-        { phone: { contains: query.search, mode: 'insensitive' } },
-        { address: { contains: query.search, mode: 'insensitive' } },
+        { name: { contains: search, mode: 'insensitive' } },
+        { companyName: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+        ...(normPhone && normPhone !== search
+          ? [{ phone: { contains: normPhone, mode: 'insensitive' as const } }]
+          : []),
+        { address: { contains: search, mode: 'insensitive' } },
       ];
     }
 
@@ -121,11 +128,15 @@ export class SupplierService {
       throw new AppError('Supplier not found', 404);
     }
 
-    if (data.phone && data.phone !== supplier.phone) {
-      const existing = await supplierRepository.findByPhone(data.phone);
-      if (existing) {
-        throw new AppError(`Supplier with phone number "${data.phone}" already exists`, 409);
+    if (data.phone !== undefined) {
+      const normalizedPhone = data.phone ? normalizePhone(data.phone) : null;
+      if (normalizedPhone && normalizedPhone !== supplier.phone) {
+        const existing = await supplierRepository.findByPhone(normalizedPhone);
+        if (existing) {
+          throw new AppError(`Supplier with phone number "${normalizedPhone}" already exists`, 409);
+        }
       }
+      data.phone = normalizedPhone;
     }
 
     return await supplierRepository.update(id, {

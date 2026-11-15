@@ -111,7 +111,7 @@ export function CustomerLedgerDrawer() {
                 {selectedCustomer.phone && (
                   <span className="flex items-center gap-1 font-mono tabular-nums tracking-tight">
                     <Phone size={12} weight="bold" />
-                    {toBanglaDigits(selectedCustomer.phone)}
+                    {selectedCustomer.phone}
                   </span>
                 )}
                 {selectedCustomer.address && (

@@ -122,7 +122,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
             <div className="min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
                 <h1 className="text-base sm:text-lg font-bold text-ink-primary tracking-tight font-mono tabular-nums">
-                  #{toBanglaDigits(sale.invoiceNumber)}
+                  #{sale.invoiceNumber}
                 </h1>
                 <Badge variant={sale.saleType === 'WHOLESALE' ? 'wholesale' : 'neutral'}>
                   {sale.saleType === 'WHOLESALE' ? 'পাইকারি বিক্রয়' : 'খুচরা বিক্রয়'}
@@ -202,7 +202,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
           </div>
           <div className="text-right">
             <h3 className="text-base font-bold text-ink-primary font-mono tabular-nums">
-              #{toBanglaDigits(sale.invoiceNumber)}
+              #{sale.invoiceNumber}
             </h3>
             <p className="text-xs text-ink-secondary">
               তারিখ: {formatDateBn(sale.createdAt)}
@@ -365,7 +365,7 @@ export function SaleInvoiceDetailClient({ saleId }: SaleInvoiceDetailClientProps
                       href={`tel:${sale.customer.phone}`}
                       className="font-mono font-bold text-brand-deep hover:underline"
                     >
-                      {toBanglaDigits(sale.customer.phone)}
+                      {sale.customer.phone}
                     </a>
                   </div>
                 )}

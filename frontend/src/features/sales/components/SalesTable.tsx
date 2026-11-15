@@ -50,7 +50,7 @@ export function SalesTable() {
           return (
             <div>
               <span className="font-mono tabular-nums font-bold text-ink-primary text-xs block">
-                #{toBanglaDigits(sale.invoiceNumber)}
+                #{sale.invoiceNumber}
               </span>
               <span className="text-xs text-ink-secondary font-mono tabular-nums">
                 {dateStr} • {timeStr}
@@ -78,7 +78,7 @@ export function SalesTable() {
               </span>
               {sale.customer.phone && (
                 <span className="text-xs text-ink-secondary font-mono tabular-nums">
-                  {toBanglaDigits(sale.customer.phone)}
+                  {sale.customer.phone}
                 </span>
               )}
             </div>

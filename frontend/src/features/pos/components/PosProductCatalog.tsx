@@ -8,13 +8,13 @@ import {
   SlidersHorizontal,
   WarningCircle,
   X,
-  Package,
   ProhibitInset,
 } from '@phosphor-icons/react';
 import { Product, ProductVariant, ProductUnit } from '@/features/product/product.types';
 import { useProductStore } from '@/features/product/useProductStore';
 import { usePosStore } from '../usePosStore';
 import { formatCurrency, formatNumber, formatWeight } from '@/lib/decimal';
+import { toEnglishDigits } from '@/lib/phone';
 import { PosQuickAddModal } from './PosQuickAddModal';
 
 export function PosProductCatalog() {
@@ -33,6 +33,7 @@ export function PosProductCatalog() {
   }, [fetchProducts, fetchCategories]);
 
   const query = searchTerm.trim().toLowerCase();
+  const asciiQuery = toEnglishDigits(query);
 
   const filteredProducts = products.filter((p) => {
     const matchCategory =
@@ -45,14 +46,27 @@ export function PosProductCatalog() {
       query === '' ||
       p.name.toLowerCase().includes(query) ||
       (p.banglaName && p.banglaName.toLowerCase().includes(query)) ||
-      (p.sku && p.sku.toLowerCase().includes(query)) ||
-      (p.barcode && p.barcode.toLowerCase().includes(query)) ||
+      (p.sku &&
+        (p.sku.toLowerCase().includes(query) ||
+          (asciiQuery && p.sku.toLowerCase().includes(asciiQuery)))) ||
+      (p.barcode &&
+        (p.barcode.toLowerCase().includes(query) ||
+          (asciiQuery && p.barcode.toLowerCase().includes(asciiQuery)))) ||
       (p.variants || []).some(
         (v) =>
           v.variantName.toLowerCase().includes(query) ||
-          (v.sku && v.sku.toLowerCase().includes(query)) ||
-          (v.barcode && v.barcode.toLowerCase().includes(query)) ||
-          (v.units || []).some((u) => u.barcode && u.barcode.toLowerCase().includes(query))
+          (v.sku &&
+            (v.sku.toLowerCase().includes(query) ||
+              (asciiQuery && v.sku.toLowerCase().includes(asciiQuery)))) ||
+          (v.barcode &&
+            (v.barcode.toLowerCase().includes(query) ||
+              (asciiQuery && v.barcode.toLowerCase().includes(asciiQuery)))) ||
+          (v.units || []).some(
+            (u) =>
+              u.barcode &&
+              (u.barcode.toLowerCase().includes(query) ||
+                (asciiQuery && u.barcode.toLowerCase().includes(asciiQuery)))
+          )
       );
     return matchCategory && matchSearch;
   });
@@ -164,7 +178,7 @@ export function PosProductCatalog() {
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-3">
             {filteredProducts.map((product) => {
               const isWholesale = saleType === 'WHOLESALE';
               const variants = product.variants || [];
@@ -189,10 +203,10 @@ export function PosProductCatalog() {
                 <div
                   key={product.id}
                   onClick={() => handleCardClick(product)}
-                  className={`relative rounded-xl p-3 border transition-all duration-150 flex flex-col justify-between text-left select-none ${
+                  className={`relative rounded-xl p-3 sm:p-3.5 border transition-all duration-150 flex flex-col justify-between text-left select-none ${
                     isOutOfStock
                       ? 'bg-surface-subtle/50 border-border-default opacity-60 cursor-not-allowed'
-                      : 'bg-surface-card hover:bg-surface-subtle/40 border-border-default hover:border-brand-mid/80 shadow-2xs hover:shadow-xs cursor-pointer active:scale-[0.98]'
+                      : 'bg-surface-card hover:bg-brand-soft/20 border-border-default hover:border-brand-mid/80 shadow-2xs hover:shadow-xs cursor-pointer active:scale-[0.98]'
                   }`}
                   role="button"
                   tabIndex={isOutOfStock ? -1 : 0}
@@ -205,14 +219,21 @@ export function PosProductCatalog() {
                     }
                   }}
                 >
-                  <div>
-                    {/* Top Row: Icon + Stock Indicator */}
+                  <div className="flex flex-col flex-1">
+                    {/* Top Row: Category/Mode Badge + Stock Indicator */}
                     <div className="flex items-center justify-between gap-1.5 mb-2">
-                      <div className="w-8 h-8 rounded-lg bg-brand-soft/70 border border-brand-light/50 flex items-center justify-center text-brand-deep shrink-0">
-                        <Package size={17} weight="duotone" />
-                      </div>
+                      {isComplex ? (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-bold bg-brand-soft text-brand-deep border border-brand-light">
+                          <SlidersHorizontal size={11} weight="bold" />
+                          <span>{variants.length > 1 ? `${formatNumber(variants.length)} সাইজ` : 'ওজন মোড'}</span>
+                        </span>
+                      ) : (
+                        <span className="text-2xs font-medium text-ink-muted truncate max-w-[120px]">
+                          {product.category?.name || 'খুচরা পণ্য'}
+                        </span>
+                      )}
 
-                      <div className="text-right">
+                      <div className="text-right shrink-0">
                         {isOutOfStock ? (
                           <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-2xs font-bold bg-due-bg text-due-text border border-due-border">
                             <ProhibitInset size={11} weight="bold" />
@@ -230,67 +251,48 @@ export function PosProductCatalog() {
                       </div>
                     </div>
 
-                    {/* Product Bangla & English Name */}
-                    <div className="min-w-0">
-                      <h3 className="font-bold text-ink-primary text-xs sm:text-sm line-clamp-2 leading-snug">
+                    {/* Product Bangla Name (Clean Hero Typography) */}
+                    <div className="min-w-0 flex-1 my-1">
+                      <h3 className="font-bold text-ink-primary text-sm sm:text-[15px] leading-snug line-clamp-3">
                         {product.banglaName || product.name}
                       </h3>
-                      {product.banglaName && product.name && (
-                        <p className="text-2xs text-ink-secondary truncate mt-0.5">
-                          {product.name}
-                        </p>
-                      )}
                     </div>
-
-                    {/* Tag showing that clicking will open modal (for weighable or variant items) */}
-                    {isComplex && (
-                      <div className="mt-2">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-2xs font-bold bg-brand-soft/80 text-brand-deep border border-brand-light/60">
-                          <SlidersHorizontal size={11} weight="bold" />
-                          <span>
-                            {variants.length > 1
-                              ? `${formatNumber(variants.length)} সাইজ / ওজন`
-                              : 'ওজন ও টাকা মোড'}
-                          </span>
-                        </span>
-                      </div>
-                    )}
                   </div>
 
-                  {/* Bottom Row: Price & Tap CTA */}
-                  <div className="pt-2.5 mt-2 border-t border-border-subtle/80 flex items-end justify-between gap-1">
-                    <div>
-                      <div className="font-black text-sm sm:text-base text-ink-primary font-mono tabular-nums leading-none">
+                  {/* Bottom Row: Price & Fast Add CTA */}
+                  <div className="pt-2.5 mt-2 border-t border-border-subtle/80 flex items-end justify-between gap-1.5 shrink-0">
+                    <div className="min-w-0">
+                      <div className="font-black text-base sm:text-lg text-brand-deep font-mono tabular-nums leading-none">
                         {formatCurrency(activePrice, false)}
-                        <span className="text-2xs font-medium text-ink-secondary ml-0.5 font-sans">
+                        <span className="text-xs font-semibold text-ink-secondary ml-1 font-sans">
                           /{activeUnitName}
                         </span>
                       </div>
                       {isWholesale && (
-                        <span className="text-2xs font-bold text-wholesale-text block mt-0.5">
-                          পাইকারি রেট
+                        <span className="text-2xs font-bold text-wholesale-text block mt-1">
+                          পাইকারি দর
                         </span>
                       )}
                     </div>
 
-                    {/* Tap indicator button */}
+                    {/* Fast Tap / Add button */}
                     {!isOutOfStock && (
                       <div
                         onClick={(e) => {
                           e.stopPropagation();
                           handleCardClick(product);
                         }}
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 shadow-2xs transition-transform group-hover:scale-105 ${
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 shadow-2xs transition-transform active:scale-95 cursor-pointer ${
                           isComplex
-                            ? 'bg-wholesale-bg text-wholesale-text border border-wholesale-border/70 hover:bg-wholesale-solid hover:text-white'
-                            : 'bg-brand-deep text-white'
+                            ? 'bg-wholesale-bg text-wholesale-text border border-wholesale-border/80 hover:bg-wholesale-solid hover:text-white'
+                            : 'bg-brand-deep hover:bg-brand-hover text-white shadow-brand-deep/20'
                         }`}
-                        title={isComplex ? 'ক্লিক করে সাইজ ও ওজন নির্ধারণ করুন' : '১ পিস কার্টে যোগ করুন'}
+                        title={isComplex ? 'ক্লিক করে সাইজ ও ওজন নির্ধারণ করুন' : 'কার্টে যোগ করুন'}
                       >
                         {isComplex ? (
-                          <SlidersHorizontal size={13} weight="bold" />
+                          <SlidersHorizontal size={14} weight="bold" />
                         ) : (
-                          <Plus size={14} weight="bold" />
+                          <Plus size={16} weight="bold" />
                         )}
                       </div>
                     )}

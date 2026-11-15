@@ -46,7 +46,7 @@ src/features/[feature-name]/
    - লাইন-হাইট সবসময় $\ge 1.4$ থেকে $1.5$ হতে হবে যাতে ওপর-নিচের কোনো কার-চিহ্ন না কাটে।
 2. **Numbers & Financial Decimals:** **`JetBrains Mono`** + `var(--font-noto-sans-bengali)` fallback with `tabular-nums`.
    - মুদ্রা, ওজন (৪ দশমিক), কাউন্ট, শতাংশ ও রানিং খাতার ব্যালেন্সে মোনোস্পেস ব্যবহার বাধ্যতামূলক যাতে দ্রুত স্ক্যানিংয়ের সময় কলাম না কাঁপে।
-   - **সেন্ট্রালাইজড `bn-BD` বাংলা অঙ্ক (Strict Standard):** ডিসপ্লেতে থাকা সমস্ত টাকা, ওজন, সংখ্যা, শতাংশ, তারিখ ও সময় `src/lib/decimal.ts`-এর `bn-BD` হেল্পার (`formatCurrency`, `formatWeight`, `formatNumber`, `formatCompactTaka`, `formatPercent`, `formatDateBn`, `formatTimeBn`, `formatDateTimeBn`, `toBanglaDigits`) দিয়ে প্রদর্শিত হবে। শুধুমাত্র `<input type="number">` মান, হার্ডওয়্যার বারকোড SVG, SKU/ISO (`YYYY-MM-DD`) API কী ও `escpos.ts` USB বাইট ASCII থাকবে।
+   - **সেন্ট্রালাইজড সংখ্যা ও আইডেন্টিফায়ার স্ট্যান্ডার্ড (Strict Standard):** ডিসপ্লেতে থাকা টাকা (`formatCurrency`), ওজন (`formatWeight`), কাউন্ট, শতাংশ ও তারিখ `src/lib/decimal.ts`-এর `bn-BD` হেল্পার দিয়ে প্রদর্শিত হবে। **তবে সার্চ ও কপি-পেস্টের সুবিধার জন্য সমস্ত সার্চেবল আইডেন্টিফায়ার—মোবাইল নম্বর (`01981234567`), মেমো নম্বর (`#INV-20261114-0008`), ক্রয় চালান নম্বর (`#PUR-...`), বারকোড ও SKU—কখনোই `toBanglaDigits()` দিয়ে রূপান্তর করা যাবে না; এগুলো সবসময় পরিষ্কার ইংরেজি সংখ্যায় (`font-mono tabular-nums`) প্রদর্শিত হবে।**
 3. *(Hind Siliguri বা অন্য কোনো ফন্ট সিস্টেম থেকে সম্পূর্ণ বর্জন করা হয়েছে)*।
 
 ### C. Iconography Standard (@phosphor-icons/react)
@@ -324,3 +324,14 @@ src/
 17. **Challan Product & Supplier Search Popover Overflow Clipping Fix (`ChallanItemPickerCard.tsx`, `ChallanHeaderCard.tsx`):**
     - নতুন চালান তৈরি পেজে (`/purchases/new`) `ChallanItemPickerCard` ও `ChallanHeaderCard`-এর মূল কার্ড কন্টেইনার থেকে `overflow-hidden` সরিয়ে `relative z-20/z-30` ও হেডারে `rounded-t-xl` যুক্ত করা হয়েছে।
     - পণ্য সার্চ ড্রপডাউনে `bg-surface-card border border-border-default rounded-xl shadow-xl overflow-y-auto max-h-72 z-50` এবং বাইরে ক্লিক করলে ড্রপডাউন বন্ধ হওয়ার জন্য `searchContainerRef` আউটসাইড-ক্লিক লিসেনার যুক্ত করা হয়েছে, যার ফলে সার্চের ফলাফল নিচে আর কেটে যাবে না (clipped)।
+
+18. **Bangladeshi Phone Normalization & Validation Standard (`src/lib/phone.ts` & `src/lib/utils.ts`):**
+    - **সেন্ট্রালাইজড ফোন মডিউল:** [`src/lib/phone.ts`](src/lib/phone.ts) (এবং [`src/lib/utils.ts`](src/lib/utils.ts)-এ রি-এক্সপোর্ট) থেকে `normalizePhone`, `isValidBDPhone`, `toGatewayPhone`, `formatPhone` এবং `toEnglishDigits` উপলব্ধ করা হয়েছে।
+    - **স্বয়ংক্রিয় নরম্যালাইজেশন (১১ ডিজিট):** ফোন নম্বর থেকে স্পেস, ড্যাশ, ব্র্যাকেট, ডট এবং কান্ট্রি কোড (`+880`, `880`) অপসারিত হয়; ইউজার ১০ ডিজিট লিখলে সামনে স্বয়ংক্রিয়ভাবে `0` বসে এবং বাংলা ডিজিট (`০১৭১...`) স্বয়ংক্রিয়ভাবে ইংরেজি সংখ্যায় কনভার্ট হয়ে ডাটাবেজে স্ট্যান্ডার্ড `01XXXXXXXXX` হিসেবে সেভ হয়।
+    - **বাংলাদেশি বৈধ অপারেটর যাচাই:** `013, 014, 015, 016, 017, 018, 019` (`/^(01[3-9])\d{8}$/`) এর বাইরে কোনো অবৈধ অপারেটর বা অসম্পূর্ণ নম্বর ইনপুট নিলে ইউজারকে সাথে সাথে সঠিক বাংলা ত্রুটি মেসেজ দেওয়া হয়।
+    - **সবগুলো ফর্ম ও মডালে ইন্টিগ্রেশন:**
+      - [`CustomerFormModal.tsx`](src/features/customer-khata/components/CustomerFormModal.tsx): কাস্টমার তৈরি ও এডিটে ফোন নরম্যালাইজ ও অপারেটর ভ্যালিডেশন।
+      - [`SupplierFormModal.tsx`](src/features/supplier-khata/components/SupplierFormModal.tsx): মহাজন তৈরি ও এডিটে ফোন নরম্যালাইজ ও অপারেটর ভ্যালিডেশন।
+      - [`InlineSupplierModal.tsx`](src/features/purchase/components/form/InlineSupplierModal.tsx): চালান ক্রয় স্ক্রিনে নতুন মহাজন তৈরিতে নরম্যালাইজেশন।
+      - [`PosQuickCustomerModal.tsx`](src/features/pos/components/PosQuickCustomerModal.tsx): পিওএস কাউন্টারে দ্রুত খাতা খোলার সময় বাংলা/ইংরেজি ফোন নম্বর অটো-ডিটেকশন ও ভ্যালিডেশন।
+      - [`PosSettlementPanel.tsx`](src/features/pos/components/PosSettlementPanel.tsx) ও [`ChallanHeaderCard.tsx`](src/features/purchase/components/form/ChallanHeaderCard.tsx): সার্চ বারে যেকোনো ফরম্যাটে ফোন লিখলে (`+88017...`, `01712-34...`, বা বাংলা `০১৭১...`) নরম্যালাইজড ম্যাচিং।

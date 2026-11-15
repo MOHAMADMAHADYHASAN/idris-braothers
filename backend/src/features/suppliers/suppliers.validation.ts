@@ -3,6 +3,7 @@ import {
   ValidationContext,
   parseBoolean,
   parseNumber,
+  parsePhone,
   parseString,
   runValidator,
 } from '../../common/utils/validators';
@@ -41,7 +42,7 @@ function validateCreateSupplier(obj: PlainObject, ctx: ValidationContext): Creat
       message: 'Supplier / Mahajan contact name is required',
     }) as string,
     companyName: parseString(obj, 'companyName', ctx, { nullable: true }),
-    phone: parseString(obj, 'phone', ctx, { nullable: true }),
+    phone: parsePhone(obj, 'phone', ctx, { nullable: true }),
     address: parseString(obj, 'address', ctx, { nullable: true }),
     openingPayable: parseNumber(obj, 'openingPayable', ctx, { defaultVal: 0 }) as number,
   };
@@ -53,7 +54,7 @@ function validateUpdateSupplier(obj: PlainObject, ctx: ValidationContext): Updat
   if (name !== undefined && name !== null) result.name = name;
   const companyName = parseString(obj, 'companyName', ctx, { nullable: true });
   if (companyName !== undefined) result.companyName = companyName;
-  const phone = parseString(obj, 'phone', ctx, { nullable: true });
+  const phone = parsePhone(obj, 'phone', ctx, { nullable: true });
   if (phone !== undefined) result.phone = phone;
   const address = parseString(obj, 'address', ctx, { nullable: true });
   if (address !== undefined) result.address = address;

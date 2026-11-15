@@ -240,7 +240,7 @@ export function SupplierStatementClient({ supplierId }: SupplierStatementClientP
                 </Badge>
               </div>
               <p className="text-xs text-ink-secondary truncate mt-0.5 font-mono tabular-nums">
-                {supplier.phone ? `ফোন: ${toBanglaDigits(supplier.phone)}` : ''}{' '}
+                {supplier.phone ? `ফোন: ${supplier.phone}` : ''}{' '}
                 {supplier.address ? `• ঠিকানা: ${supplier.address}` : ''}
               </p>
             </div>
@@ -277,7 +277,7 @@ export function SupplierStatementClient({ supplierId }: SupplierStatementClientP
                 <p className="text-xs text-ink-secondary font-medium">প্রোঃ {supplier.name}</p>
               )}
               <p className="text-xs text-ink-secondary font-mono">
-                {supplier.phone ? toBanglaDigits(supplier.phone) : ''}
+                {supplier.phone || ''}
               </p>
               <p className="text-xs text-ink-secondary">ঠিকানা: {supplier.address || ''}</p>
             </div>
@@ -392,7 +392,7 @@ export function SupplierStatementClient({ supplierId }: SupplierStatementClientP
                                   className="inline-flex items-center gap-1 font-mono font-bold text-brand-deep hover:underline"
                                   title="চালান বিস্তারিত দেখুন"
                                 >
-                                  <span>চালান #{toBanglaDigits(entry.purchaseId.slice(-6).toUpperCase())}</span>
+                                  <span>চালান #{entry.purchaseId.slice(-6).toUpperCase()}</span>
                                   <ArrowSquareOut size={12} weight="bold" />
                                 </Link>
                               ) : (
@@ -548,7 +548,7 @@ export function SupplierStatementClient({ supplierId }: SupplierStatementClientP
                       href={`tel:${supplier.phone}`}
                       className="font-mono font-bold text-brand-deep hover:underline"
                     >
-                      {toBanglaDigits(supplier.phone)}
+                      {supplier.phone}
                     </a>
                   </div>
                 )}

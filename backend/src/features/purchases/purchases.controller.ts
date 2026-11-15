@@ -10,8 +10,9 @@ export class PurchasesController {
   });
 
   getPurchases = asyncHandler(async (req: Request, res: Response) => {
-    const { supplierId, purchaseNumber, startDate, endDate, page, limit } = req.query;
+    const { search, supplierId, purchaseNumber, startDate, endDate, page, limit } = req.query;
     const result = await purchasesService.getPurchases({
+      search: (search as string) || (purchaseNumber as string),
       supplierId: supplierId as string,
       purchaseNumber: purchaseNumber as string,
       startDate: startDate as string,

@@ -47,6 +47,7 @@ export const salesService = {
     const queryParams: Record<string, any> = {};
 
     if (params.searchQuery) {
+      queryParams.search = params.searchQuery.trim();
       queryParams.invoiceNumber = params.searchQuery.trim();
     }
     if (params.saleType) {

@@ -106,6 +106,8 @@ class PosService {
         billing.totalCurrentDue ?? billing.customerTotalDueAfterSale,
         0
       ),
+      duePayment: parseDecimal(billing.duePayment, 0),
+      changeReturn: parseDecimal(billing.changeReturn, 0),
     };
 
     return {

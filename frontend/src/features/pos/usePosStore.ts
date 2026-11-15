@@ -3,6 +3,7 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 import { posService } from './pos.service';
 import {
   SaleType,
+  OverpaymentAllocation,
   CartItem,
   CustomerOption,
   CreateSalePayload,
@@ -22,6 +23,7 @@ interface PosState {
   selectedCustomer: CustomerOption | null;
   discount: number;
   paidAmount: number;
+  overpaymentAllocation: OverpaymentAllocation;
   note: string;
   
   // UI & Submission
@@ -44,6 +46,7 @@ interface PosState {
   setSelectedCustomer: (customer: CustomerOption | null) => void;
   setDiscount: (discount: number) => void;
   setPaidAmount: (paidAmount: number) => void;
+  setOverpaymentAllocation: (allocation: OverpaymentAllocation) => void;
   setNote: (note: string) => void;
   
   // Computed Calculations
@@ -52,6 +55,7 @@ interface PosState {
   getInvoiceDue: () => number;
   getClosingCustomerDue: () => number;
   getChangeAmount: () => number;
+  getDuePaymentAmount: () => number;
   
   // Checkout
   submitSale: () => Promise<SaleInvoiceReceipt>;
@@ -68,6 +72,7 @@ export const usePosStore = create<PosState>()(
       selectedCustomer: null,
       discount: 0,
       paidAmount: 0,
+      overpaymentAllocation: 'APPLY_TO_DUE',
       note: '',
       isSubmitting: false,
       error: null,
@@ -316,9 +321,17 @@ export const usePosStore = create<PosState>()(
         set({ cart: [], discount: 0, paidAmount: 0, note: '', error: null });
       },
 
-      setSelectedCustomer: (selectedCustomer) => set({ selectedCustomer }),
+      setSelectedCustomer: (selectedCustomer) =>
+        set({
+          selectedCustomer,
+          overpaymentAllocation:
+            selectedCustomer && selectedCustomer.currentDue > 0
+              ? 'APPLY_TO_DUE'
+              : 'RETURN_CHANGE',
+        }),
       setDiscount: (discount) => set({ discount: Math.max(0, discount) }),
       setPaidAmount: (paidAmount) => set({ paidAmount: Math.max(0, paidAmount) }),
+      setOverpaymentAllocation: (overpaymentAllocation) => set({ overpaymentAllocation }),
       setNote: (note) => set({ note }),
 
       // Computed Totals
@@ -343,9 +356,19 @@ export const usePosStore = create<PosState>()(
       },
 
       getClosingCustomerDue: () => {
-        const previousDue = get().selectedCustomer?.currentDue || 0;
+        const customer = get().selectedCustomer;
+        if (!customer) return 0;
+
+        const previousDue = customer.currentDue || 0;
         const grand = get().getGrandTotal();
         const paid = get().paidAmount || 0;
+        const allocation = get().overpaymentAllocation;
+
+        if (paid > grand && allocation === 'RETURN_CHANGE') {
+          // Excess was returned as cash change, so previous due remains untouched
+          return parseFloat(previousDue.toFixed(2));
+        }
+
         // previousDue + grandTotal - cashReceived = new balance
         return parseFloat((previousDue + grand - paid).toFixed(2));
       },
@@ -353,7 +376,36 @@ export const usePosStore = create<PosState>()(
       getChangeAmount: () => {
         const grand = get().getGrandTotal();
         const paid = get().paidAmount || 0;
-        return paid > grand ? parseFloat((paid - grand).toFixed(2)) : 0;
+        const customer = get().selectedCustomer;
+        const allocation = get().overpaymentAllocation;
+
+        if (paid <= grand) return 0;
+
+        // Walk-in customer: always return change
+        if (!customer) {
+          return parseFloat((paid - grand).toFixed(2));
+        }
+
+        // Registered customer explicitly choosing to take change back
+        if (allocation === 'RETURN_CHANGE') {
+          return parseFloat((paid - grand).toFixed(2));
+        }
+
+        // When applying to due, no cash is returned from the drawer
+        return 0;
+      },
+
+      getDuePaymentAmount: () => {
+        const grand = get().getGrandTotal();
+        const paid = get().paidAmount || 0;
+        const customer = get().selectedCustomer;
+        const allocation = get().overpaymentAllocation;
+
+        if (!customer || paid <= grand || allocation === 'RETURN_CHANGE') {
+          return 0;
+        }
+
+        return parseFloat((paid - grand).toFixed(2));
       },
 
       // Checkout Submission
@@ -366,11 +418,19 @@ export const usePosStore = create<PosState>()(
         set({ isSubmitting: true, error: null });
 
         try {
+          const grand = state.getGrandTotal();
+          const isReturningChange = state.overpaymentAllocation === 'RETURN_CHANGE';
+          // If returning change, only the grandTotal portion is treated as paid for the sale
+          const effectivePaidAmount =
+            isReturningChange && state.paidAmount > grand
+              ? grand
+              : state.paidAmount;
+
           const payload: CreateSalePayload = {
             saleType: state.saleType,
             customerId: state.selectedCustomer?.id || null,
             discount: state.discount,
-            paidAmount: state.paidAmount,
+            paidAmount: effectivePaidAmount,
             note: state.note || undefined,
             items: state.cart.map((item) => {
               if (item.isReverseCalculated) {

@@ -7,6 +7,7 @@ import { customerRepository } from '../customers/customers.repository';
 import { getPagination, buildPaginationMeta, PaginationParams } from '../../common/utils/pagination';
 import { getDayBoundaries } from '../../common/utils/dateUtils';
 import { resolveDateFilter, ResolvedDateRange } from '../../common/utils/dateFilter';
+import { toEnglishDigits, normalizePhone } from '../../common/utils/phone';
 import { CreateSaleInput } from './sales.validation';
 
 export class SalesService {
@@ -243,6 +244,7 @@ export class SalesService {
     customerId?: string;
     saleType?: SaleType;
     invoiceNumber?: string;
+    search?: string;
     filter?: string;
     startDate?: string;
     endDate?: string;
@@ -259,8 +261,24 @@ export class SalesService {
       where.saleType = query.saleType;
     }
 
-    if (query.invoiceNumber) {
-      where.invoiceNumber = { contains: query.invoiceNumber, mode: 'insensitive' };
+    const searchTerm = (query.search || query.invoiceNumber || '').trim();
+    if (searchTerm) {
+      const asciiTerm = toEnglishDigits(searchTerm);
+      const normPhone = normalizePhone(searchTerm);
+      where.OR = [
+        { invoiceNumber: { contains: searchTerm, mode: 'insensitive' } },
+        ...(asciiTerm !== searchTerm
+          ? [{ invoiceNumber: { contains: asciiTerm, mode: 'insensitive' as const } }]
+          : []),
+        { customer: { name: { contains: searchTerm, mode: 'insensitive' } } },
+        { customer: { phone: { contains: searchTerm, mode: 'insensitive' } } },
+        ...(asciiTerm !== searchTerm
+          ? [{ customer: { phone: { contains: asciiTerm, mode: 'insensitive' as const } } }]
+          : []),
+        ...(normPhone && normPhone !== searchTerm && normPhone !== asciiTerm
+          ? [{ customer: { phone: { contains: normPhone, mode: 'insensitive' as const } } }]
+          : []),
+      ];
     }
 
     let dateRange: ResolvedDateRange | null = null;
@@ -365,6 +383,12 @@ export class SalesService {
     // Fallback search by invoiceNumber if not found by UUID
     if (!sale) {
       sale = await salesRepository.findByInvoiceNumber(id);
+      if (!sale) {
+        const asciiId = toEnglishDigits(id);
+        if (asciiId !== id) {
+          sale = await salesRepository.findByInvoiceNumber(asciiId);
+        }
+      }
     }
 
     if (!sale) {

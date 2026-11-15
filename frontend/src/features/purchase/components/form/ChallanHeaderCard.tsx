@@ -7,6 +7,7 @@ import { supplierKhataService } from '@/features/supplier-khata/supplierKhata.se
 import { Supplier } from '@/features/supplier-khata/supplierKhata.types';
 import { InlineSupplierModal } from './InlineSupplierModal';
 import { formatCurrency } from '@/lib/decimal';
+import { normalizePhone } from '@/lib/phone';
 
 export function ChallanHeaderCard() {
   const {
@@ -42,11 +43,15 @@ export function ChallanHeaderCard() {
     loadSuppliers();
   }, []);
 
+  const normalizedSupplierSearch = normalizePhone(searchTerm);
   const filteredSuppliers = suppliers.filter((s) => {
     const term = searchTerm.toLowerCase();
     return (
       s.name.toLowerCase().includes(term) ||
       (s.companyName && s.companyName.toLowerCase().includes(term)) ||
+      (s.phone &&
+        (s.phone.includes(searchTerm) ||
+          (normalizedSupplierSearch && s.phone.includes(normalizedSupplierSearch)))) ||
       (s.address && s.address.toLowerCase().includes(term))
     );
   });

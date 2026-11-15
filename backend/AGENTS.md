@@ -47,6 +47,12 @@ This backend is strictly tailored to the traditional grocery and spice market op
    - Suppliers/Mahajans maintain a running payable balance (`currentPayable`) with atomic `SupplierLedger` records.
 8. **Daily Cashbox Closing:**
    - Cash drawer reconciliation: `Net Cash in Hand = Total Cash In (Sales + Due Collections) - Total Cash Out (Supplier Payments + Expenses)`.
+9. **Bangladeshi Phone Normalization & Validation (Strict Standard):**
+   - All customer and supplier phone numbers are normalized into the standard 11-digit local format: `01XXXXXXXXX` (strips `+880`, `880`, hyphens, spaces, and translates Bengali numerals).
+   - Validates strictly against active Bangladeshi mobile operators: `013`, `014`, `015`, `016`, `017`, `018`, `019` (`/^(01[3-9])\d{8}$/`).
+   - Centralized utilities located in [`src/common/utils/phone.ts`](src/common/utils/phone.ts) (`normalizePhone`, `isValidBDPhone`, `toGatewayPhone`, `formatPhone`, `parsePhone`).
+   - DTO validation via `parsePhone` ensures database uniqueness integrity and prevents duplicate accounts under alternate string formats.
+   - Search APIs automatically normalize query strings, enabling seamless lookups whether storekeepers type `+880`, hyphenated formats, or Bengali numerals.
 
 ---
 

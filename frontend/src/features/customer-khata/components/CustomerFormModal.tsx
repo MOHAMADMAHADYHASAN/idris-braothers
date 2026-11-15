@@ -7,6 +7,7 @@ import { buttonClasses } from '@/components/ui/Button';
 import { useCustomerKhataStore } from '../useCustomerKhataStore';
 import { CustomerType } from '../customerKhata.types';
 import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
+import { normalizePhone, isValidBDPhone } from '@/lib/phone';
 
 export function CustomerFormModal() {
   const { activeModal, selectedCustomer, closeModal, submitCreateCustomer, submitUpdateCustomer } =
@@ -54,6 +55,16 @@ export function CustomerFormModal() {
       return;
     }
 
+    const trimmedPhone = phone.trim();
+    let normalizedPhone: string | null = null;
+    if (trimmedPhone) {
+      if (!isValidBDPhone(trimmedPhone)) {
+        setError('সঠিক বাংলাদেশি মোবাইল নম্বর লিখুন (যেমন: ০১৭১২-৩৪৫৬৭৮ বা 017XXXXXXXX)');
+        return;
+      }
+      normalizedPhone = normalizePhone(trimmedPhone);
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -61,14 +72,14 @@ export function CustomerFormModal() {
       if (isEdit && selectedCustomer) {
         await submitUpdateCustomer(selectedCustomer.id, {
           name: name.trim(),
-          phone: phone.trim() || null,
+          phone: normalizedPhone,
           address: address.trim() || null,
           customerType,
         });
       } else {
         await submitCreateCustomer({
           name: name.trim(),
-          phone: phone.trim() || null,
+          phone: normalizedPhone,
           address: address.trim() || null,
           customerType,
           openingDue: Number(openingDueStr) || 0,

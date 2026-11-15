@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { buttonClasses } from '@/components/ui/Button';
 import { useSupplierKhataStore } from '../useSupplierKhataStore';
 import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
+import { normalizePhone, isValidBDPhone } from '@/lib/phone';
 
 export function SupplierFormModal() {
   const {
@@ -58,6 +59,16 @@ export function SupplierFormModal() {
       return;
     }
 
+    const trimmedPhone = phone.trim();
+    let normalizedPhone: string | null = null;
+    if (trimmedPhone) {
+      if (!isValidBDPhone(trimmedPhone)) {
+        setError('সঠিক বাংলাদেশি মোবাইল নম্বর লিখুন (যেমন: ০১৭১২-৩৪৫৬৭৮ বা 017XXXXXXXX)');
+        return;
+      }
+      normalizedPhone = normalizePhone(trimmedPhone);
+    }
+
     setIsSubmitting(true);
     setError(null);
 
@@ -66,14 +77,14 @@ export function SupplierFormModal() {
         await submitUpdateSupplier(selectedSupplier.id, {
           name: name.trim(),
           companyName: companyName.trim() || null,
-          phone: phone.trim() || null,
+          phone: normalizedPhone,
           address: address.trim() || null,
         });
       } else {
         await submitCreateSupplier({
           name: name.trim(),
           companyName: companyName.trim() || null,
-          phone: phone.trim() || null,
+          phone: normalizedPhone,
           address: address.trim() || null,
           openingPayable: Number(openingPayableStr) || 0,
         });

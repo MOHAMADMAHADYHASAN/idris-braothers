@@ -231,7 +231,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                 </Badge>
               </div>
               <p className="text-xs text-ink-secondary truncate mt-0.5 font-mono tabular-nums">
-                {customer.phone ? `ফোন: ${toBanglaDigits(customer.phone)}` : ''}{' '}
+                {customer.phone ? `ফোন: ${customer.phone}` : ''}{' '}
                 {customer.address ? `• ঠিকানা: ${customer.address}` : ''}
               </p>
             </div>
@@ -263,7 +263,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
             <div className="text-right">
               <h3 className="text-base font-bold text-ink-primary">{customer.name}</h3>
               <p className="text-xs text-ink-secondary font-mono">
-                {customer.phone ? toBanglaDigits(customer.phone) : ''}
+                {customer.phone || ''}
               </p>
               <p className="text-xs text-ink-secondary">{customer.address || ''}</p>
             </div>
@@ -480,7 +480,7 @@ export function CustomerStatementClient({ customerId }: CustomerStatementClientP
                   <div className="flex items-center gap-2">
                     <Phone size={14} className="text-ink-secondary" />
                     <span className="font-mono tabular-nums text-ink-primary">
-                      {toBanglaDigits(customer.phone)}
+                      {customer.phone}
                     </span>
                   </div>
                 )}

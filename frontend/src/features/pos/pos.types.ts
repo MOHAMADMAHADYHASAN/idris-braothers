@@ -3,6 +3,7 @@
  */
 
 export type SaleType = 'RETAIL' | 'WHOLESALE';
+export type OverpaymentAllocation = 'APPLY_TO_DUE' | 'RETURN_CHANGE';
 
 export interface CustomerOption {
   id: string;
@@ -130,5 +131,7 @@ export interface ThermalReceiptData {
     cashPaid: number;
     invoiceDue: number;
     customerTotalDueAfterSale: number;
+    duePayment?: number;
+    changeReturn?: number;
   };
 }

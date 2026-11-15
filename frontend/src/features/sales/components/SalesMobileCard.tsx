@@ -39,7 +39,7 @@ export function SalesMobileCard({ sale }: { sale: SaleListItem }) {
       <div className="flex items-start justify-between gap-2 pb-2 border-b border-border-subtle">
         <div>
           <span className="font-mono tabular-nums font-bold text-ink-primary text-xs block">
-            #{toBanglaDigits(sale.invoiceNumber)}
+            #{sale.invoiceNumber}
           </span>
           <span className="text-xs text-ink-secondary font-mono tabular-nums">
             {dateStr} • {timeStr}

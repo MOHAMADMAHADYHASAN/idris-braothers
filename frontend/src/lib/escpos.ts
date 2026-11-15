@@ -111,6 +111,16 @@ export function generateEscPosCommands(
   out += justifyRow('Grand Total:', `Tk ${data.summary.grandTotal.toFixed(2)}`, colWidth) + '\n';
   out += justifyRow('Cash Paid:', `Tk ${data.summary.cashPaid.toFixed(2)}`, colWidth) + '\n';
 
+  if (data.customer && data.summary.cashPaid > data.summary.grandTotal) {
+    const excess = data.summary.cashPaid - data.summary.grandTotal;
+    out += justifyRow('  - Bill Paid:', `Tk ${data.summary.grandTotal.toFixed(2)}`, colWidth) + '\n';
+    out += justifyRow('  - Due Recovery:', `Tk ${excess.toFixed(2)}`, colWidth) + '\n';
+  }
+
+  if (data.summary.changeReturn && data.summary.changeReturn > 0) {
+    out += justifyRow('Change Return:', `Tk ${data.summary.changeReturn.toFixed(2)}`, colWidth) + '\n';
+  }
+
   if (data.summary.invoiceDue > 0) {
     out += justifyRow('Invoice Due:', `Tk ${data.summary.invoiceDue.toFixed(2)}`, colWidth) + '\n';
   }

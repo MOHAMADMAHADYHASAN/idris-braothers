@@ -3,6 +3,7 @@ import { AppError } from '../../common/errors/AppError';
 import { prisma } from '../../config/prisma';
 import { inventoryRepository } from './inventory.repository';
 import { getPagination, buildPaginationMeta, PaginationParams } from '../../common/utils/pagination';
+import { toEnglishDigits } from '../../common/utils/phone';
 import {
   CreateProductInput,
   UpdateProductInput,
@@ -201,16 +202,24 @@ export class InventoryService {
     }
 
     if (query.search) {
+      const search = query.search.trim();
+      const asciiSearch = toEnglishDigits(search);
       where.OR = [
-        { name: { contains: query.search, mode: 'insensitive' } },
-        { banglaName: { contains: query.search, mode: 'insensitive' } },
+        { name: { contains: search, mode: 'insensitive' } },
+        { banglaName: { contains: search, mode: 'insensitive' } },
         {
           variants: {
             some: {
               OR: [
-                { variantName: { contains: query.search, mode: 'insensitive' } },
-                { barcode: { contains: query.search, mode: 'insensitive' } },
-                { sku: { contains: query.search, mode: 'insensitive' } },
+                { variantName: { contains: search, mode: 'insensitive' } },
+                { barcode: { contains: search, mode: 'insensitive' } },
+                ...(asciiSearch !== search
+                  ? [{ barcode: { contains: asciiSearch, mode: 'insensitive' as const } }]
+                  : []),
+                { sku: { contains: search, mode: 'insensitive' } },
+                ...(asciiSearch !== search
+                  ? [{ sku: { contains: asciiSearch, mode: 'insensitive' as const } }]
+                  : []),
               ],
             },
           },

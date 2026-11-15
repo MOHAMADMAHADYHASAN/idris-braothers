@@ -40,7 +40,7 @@ export function runValidator<T>(fn: (obj: PlainObject, ctx: ValidationContext) =
   return parsed;
 }
 
-function joinPath(prefix: string, field: string): string {
+export function joinPath(prefix: string, field: string): string {
   return prefix ? `${prefix}.${field}` : field;
 }
 
@@ -256,3 +256,12 @@ export function parseArray<T>(
     return itemParser(el, ctx, itemPath);
   });
 }
+
+export {
+  normalizePhone,
+  isValidBDPhone,
+  toGatewayPhone,
+  formatPhone,
+  parsePhone,
+  type PhoneRuleOptions,
+} from './phone';

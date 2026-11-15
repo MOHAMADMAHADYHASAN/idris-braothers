@@ -16,8 +16,9 @@ export class SalesController {
   });
 
   getSales = asyncHandler(async (req: Request, res: Response) => {
-    const { customerId, saleType, invoiceNumber, filter, startDate, endDate, page, limit } = req.query;
+    const { search, customerId, saleType, invoiceNumber, filter, startDate, endDate, page, limit } = req.query;
     const result = await salesService.getSales({
+      search: (search as string) || (invoiceNumber as string),
       customerId: customerId as string,
       saleType: saleType as SaleType | undefined,
       invoiceNumber: invoiceNumber as string,

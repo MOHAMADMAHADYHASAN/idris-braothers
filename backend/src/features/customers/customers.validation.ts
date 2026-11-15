@@ -5,6 +5,7 @@ import {
   parseBoolean,
   parseEnum,
   parseNumber,
+  parsePhone,
   parseString,
   runValidator,
 } from '../../common/utils/validators';
@@ -40,7 +41,7 @@ export interface AdjustBalanceInput {
 function validateCreateCustomer(obj: PlainObject, ctx: ValidationContext): CreateCustomerInput {
   return {
     name: parseString(obj, 'name', ctx, { required: true, min: 2, message: 'Customer name is required' }) as string,
-    phone: parseString(obj, 'phone', ctx, { nullable: true }),
+    phone: parsePhone(obj, 'phone', ctx, { nullable: true }),
     address: parseString(obj, 'address', ctx, { nullable: true }),
     customerType: parseEnum(obj, 'customerType', SALE_TYPES, ctx, { defaultVal: SaleType.RETAIL }) as SaleType,
     openingDue: parseNumber(obj, 'openingDue', ctx, { defaultVal: 0 }) as number,
@@ -51,7 +52,7 @@ function validateUpdateCustomer(obj: PlainObject, ctx: ValidationContext): Updat
   const result: UpdateCustomerInput = {};
   const name = parseString(obj, 'name', ctx, { min: 2 });
   if (name !== undefined && name !== null) result.name = name;
-  const phone = parseString(obj, 'phone', ctx, { nullable: true });
+  const phone = parsePhone(obj, 'phone', ctx, { nullable: true });
   if (phone !== undefined) result.phone = phone;
   const address = parseString(obj, 'address', ctx, { nullable: true });
   if (address !== undefined) result.address = address;

@@ -43,7 +43,7 @@ export function CustomerTable() {
             {c.phone ? (
               <div className="flex items-center gap-1 text-xs text-ink-secondary font-mono tabular-nums tracking-tight mt-0.5">
                 <Phone size={12} weight="bold" className="text-ink-secondary" />
-                <span>{toBanglaDigits(c.phone)}</span>
+                <span>{c.phone}</span>
               </div>
             ) : (
               <span className="text-xs text-ink-secondary italic">মোবাইল নেই</span>

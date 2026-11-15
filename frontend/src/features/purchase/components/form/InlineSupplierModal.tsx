@@ -5,6 +5,7 @@ import { X, Buildings, Spinner } from '@phosphor-icons/react';
 import { supplierKhataService } from '@/features/supplier-khata/supplierKhata.service';
 import { Supplier } from '@/features/supplier-khata/supplierKhata.types';
 import { useDialogAccessibility } from '@/components/shared/AccessibleDialog';
+import { normalizePhone, isValidBDPhone } from '@/lib/phone';
 
 interface InlineSupplierModalProps {
   isOpen: boolean;
@@ -35,13 +36,23 @@ export function InlineSupplierModal({
       return;
     }
 
+    const trimmedPhone = phone.trim();
+    let normalizedPhone: string | undefined = undefined;
+    if (trimmedPhone) {
+      if (!isValidBDPhone(trimmedPhone)) {
+        setError('সঠিক বাংলাদেশি মোবাইল নম্বর লিখুন (যেমন: ০১৭১২-৩৪৫৬৭৮ বা 017XXXXXXXX)');
+        return;
+      }
+      normalizedPhone = normalizePhone(trimmedPhone);
+    }
+
     setIsSubmitting(true);
     setError(null);
     try {
       const created = await supplierKhataService.createSupplier({
         name: name.trim(),
         companyName: companyName.trim() || undefined,
-        phone: phone.trim() || undefined,
+        phone: normalizedPhone,
         address: address.trim() || undefined,
       });
       onSuccess(created);

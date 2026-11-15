@@ -40,7 +40,7 @@ export function CustomerMobileCard({ customer }: { customer: Customer }) {
               className="inline-flex items-center gap-1 text-xs text-ink-secondary font-mono tabular-nums tracking-tight mt-0.5 hover:text-brand-deep"
             >
               <Phone size={12} weight="bold" />
-              <span>{toBanglaDigits(customer.phone)}</span>
+              <span>{customer.phone}</span>
             </a>
           )}
 

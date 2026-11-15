@@ -53,7 +53,7 @@ export function CancelSaleModal() {
                 বিক্রয় মেমো বাতিলকরণ
               </h3>
               <p className="text-xs text-due-text font-mono tabular-nums">
-                মেমো #{toBanglaDigits(saleToCancel.invoiceNumber)}
+                মেমো #{saleToCancel.invoiceNumber}
               </p>
             </div>
           </div>

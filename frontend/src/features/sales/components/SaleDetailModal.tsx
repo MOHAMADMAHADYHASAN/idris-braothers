@@ -57,7 +57,7 @@ export function SaleDetailModal() {
             <div>
               <div className="flex items-center gap-2">
                 <h3 id={titleId} className="font-bold text-ink-primary text-sm sm:text-base font-mono tabular-nums">
-                  মেমো ভাউচার #{selectedSale ? toBanglaDigits(selectedSale.invoiceNumber) : ''}
+                  মেমো ভাউচার #{selectedSale ? selectedSale.invoiceNumber : ''}
                 </h3>
                 {selectedSale?.status === 'CANCELLED' && (
                   <Badge variant="due" className="bg-due-bg text-due-text border-due-border">
@@ -127,7 +127,7 @@ export function SaleDetailModal() {
                   </span>
                   {selectedSale.customer?.phone && (
                     <span className="text-xs text-ink-secondary font-mono tabular-nums block">
-                      ফোন: {toBanglaDigits(selectedSale.customer.phone)}
+                      ফোন: {selectedSale.customer.phone}
                     </span>
                   )}
                   {selectedSale.customer?.address && (

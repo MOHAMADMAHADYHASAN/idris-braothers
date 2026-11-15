@@ -197,7 +197,7 @@ export function SaleReturnClient({ saleId }: SaleReturnClientProps) {
                   <span>পণ্য ফেরত ও স্টক রিস্টকিং</span>
                 </h1>
                 <Badge variant="neutral" className="font-mono tabular-nums font-bold">
-                  মেমো #{toBanglaDigits(sale.invoiceNumber)}
+                  মেমো #{sale.invoiceNumber}
                 </Badge>
                 {sale.customer && (
                   <span className="text-xs text-ink-secondary font-medium hidden sm:inline">

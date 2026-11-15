@@ -6,6 +6,7 @@ import { inventoryRepository } from '../inventory/inventory.repository';
 import { supplierRepository } from '../suppliers/suppliers.repository';
 import { getPagination, buildPaginationMeta, PaginationParams } from '../../common/utils/pagination';
 import { getDayBoundaries } from '../../common/utils/dateUtils';
+import { toEnglishDigits, normalizePhone } from '../../common/utils/phone';
 import { CreatePurchaseInput } from './purchases.validation';
 
 export class PurchasesService {
@@ -214,6 +215,7 @@ export class PurchasesService {
   async getPurchases(query: {
     supplierId?: string;
     purchaseNumber?: string;
+    search?: string;
     startDate?: string;
     endDate?: string;
   } & PaginationParams) {
@@ -225,8 +227,25 @@ export class PurchasesService {
       where.supplierId = query.supplierId;
     }
 
-    if (query.purchaseNumber) {
-      where.purchaseNumber = { contains: query.purchaseNumber, mode: 'insensitive' };
+    const searchTerm = (query.search || query.purchaseNumber || '').trim();
+    if (searchTerm) {
+      const asciiTerm = toEnglishDigits(searchTerm);
+      const normPhone = normalizePhone(searchTerm);
+      where.OR = [
+        { purchaseNumber: { contains: searchTerm, mode: 'insensitive' } },
+        ...(asciiTerm !== searchTerm
+          ? [{ purchaseNumber: { contains: asciiTerm, mode: 'insensitive' as const } }]
+          : []),
+        { supplier: { name: { contains: searchTerm, mode: 'insensitive' } } },
+        { supplier: { companyName: { contains: searchTerm, mode: 'insensitive' } } },
+        { supplier: { phone: { contains: searchTerm, mode: 'insensitive' } } },
+        ...(asciiTerm !== searchTerm
+          ? [{ supplier: { phone: { contains: asciiTerm, mode: 'insensitive' as const } } }]
+          : []),
+        ...(normPhone && normPhone !== searchTerm && normPhone !== asciiTerm
+          ? [{ supplier: { phone: { contains: normPhone, mode: 'insensitive' as const } } }]
+          : []),
+      ];
     }
 
     if (query.startDate || query.endDate) {

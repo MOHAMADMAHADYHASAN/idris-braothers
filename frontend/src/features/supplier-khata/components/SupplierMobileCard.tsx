@@ -44,7 +44,7 @@ export function SupplierMobileCard({ supplier }: { supplier: Supplier }) {
               className="inline-flex items-center gap-1 text-xs text-ink-body font-mono tabular-nums tracking-tight mt-0.5 hover:text-brand-deep hover:underline"
             >
               <Phone size={12} weight="bold" className="text-ink-secondary" />
-              <span>{toBanglaDigits(supplier.phone)}</span>
+              <span>{supplier.phone}</span>
             </a>
           )}
 

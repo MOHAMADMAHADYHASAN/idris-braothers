@@ -136,7 +136,7 @@ export function ReturnSaleModal() {
                 <span>পণ্য ফেরত ও রিফান্ড</span>
                 {saleToReturn && (
                   <Badge variant="neutral" className="font-mono tabular-nums">
-                    #{toBanglaDigits(saleToReturn.invoiceNumber)}
+                    #{saleToReturn.invoiceNumber}
                   </Badge>
                 )}
               </h2>
@@ -169,7 +169,7 @@ export function ReturnSaleModal() {
                 </span>
                 {saleToReturn.customer?.phone && (
                   <span className="text-ink-secondary font-mono tabular-nums ml-1.5">
-                    ({toBanglaDigits(saleToReturn.customer.phone)})
+                    ({saleToReturn.customer.phone})
                   </span>
                 )}
               </div>

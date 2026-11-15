@@ -183,22 +183,31 @@ export function useBarcodeScanner() {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Guard against undefined/null key events (e.g. IME composition, virtual keyboards, autofill)
+      if (!e || typeof e.key !== 'string') {
+        return;
+      }
+
       // Ignore functional control keys
       if (e.key === 'Shift' || e.key === 'Control' || e.key === 'Alt' || e.key === 'Meta') {
         return;
       }
 
       const now = performance.now();
+      if (!Array.isArray(bufferRef.current)) {
+        bufferRef.current = [];
+      }
       const buffer = bufferRef.current;
 
       if (e.key === 'Enter') {
-        // Evaluate if this sequence arrived with scanner-like speed (< 60ms average interval)
-        if (buffer.length >= 3) {
-          const firstTime = buffer[0].timestamp;
+        // Evaluate if this sequence arrived with scanner-like speed (< 65ms average interval)
+        if (buffer && buffer.length >= 3) {
+          const firstItem = buffer[0];
+          const firstTime = firstItem ? firstItem.timestamp : now;
           const totalDuration = now - firstTime;
           const avgInterval = totalDuration / buffer.length;
 
-          // Hardware scanners output characters at < 45ms intervals
+          // Hardware scanners output characters at < 65ms intervals
           if (avgInterval < 65) {
             e.preventDefault();
             e.stopPropagation();
@@ -215,9 +224,10 @@ export function useBarcodeScanner() {
       }
 
       // Single printable character
-      if (e.key.length === 1) {
-        if (buffer.length > 0) {
-          const lastTime = buffer[buffer.length - 1].timestamp;
+      if (typeof e.key === 'string' && e.key.length === 1) {
+        if (buffer && buffer.length > 0) {
+          const lastItem = buffer[buffer.length - 1];
+          const lastTime = lastItem ? lastItem.timestamp : now;
           // If pause is more than 80ms, the previous burst is stale (human typing or new scan)
           if (now - lastTime > 80) {
             bufferRef.current = [{ char: e.key, timestamp: now }];

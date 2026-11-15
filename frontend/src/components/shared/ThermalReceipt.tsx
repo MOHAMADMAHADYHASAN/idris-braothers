@@ -244,6 +244,34 @@ export function ThermalReceipt({
                 </span>
               </div>
 
+              {/* Excess Payment Breakdown for Khata Customers */}
+              {data.customer && data.summary.cashPaid > data.summary.grandTotal && (
+                <div className="text-[10px] pl-2 text-black/80 space-y-0.5 border-l border-black/30 my-0.5">
+                  <div className="flex justify-between">
+                    <span>↳ আজকের বিল বাবদ:</span>
+                    <span className="tabular-nums font-mono">
+                      {formatCurrency(data.summary.grandTotal, false)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between font-bold text-black">
+                    <span>↳ পূর্বের বকেয়া শোধ:</span>
+                    <span className="tabular-nums font-mono">
+                      {formatCurrency(data.summary.cashPaid - data.summary.grandTotal, false)}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Change Return if Walk-in or explicitly returned */}
+              {(data.summary.changeReturn ?? 0) > 0 && (
+                <div className="flex justify-between text-black font-semibold pt-0.5">
+                  <span>ফেরত টাকা (Change):</span>
+                  <span className="tabular-nums font-mono">
+                    {formatCurrency(data.summary.changeReturn ?? 0, false)}
+                  </span>
+                </div>
+              )}
+
               {/* Running Khata Balance */}
               {data.summary.invoiceDue > 0 && (
                 <div className="flex justify-between pt-1 border-t border-dotted border-black font-bold">
