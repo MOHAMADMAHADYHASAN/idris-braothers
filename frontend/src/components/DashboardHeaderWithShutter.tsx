@@ -1,18 +1,56 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Storefront, ShoppingCart, ArrowRight, LockKey } from '@phosphor-icons/react';
 import { StoreShutterHero } from '@/components/StoreShutterHero';
 import { Badge } from '@/components/ui/Badge';
 import { Button, buttonClasses } from '@/components/ui/Button';
 
-export function DashboardHeaderWithShutter() {
-  const [isOpen, setIsOpen] = useState(false);
+const STORE_STATE_KEY = 'idris_store_open_state';
 
+export function DashboardHeaderWithShutter() {
+  // ১. ইনিশিয়াল স্টেট: প্রথম ভিজিটে বা আন-ওপেন থাকলে false (শাটার নিচে)
+  const [isOpen, setIsOpen] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return localStorage.getItem(STORE_STATE_KEY) === 'OPEN';
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  });
+
+  // ২. ক্লায়েন্ট মাউন্টে সিঙ্ক
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORE_STATE_KEY);
+      if (stored === 'OPEN') {
+        setIsOpen(true);
+      } else {
+        setIsOpen(false);
+      }
+    } catch {
+      // Ignore storage errors in private browsing
+    }
+  }, []);
+
+  // ৩. ইউজার যখন নিজে "শাটার নামান" বাটনে ক্লিক করবেন
   const handleCloseShutter = () => {
     setIsOpen(false);
+    try {
+      localStorage.setItem(STORE_STATE_KEY, 'CLOSED');
+    } catch {}
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // ৪. শাটার ওপেন বা টগল ইভেন্ট হ্যান্ডলার
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    try {
+      localStorage.setItem(STORE_STATE_KEY, open ? 'OPEN' : 'CLOSED');
+    } catch {}
   };
 
   return (
@@ -22,7 +60,7 @@ export function DashboardHeaderWithShutter() {
         storeTagline="মরিচপট্টি, ফেনী বাজার"
         imageSrc="/images/shutter/store_shutter.jpg"
         isOpen={isOpen}
-        onOpenChange={setIsOpen}
+        onOpenChange={handleOpenChange}
         hideFloatingTrigger
       />
 

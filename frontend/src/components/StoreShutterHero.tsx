@@ -21,6 +21,14 @@ export function StoreShutterHero({
 }: StoreShutterHeroProps) {
   const [internalOpen, setInternalOpen] = useState(false);
   const isOpen = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMounted(true);
+    }, 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   const setOpenState = useCallback(
     (next: boolean) => {
@@ -99,7 +107,10 @@ export function StoreShutterHero({
 
       {/* Fullscreen Rolling Shutter Curtain (Minimal Matte Editorial View) */}
       <div
-        className={`fixed inset-0 z-50 w-full h-screen overflow-hidden select-none transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        suppressHydrationWarning
+        className={`fixed inset-0 z-50 w-full h-screen overflow-hidden select-none ${
+          mounted ? 'transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]' : ''
+        } ${
           isOpen
             ? '-translate-y-full opacity-0 pointer-events-none'
             : 'translate-y-0 opacity-100 pointer-events-auto'
